@@ -72,7 +72,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     if len(X.shape) != 2:
       X = X.reshape(1, 2)
 
-    return X.apply(lambda x: self.predict_instance(x), axis=1)
+    return np.array(X.apply(lambda x: self.predict_instance(x), axis=1))
 
   def predict_proba(self, X):
     """
@@ -92,7 +92,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     if len(X.shape) != 2:
       X = X.reshape(1, 2)
 
-    return X.apply(lambda x: self.predict_instance(x, True), axis=1)
+    return np.array(X.apply(lambda x: self.predict_instance(x, probabilities=True), axis=1))
 
   def predict_instance(self, instance, probabilities=False):
     """
@@ -105,8 +105,8 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
 
     Returns
     -------
-    array<float>
-        Array of prediction scores per class.
+    Any
+        Prediction values or class probabilities.
 
     """
 

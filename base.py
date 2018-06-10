@@ -82,12 +82,13 @@ class PMMLBaseEstimator(BaseEstimator):
 
     transformDict = find(self.root, 'TransformationDictionary')
 
-    feature_mapping.update({
-      e.get('name'): (find(e, 'FieldRef').get('field'), lambda value, e=e:
-                                                          self.parse_type(value, e))
-      for e in transformDict
-      if e.tag == '{http://www.dmg.org/PMML-4_3}DerivedField'
-    })
+    if transformDict is not None:
+      feature_mapping.update({
+        e.get('name'): (find(e, 'FieldRef').get('field'), lambda value, e=e:
+                                                            self.parse_type(value, e))
+        for e in transformDict
+        if e.tag == '{http://www.dmg.org/PMML-4_3}DerivedField'
+      })
 
     return feature_mapping
 
