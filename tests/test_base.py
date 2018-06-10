@@ -172,6 +172,9 @@ class TestBase(TestCase):
     assert clf.parse_type("louder", data_field) == "louder"
     assert clf.parse_type("insane", data_field) == "insane"
 
+    assert clf.parse_type("loud", data_field) < clf.parse_type("louder", data_field)
+    assert clf.parse_type("louder", data_field) < clf.parse_type("insane", data_field)
+
 
   def test_parse_type_interval(self):
     template = """
@@ -198,5 +201,9 @@ class TestBase(TestCase):
     assert clf.parse_type(3.5, data_field) == Interval(leftMargin=3.5, closure='closedClosed')
 
 
-  def test_parse_type_interval_exception(self):
+  def test_interval_exception(self):
     with self.assertRaises(Exception): Interval(closure='openOpen')
+
+
+  def test_category_exception(self):
+    with self.assertRaises(Exception): Category('1', [1, 2])

@@ -39,15 +39,20 @@ class Interval():
 
 
 class Category():
-  def __init__(self, value, categories):
+  def __init__(self, value, categories, ordered = False):
     if value not in categories:
       raise Exception("Invalid categorical value.")
 
     self.value = value
     self.categories = categories
+    self.ordered = ordered
 
   def __eq__(self, other):
     return self.value == other
+
+  def __lt__(self, other):
+    if self.ordered:
+      return self.categories.index(self) < self.categories.index(other)
 
 
 class PMMLBaseEstimator(BaseEstimator):
@@ -135,7 +140,7 @@ class PMMLBaseEstimator(BaseEstimator):
         if e.tag == '{http://www.dmg.org/PMML-4_3}Value'
       ]
       categories = [
-        Category(label, labels)
+        Category(label, labels, ordered = (opType == 'ordinal'))
         for label in labels
       ]
       # TODO: isCyclic
