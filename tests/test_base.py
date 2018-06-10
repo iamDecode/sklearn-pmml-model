@@ -1,11 +1,9 @@
 from unittest import TestCase
-from base import PMMLBaseEstimator, Interval
+from base import PMMLBaseEstimator, Interval, Category
 from sklearn.datasets import load_iris
-from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 from io import StringIO
-from pandas.api.types import CategoricalDtype
 from tree import find
 from collections import namedtuple
 
@@ -55,7 +53,7 @@ class TestBase(TestCase):
 
     Result = namedtuple('Result', 'column type')
     tests = {
-      'Class':                     Result(column='Class', type=str),
+      'Class':                     Result(column='Class', type=Category),
       'sepal length (cm)':         Result(column='sepal length (cm)', type=float),
       'sepal width (cm)':          Result(column='sepal width (cm)', type=float),
       'integer(sepal length (cm))':Result(column='sepal length (cm)', type=int),
@@ -66,7 +64,14 @@ class TestBase(TestCase):
       for feature, result in tests.items():
         column, mapping = clf.field_mapping[feature]
         assert column == result.column
-        assert type(mapping(df.iloc[i][column])) == result.type
+        mapped_value = mapping(df.iloc[i][column])
+        assert type(mapped_value) == result.type
+
+        if result.type == Category:
+          assert mapped_value.value == df.iloc[i][column]
+          assert mapped_value.categories == ["setosa", "versicolor", "virginica"]
+        else:
+          assert mapped_value == result.type(df.iloc[i][column])
 
 
   def test_parse_type_value_continuous(self):

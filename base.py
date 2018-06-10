@@ -3,14 +3,13 @@ from xml.etree import cElementTree as etree
 from cached_property import cached_property
 import math
 import operator as op
-from collections import namedtuple
+
 
 def find(element, path):
   return element.find(f"PMML:{path}", namespaces={"PMML": "http://www.dmg.org/PMML-4_3"})
 
 def findall(element, path):
   return element.findall(f"PMML:{path}", namespaces={"PMML": "http://www.dmg.org/PMML-4_3"})
-
 
 
 class Interval():
@@ -37,6 +36,18 @@ class Interval():
     return self.leftMargin == other.leftMargin \
            and self.rightMargin == other.rightMargin \
            and self.closure == other.closure
+
+
+class Category():
+  def __init__(self, value, categories):
+    if value not in categories:
+      raise Exception("Invalid categorical value.")
+
+    self.value = value
+    self.categories = categories
+
+  def __eq__(self, other):
+    return self.value == other
 
 
 class PMMLBaseEstimator(BaseEstimator):
@@ -118,10 +129,14 @@ class PMMLBaseEstimator(BaseEstimator):
       return type_mapping[dataType](value)
 
     else:
-      categories = [
+      labels = [
         e.get('value')
         for e in dataField
         if e.tag == '{http://www.dmg.org/PMML-4_3}Value'
+      ]
+      categories = [
+        Category(label, labels)
+        for label in labels
       ]
       # TODO: isCyclic
 
