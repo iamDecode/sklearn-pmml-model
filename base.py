@@ -5,24 +5,26 @@ import math
 import operator as op
 
 
-def find(element, path):
-  return element.find(f"PMML:{path}", namespaces={"PMML": "http://www.dmg.org/PMML-4_3"})
-
-def findall(element, path):
-  return element.findall(f"PMML:{path}", namespaces={"PMML": "http://www.dmg.org/PMML-4_3"})
-
-
 class Interval():
-  def __init__(self, closure, leftMargin=None, rightMargin=None):
+  def __init__(self, value, closure, leftMargin=None, rightMargin=None):
     if leftMargin is None and rightMargin is None:
       raise Exception("Interval not well defined.")
 
+    self.value = value
     self.closure = closure
     self.leftMargin = float(leftMargin or -math.inf)
     self.rightMargin = float(rightMargin or math.inf)
 
   def __eq__(self, other):
-    if isinstance(other, float) or isinstance(other, int):
+    if isinstance(other, type(self.value)):
+      return other == self.value and other in self
+
+    return self.leftMargin == other.leftMargin \
+           and self.rightMargin == other.rightMargin \
+           and self.closure == other.closure
+
+  def __contains__(self, item):
+    if isinstance(item, float) or isinstance(item, int):
       closure_mapping = {
         'openClosed': [op.lt, op.le],
         'openOpen': [op.lt, op.lt],
@@ -31,11 +33,7 @@ class Interval():
       }
 
       left, right = closure_mapping[self.closure]
-      return left(self.leftMargin, other) and right(other, self.rightMargin)
-
-    return self.leftMargin == other.leftMargin \
-           and self.rightMargin == other.rightMargin \
-           and self.closure == other.closure
+      return left(self.leftMargin, item) and right(item, self.rightMargin)
 
 
 class Category():
@@ -58,6 +56,16 @@ class Category():
 class PMMLBaseEstimator(BaseEstimator):
   def __init__(self, pmml):
     self.root = etree.parse(pmml).getroot()
+    self.namespace = self.root.tag[1:self.root.tag.index('}')]
+
+
+  def find(self, element, path):
+    return element.find(f"PMML:{path}", namespaces={"PMML": self.namespace})
+
+
+  def findall(self, element, path):
+    return element.findall(f"PMML:{path}", namespaces={"PMML": self.namespace})
+
 
   @cached_property
   def field_mapping(self):
@@ -71,23 +79,23 @@ class PMMLBaseEstimator(BaseEstimator):
         instance X, applying transformations defined in the pipeline and returning that value.
 
     """
-    dataDict = find(self.root, 'DataDictionary')
+    dataDict = self.find(self.root, 'DataDictionary')
 
     feature_mapping = {
       e.get('name'): (e.get('name'), lambda value, e=e:
                                        self.parse_type(value, e))
       for e in dataDict
-      if e.tag == '{http://www.dmg.org/PMML-4_3}DataField'
+      if e.tag == f'{{{self.namespace}}}DataField'
     }
 
-    transformDict = find(self.root, 'TransformationDictionary')
+    transformDict = self.find(self.root, 'TransformationDictionary')
 
     if transformDict is not None:
       feature_mapping.update({
-        e.get('name'): (find(e, 'FieldRef').get('field'), lambda value, e=e:
+        e.get('name'): (self.find(e, 'FieldRef').get('field'), lambda value, e=e:
                                                             self.parse_type(value, e))
         for e in transformDict
-        if e.tag == '{http://www.dmg.org/PMML-4_3}DerivedField'
+        if e.tag == f'{{{self.namespace}}}DerivedField'
       })
 
     return feature_mapping
@@ -138,7 +146,7 @@ class PMMLBaseEstimator(BaseEstimator):
       labels = [
         e.get('value')
         for e in dataField
-        if e.tag == '{http://www.dmg.org/PMML-4_3}Value'
+        if e.tag == f'{{{self.namespace}}}Value'
       ]
       categories = [
         Category(label, labels, ordered = (opType == 'ordinal'))
@@ -148,12 +156,13 @@ class PMMLBaseEstimator(BaseEstimator):
 
       categories += [
         Interval(
+          value = value,
           leftMargin = e.get('leftMargin'),
           rightMargin = e.get('rightMargin'),
           closure = e.get('closure')
         )
         for e in dataField
-        if e.tag == '{http://www.dmg.org/PMML-4_3}Interval'
+        if e.tag == f'{{{self.namespace}}}Interval'
       ]
 
       value = next((x for x in categories if x == value), None)

@@ -1,7 +1,5 @@
-import operator as op
 import numpy as np
 import pandas as pd
-
 from base import *
 
 
@@ -9,7 +7,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
   def __init__(self, pmml):
     super(PMMLTreeClassifier, self).__init__(pmml)
 
-    self.tree = find(self.root, 'TreeModel')
+    self.tree = self.find(self.root, 'TreeModel')
 
     if self.tree is None:
       raise Exception("PMML model does not contain TreeModel.")
@@ -25,7 +23,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     }
 
     for predicate, evaluate in predicates.items():
-      element = find(node, predicate)
+      element = self.find(node, predicate)
       if element is not None:
         return evaluate(element, instance)
 
@@ -113,13 +111,13 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     Node = self.tree
 
     while True:
-      childNodes = findall(Node, 'Node')
+      childNodes = self.findall(Node, 'Node')
 
       if len(childNodes) == 0:
         if probabilities:
           return [
             float(e.get('recordCount')) / float(Node.get('recordCount'))
-            for e in findall(Node, "ScoreDistribution")
+            for e in self.findall(Node, "ScoreDistribution")
           ]
         else:
           return Node.get('score')

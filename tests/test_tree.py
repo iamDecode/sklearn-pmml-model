@@ -4,9 +4,6 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
-from io import StringIO
-from pandas.api.types import CategoricalDtype
-from tree import find
 
 # Parameters
 pair = [0, 1]
@@ -53,12 +50,33 @@ class TestTree(TestCase):
   def setUp(self):
     self.clf = PMMLTreeClassifier(pmml="../models/DecisionTreeIris.pmml")
 
+
   def test_predict(self):
     a = self.clf.predict(Xte)
-
+    print(type(a))
     assert True
+
 
   def test_predict_proba(self):
     a = self.clf.predict_proba(Xte)
-
+    print(type(a))
     assert True
+
+
+  def test_predict_dt(self):
+    clf = PMMLTreeClassifier(pmml="../models/dt.pmml")
+
+    X = pd.DataFrame(data={
+      'nom_nivell': ['ESO', 'CFGM Infor', 'ESO'],
+      'hora_inici': ['09:15:00', '11:30:00', '09:15:00'],
+      'assistenciaMateixaHora1WeekBefore': ['Present', 'Absent', 'NA'],
+      'assistenciaMateixaHora2WeekBefore': ['NA', 'Absent', 'NA'],
+      'assistenciaMateixaHora3WeekBefore': ['NA', 'Absent', 'NA'],
+      'assistenciaaHoraAnterior': ['Present', 'Absent', 'NA']
+    })
+
+    # ('Present', 0.9466557721489436)
+    # ('Absent', 0.9154589371980676)
+    # ('Present', 0.7301587301587301)
+
+    clf.predict(X)

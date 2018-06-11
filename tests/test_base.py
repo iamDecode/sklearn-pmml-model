@@ -4,7 +4,6 @@ from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np
 from io import StringIO
-from tree import find
 from collections import namedtuple
 
 # Parameters
@@ -95,8 +94,8 @@ class TestBase(TestCase):
         optype, pmml_type, data_type = type
         clf = PMMLBaseEstimator(pmml=StringIO(template.format(optype, pmml_type)))
 
-        data_dictionary = find(clf.root, "DataDictionary")
-        data_field = find(data_dictionary, "DataField")
+        data_dictionary = clf.find(clf.root, "DataDictionary")
+        data_field = clf.find(data_dictionary, "DataField")
         result = clf.parse_type(value, data_field)
 
         assert isinstance(result, data_type)
@@ -112,16 +111,16 @@ class TestBase(TestCase):
 
     # Test invalid data type
     clf = PMMLBaseEstimator(pmml=StringIO(template.format("continuous", "does_not_exist")))
-    data_dictionary = find(clf.root, "DataDictionary")
-    data_field = find(data_dictionary, "DataField")
+    data_dictionary = clf.find(clf.root, "DataDictionary")
+    data_field = clf.find(data_dictionary, "DataField")
 
     with self.assertRaises(Exception) as cm: clf.parse_type("test", data_field)
     assert str(cm.exception) == "Unsupported data type."
 
     # Test invalid operation type
     clf = PMMLBaseEstimator(pmml=StringIO(template.format("does_not_exist", "string")))
-    data_dictionary = find(clf.root, "DataDictionary")
-    data_field = find(data_dictionary, "DataField")
+    data_dictionary = clf.find(clf.root, "DataDictionary")
+    data_field = clf.find(data_dictionary, "DataField")
 
     with self.assertRaises(Exception) as cm: clf.parse_type("test", data_field)
     assert str(cm.exception) == "Unsupported operation type."
@@ -140,8 +139,8 @@ class TestBase(TestCase):
       </PMML>"""
 
       clf = PMMLBaseEstimator(pmml=StringIO(template))
-      data_dictionary = find(clf.root, "DataDictionary")
-      data_field = find(data_dictionary, "DataField")
+      data_dictionary = clf.find(clf.root, "DataDictionary")
+      data_field = clf.find(data_dictionary, "DataField")
 
       with self.assertRaises(Exception) as cm: clf.parse_type("not_in_category", data_field)
       assert str(cm.exception) == "Invalid categorical value."
@@ -163,8 +162,8 @@ class TestBase(TestCase):
       </PMML>"""
 
     clf = PMMLBaseEstimator(pmml=StringIO(template))
-    data_dictionary = find(clf.root, "DataDictionary")
-    data_field = find(data_dictionary, "DataField")
+    data_dictionary = clf.find(clf.root, "DataDictionary")
+    data_field = clf.find(data_dictionary, "DataField")
 
     with self.assertRaises(Exception)as cm: clf.parse_type("not_in_category", data_field)
     assert str(cm.exception) == "Invalid ordinal value."
@@ -191,18 +190,18 @@ class TestBase(TestCase):
     </PMML>"""
 
     clf = PMMLBaseEstimator(pmml=StringIO(template))
-    data_dictionary = find(clf.root, "DataDictionary")
-    data_field = find(data_dictionary, "DataField")
+    data_dictionary = clf.find(clf.root, "DataDictionary")
+    data_field = clf.find(data_dictionary, "DataField")
 
-    assert clf.parse_type(-1, data_field) == Interval(rightMargin=1, closure='openOpen')
+    assert clf.parse_type(-1, data_field) == Interval(-1, rightMargin=1, closure='openOpen')
     with self.assertRaises(Exception): clf.parse_type(1, data_field)
-    assert clf.parse_type(2, data_field) == Interval(leftMargin=1.5, rightMargin=2.5, closure='openOpen')
-    assert clf.parse_type(2.5, data_field) == Interval(leftMargin=2.5, rightMargin=3.5, closure='closedOpen')
-    assert clf.parse_type(3.5, data_field) == Interval(leftMargin=3.5, closure='closedClosed')
+    assert clf.parse_type(2, data_field) == Interval(2, leftMargin=1.5, rightMargin=2.5, closure='openOpen')
+    assert clf.parse_type(2.5, data_field) == Interval(2.5, leftMargin=2.5, rightMargin=3.5, closure='closedOpen')
+    assert clf.parse_type(3.5, data_field) == Interval(3.5, leftMargin=3.5, closure='closedClosed')
 
 
   def test_interval_exception(self):
-    with self.assertRaises(Exception): Interval(closure='openOpen')
+    with self.assertRaises(Exception): Interval(1, closure='openOpen')
 
 
   def test_category_exception(self):
