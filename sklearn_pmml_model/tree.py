@@ -1,5 +1,5 @@
 import numpy as np
-from base import *
+from sklearn_pmml_model.base import *
 
 
 class PMMLTreeClassifier(PMMLBaseEstimator):

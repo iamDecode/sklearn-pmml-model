@@ -1,4 +1,4 @@
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, ClassifierMixin
 from xml.etree import cElementTree as etree
 from cached_property import cached_property
 import math
@@ -54,7 +54,7 @@ class Category():
       return self.categories.index(self) < self.categories.index(other)
 
 
-class PMMLBaseEstimator(BaseEstimator):
+class PMMLBaseEstimator(BaseEstimator,ClassifierMixin):
   def __init__(self, pmml):
     self.root = etree.parse(pmml).getroot()
     self.namespace = self.root.tag[1:self.root.tag.index('}')]

@@ -106,6 +106,3 @@ venv.bak/
 # Intellij IDEA
 .idea/
 *.iml
-
-# Models folder
-models/

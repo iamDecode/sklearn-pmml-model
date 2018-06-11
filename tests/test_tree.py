@@ -1,9 +1,10 @@
 from unittest import TestCase
-from tree import PMMLTreeClassifier
+from sklearn_pmml_model.tree import PMMLTreeClassifier
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
+from os import path
 
 # Parameters
 pair = [0, 1]
@@ -48,23 +49,27 @@ feature_mapping_pmml = """
 class TestTree(TestCase):
 
   def setUp(self):
-    self.clf = PMMLTreeClassifier(pmml="../models/DecisionTreeIris.pmml")
+    self.clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/sklearn2pmml.pmml'))
 
 
   def test_predict(self):
     a = self.clf.predict(Xte)
-    print(type(a))
+    print(a)
     assert True
 
 
   def test_predict_proba(self):
     a = self.clf.predict_proba(Xte)
-    print(type(a))
+    print(a)
     assert True
 
+  def test_score(self):
+    a = self.clf.score(Xte,yte)
+    print(a)
+    assert True
 
   def test_predict_dt(self):
-    clf = PMMLTreeClassifier(pmml="../models/dt.pmml")
+    clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/lightpmmlpredictor.pmml'))
 
     X = pd.DataFrame(data={
       'nom_nivell': ['ESO', 'CFGM Infor', 'ESO'],
@@ -79,4 +84,5 @@ class TestTree(TestCase):
     # ('Absent', 0.9154589371980676)
     # ('Present', 0.7301587301587301)
 
-    clf.predict(X)
+    print(clf.predict(X))
+    print(clf.predict_proba(X))

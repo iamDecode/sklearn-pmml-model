@@ -1,5 +1,5 @@
 from unittest import TestCase
-from base import PMMLBaseEstimator, Interval, Category
+from sklearn_pmml_model.base import PMMLBaseEstimator, Interval, Category
 from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np

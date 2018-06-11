@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+	<Header>
+		<Application name="JPMML-SkLearn" version="1.5.3"/>
+		<Timestamp>2018-06-08T12:29:45Z</Timestamp>
+	</Header>
+	<MiningBuildTask>
+		<Extension>PMMLPipeline(steps=[('classifier', DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=2,
+            max_features=None, max_leaf_nodes=None,
+            min_impurity_decrease=0.0, min_impurity_split=None,
+            min_samples_leaf=1, min_samples_split=2,
+            min_weight_fraction_leaf=0.0, presort=False, random_state=None,
+            splitter='best'))])</Extension>
+	</MiningBuildTask>
+	<DataDictionary>
+		<DataField name="Class" optype="categorical" dataType="string">
+			<Value value="setosa"/>
+			<Value value="versicolor"/>
+			<Value value="virginica"/>
+		</DataField>
+		<DataField name="sepal length (cm)" optype="continuous" dataType="float"/>
+		<DataField name="sepal width (cm)" optype="continuous" dataType="float"/>
+	</DataDictionary>
+	<TransformationDictionary>
+		<DerivedField name="double(sepal length (cm))" optype="continuous" dataType="double">
+			<FieldRef field="sepal length (cm)"/>
+		</DerivedField>
+		<DerivedField name="double(sepal width (cm))" optype="continuous" dataType="double">
+			<FieldRef field="sepal width (cm)"/>
+		</DerivedField>
+	</TransformationDictionary>
+	<TreeModel functionName="classification" missingValueStrategy="nullPrediction" splitCharacteristic="multiSplit">
+		<MiningSchema>
+			<MiningField name="Class" usageType="target"/>
+			<MiningField name="sepal length (cm)"/>
+			<MiningField name="sepal width (cm)"/>
+		</MiningSchema>
+		<Output>
+			<OutputField name="probability(setosa)" optype="continuous" dataType="double" feature="probability" value="setosa"/>
+			<OutputField name="probability(versicolor)" optype="continuous" dataType="double" feature="probability" value="versicolor"/>
+			<OutputField name="probability(virginica)" optype="continuous" dataType="double" feature="probability" value="virginica"/>
+		</Output>
+		<Node>
+			<True/>
+			<Node>
+				<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="5.449999809265137"/>
+				<Node score="versicolor" recordCount="4.0">
+					<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.75"/>
+					<ScoreDistribution value="setosa" recordCount="1.0"/>
+					<ScoreDistribution value="versicolor" recordCount="2.0"/>
+					<ScoreDistribution value="virginica" recordCount="1.0"/>
+				</Node>
+				<Node score="setosa" recordCount="27.0">
+					<True/>
+					<ScoreDistribution value="setosa" recordCount="26.0"/>
+					<ScoreDistribution value="versicolor" recordCount="1.0"/>
+					<ScoreDistribution value="virginica" recordCount="0.0"/>
+				</Node>
+			</Node>
+			<Node score="versicolor" recordCount="29.0">
+				<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.149999618530273"/>
+				<ScoreDistribution value="setosa" recordCount="3.0"/>
+				<ScoreDistribution value="versicolor" recordCount="22.0"/>
+				<ScoreDistribution value="virginica" recordCount="4.0"/>
+			</Node>
+			<Node score="virginica" recordCount="40.0">
+				<True/>
+				<ScoreDistribution value="setosa" recordCount="0.0"/>
+				<ScoreDistribution value="versicolor" recordCount="14.0"/>
+				<ScoreDistribution value="virginica" recordCount="26.0"/>
+			</Node>
+		</Node>
+	</TreeModel>
+</PMML>
