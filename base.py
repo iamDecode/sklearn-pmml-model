@@ -49,6 +49,7 @@ class Category():
     return self.value == other
 
   def __lt__(self, other):
+    # TODO: isCyclic
     if self.ordered:
       return self.categories.index(self) < self.categories.index(other)
 
@@ -152,7 +153,6 @@ class PMMLBaseEstimator(BaseEstimator):
         Category(label, labels, ordered = (opType == 'ordinal'))
         for label in labels
       ]
-      # TODO: isCyclic
 
       categories += [
         Interval(
