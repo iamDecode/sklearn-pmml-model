@@ -2,15 +2,15 @@
 <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
 	<Header>
 		<Application name="JPMML-SkLearn" version="1.5.3"/>
-		<Timestamp>2018-06-08T12:29:45Z</Timestamp>
+		<Timestamp>2018-06-12T19:42:50Z</Timestamp>
 	</Header>
 	<MiningBuildTask>
-		<Extension>PMMLPipeline(steps=[('classifier', DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=2,
-            max_features=None, max_leaf_nodes=None,
-            min_impurity_decrease=0.0, min_impurity_split=None,
-            min_samples_leaf=1, min_samples_split=2,
-            min_weight_fraction_leaf=0.0, presort=False, random_state=None,
-            splitter='best'))])</Extension>
+		<Extension>PMMLPipeline(steps=[('classifier', DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=None,
+			max_features=None, max_leaf_nodes=None,
+			min_impurity_decrease=0.0, min_impurity_split=None,
+			min_samples_leaf=1, min_samples_split=2,
+			min_weight_fraction_leaf=0.0, presort=False, random_state=1,
+			splitter='best'))])</Extension>
 	</MiningBuildTask>
 	<DataDictionary>
 		<DataField name="Class" optype="categorical" dataType="string">
@@ -44,30 +44,282 @@
 			<True/>
 			<Node>
 				<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="5.449999809265137"/>
-				<Node score="versicolor" recordCount="4.0">
+				<Node>
 					<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.75"/>
-					<ScoreDistribution value="setosa" recordCount="1.0"/>
-					<ScoreDistribution value="versicolor" recordCount="2.0"/>
-					<ScoreDistribution value="virginica" recordCount="1.0"/>
+					<Node score="setosa" recordCount="1.0">
+						<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="4.699999809265137"/>
+						<ScoreDistribution value="setosa" recordCount="1.0"/>
+						<ScoreDistribution value="versicolor" recordCount="0.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+					<Node score="versicolor" recordCount="1.0">
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.450000047683716"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="1.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+					<Node score="virginica" recordCount="1.0">
+						<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="5.0"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="0.0"/>
+						<ScoreDistribution value="virginica" recordCount="1.0"/>
+					</Node>
+					<Node score="versicolor" recordCount="1.0">
+						<True/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="1.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
 				</Node>
-				<Node score="setosa" recordCount="27.0">
-					<True/>
-					<ScoreDistribution value="setosa" recordCount="26.0"/>
+				<Node score="setosa" recordCount="25.0">
+					<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="5.350000381469727"/>
+					<ScoreDistribution value="setosa" recordCount="25.0"/>
+					<ScoreDistribution value="versicolor" recordCount="0.0"/>
+					<ScoreDistribution value="virginica" recordCount="0.0"/>
+				</Node>
+				<Node score="versicolor" recordCount="1.0">
+					<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="3.3499999046325684"/>
+					<ScoreDistribution value="setosa" recordCount="0.0"/>
 					<ScoreDistribution value="versicolor" recordCount="1.0"/>
 					<ScoreDistribution value="virginica" recordCount="0.0"/>
 				</Node>
+				<Node score="setosa" recordCount="1.0">
+					<True/>
+					<ScoreDistribution value="setosa" recordCount="1.0"/>
+					<ScoreDistribution value="versicolor" recordCount="0.0"/>
+					<ScoreDistribution value="virginica" recordCount="0.0"/>
+				</Node>
 			</Node>
-			<Node score="versicolor" recordCount="29.0">
+			<Node>
 				<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.149999618530273"/>
-				<ScoreDistribution value="setosa" recordCount="3.0"/>
-				<ScoreDistribution value="versicolor" recordCount="22.0"/>
-				<ScoreDistribution value="virginica" recordCount="4.0"/>
+				<Node>
+					<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="3.5999999046325684"/>
+					<Node score="versicolor" recordCount="7.0">
+						<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="5.649999618530273"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="7.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+					<Node score="virginica" recordCount="1.0">
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.549999952316284"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="0.0"/>
+						<ScoreDistribution value="virginica" recordCount="1.0"/>
+					</Node>
+					<Node>
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.75"/>
+						<Node>
+							<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.050000190734863"/>
+							<Node score="versicolor" recordCount="2.0">
+								<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.6500000953674316"/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="2.0"/>
+								<ScoreDistribution value="virginica" recordCount="0.0"/>
+							</Node>
+							<Node score="versicolor" recordCount="2.0">
+								<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="5.900000095367432"/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="1.0"/>
+								<ScoreDistribution value="virginica" recordCount="1.0"/>
+							</Node>
+							<Node score="versicolor" recordCount="1.0">
+								<True/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="1.0"/>
+								<ScoreDistribution value="virginica" recordCount="0.0"/>
+							</Node>
+						</Node>
+						<Node score="virginica" recordCount="1.0">
+							<True/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="0.0"/>
+							<ScoreDistribution value="virginica" recordCount="1.0"/>
+						</Node>
+					</Node>
+					<Node score="versicolor" recordCount="6.0">
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.950000047683716"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="6.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+					<Node>
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="3.0999999046325684"/>
+						<Node score="versicolor" recordCount="1.0">
+							<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="5.800000190734863"/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="1.0"/>
+							<ScoreDistribution value="virginica" recordCount="0.0"/>
+						</Node>
+						<Node score="versicolor" recordCount="2.0">
+							<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.0"/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="1.0"/>
+							<ScoreDistribution value="virginica" recordCount="1.0"/>
+						</Node>
+						<Node score="versicolor" recordCount="1.0">
+							<True/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="1.0"/>
+							<ScoreDistribution value="virginica" recordCount="0.0"/>
+						</Node>
+					</Node>
+					<Node score="versicolor" recordCount="2.0">
+						<True/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="2.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+				</Node>
+				<Node score="setosa" recordCount="3.0">
+					<True/>
+					<ScoreDistribution value="setosa" recordCount="3.0"/>
+					<ScoreDistribution value="versicolor" recordCount="0.0"/>
+					<ScoreDistribution value="virginica" recordCount="0.0"/>
+				</Node>
 			</Node>
-			<Node score="virginica" recordCount="40.0">
+			<Node>
+				<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="7.050000190734863"/>
+				<Node>
+					<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.550000190734863"/>
+					<Node score="versicolor" recordCount="1.0">
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.3499999046325684"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="1.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+					<Node score="virginica" recordCount="3.0">
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.75"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="0.0"/>
+						<ScoreDistribution value="virginica" recordCount="3.0"/>
+					</Node>
+					<Node>
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.950000047683716"/>
+						<Node>
+							<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.449999809265137"/>
+							<Node score="virginica" recordCount="2.0">
+								<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.8499999046325684"/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="0.0"/>
+								<ScoreDistribution value="virginica" recordCount="2.0"/>
+							</Node>
+							<Node score="versicolor" recordCount="1.0">
+								<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.25"/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="1.0"/>
+								<ScoreDistribution value="virginica" recordCount="0.0"/>
+							</Node>
+							<Node score="virginica" recordCount="1.0">
+								<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.350000381469727"/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="0.0"/>
+								<ScoreDistribution value="virginica" recordCount="1.0"/>
+							</Node>
+							<Node score="versicolor" recordCount="1.0">
+								<True/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="1.0"/>
+								<ScoreDistribution value="virginica" recordCount="0.0"/>
+							</Node>
+						</Node>
+						<Node score="versicolor" recordCount="1.0">
+							<True/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="1.0"/>
+							<ScoreDistribution value="virginica" recordCount="0.0"/>
+						</Node>
+					</Node>
+					<Node>
+						<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.449999809265137"/>
+						<Node score="virginica" recordCount="1.0">
+							<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.25"/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="0.0"/>
+							<ScoreDistribution value="virginica" recordCount="1.0"/>
+						</Node>
+						<Node score="virginica" recordCount="1.0">
+							<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="3.1500000953674316"/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="0.0"/>
+							<ScoreDistribution value="virginica" recordCount="1.0"/>
+						</Node>
+						<Node score="versicolor" recordCount="2.0">
+							<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.350000381469727"/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="1.0"/>
+							<ScoreDistribution value="virginica" recordCount="1.0"/>
+						</Node>
+						<Node score="versicolor" recordCount="2.0">
+							<True/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="1.0"/>
+							<ScoreDistribution value="virginica" recordCount="1.0"/>
+						</Node>
+					</Node>
+					<Node score="virginica" recordCount="2.0">
+						<True/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="0.0"/>
+						<ScoreDistribution value="virginica" recordCount="2.0"/>
+					</Node>
+				</Node>
+				<Node>
+					<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="3.25"/>
+					<Node score="virginica" recordCount="1.0">
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="2.6500000953674316"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="0.0"/>
+						<ScoreDistribution value="virginica" recordCount="1.0"/>
+					</Node>
+					<Node score="versicolor" recordCount="4.0">
+						<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="3.049999952316284"/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="4.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+					<Node>
+						<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.949999809265137"/>
+						<Node>
+							<SimplePredicate field="double(sepal width (cm))" operator="lessOrEqual" value="3.1500000953674316"/>
+							<Node score="versicolor" recordCount="3.0">
+								<SimplePredicate field="double(sepal length (cm))" operator="lessOrEqual" value="6.800000190734863"/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="2.0"/>
+								<ScoreDistribution value="virginica" recordCount="1.0"/>
+							</Node>
+							<Node score="versicolor" recordCount="2.0">
+								<True/>
+								<ScoreDistribution value="setosa" recordCount="0.0"/>
+								<ScoreDistribution value="versicolor" recordCount="1.0"/>
+								<ScoreDistribution value="virginica" recordCount="1.0"/>
+							</Node>
+						</Node>
+						<Node score="virginica" recordCount="1.0">
+							<True/>
+							<ScoreDistribution value="setosa" recordCount="0.0"/>
+							<ScoreDistribution value="versicolor" recordCount="0.0"/>
+							<ScoreDistribution value="virginica" recordCount="1.0"/>
+						</Node>
+					</Node>
+					<Node score="versicolor" recordCount="1.0">
+						<True/>
+						<ScoreDistribution value="setosa" recordCount="0.0"/>
+						<ScoreDistribution value="versicolor" recordCount="1.0"/>
+						<ScoreDistribution value="virginica" recordCount="0.0"/>
+					</Node>
+				</Node>
+				<Node score="virginica" recordCount="2.0">
+					<True/>
+					<ScoreDistribution value="setosa" recordCount="0.0"/>
+					<ScoreDistribution value="versicolor" recordCount="0.0"/>
+					<ScoreDistribution value="virginica" recordCount="2.0"/>
+				</Node>
+			</Node>
+			<Node score="virginica" recordCount="8.0">
 				<True/>
 				<ScoreDistribution value="setosa" recordCount="0.0"/>
-				<ScoreDistribution value="versicolor" recordCount="14.0"/>
-				<ScoreDistribution value="virginica" recordCount="26.0"/>
+				<ScoreDistribution value="versicolor" recordCount="0.0"/>
+				<ScoreDistribution value="virginica" recordCount="8.0"/>
 			</Node>
 		</Node>
 	</TreeModel>

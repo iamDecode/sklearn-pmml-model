@@ -72,6 +72,23 @@ class Category():
     raise Exception("Invalid operation for categorical value.")
 
 
+class Boolean(int):
+  def __new__(cls, value):
+    return int.__new__(cls, bool(value))
+
+  def __lt__(self, other):
+    raise Exception("Invalid operation for Boolean value.")
+
+  def __le__(self, other):
+    raise Exception("Invalid operation for Boolean value.")
+
+  def __gt__(self, other):
+    raise Exception("Invalid operation for Boolean value.")
+
+  def __ge__(self, other):
+    raise Exception("Invalid operation for Boolean value.")
+
+
 class PMMLBaseEstimator(BaseEstimator,ClassifierMixin):
   def __init__(self, pmml):
     self.root = etree.parse(pmml).getroot()
@@ -146,7 +163,7 @@ class PMMLBaseEstimator(BaseEstimator,ClassifierMixin):
       'integer': int,
       'float': float,
       'double': float,
-      'boolean': bool
+      'boolean': lambda x: Boolean(x.lower() in ['1', 'true', 'yes'] if type(x) is str else x)
     }
 
     if type_mapping.get(dataType) is None:

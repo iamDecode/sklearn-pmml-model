@@ -1,5 +1,5 @@
 from unittest import TestCase
-from sklearn_pmml_model.base import PMMLBaseEstimator, Interval, Category
+from sklearn_pmml_model.base import *
 from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np
@@ -85,7 +85,6 @@ class TestBase(TestCase):
       ['continuous', 'integer', int],
       ['continuous', 'float', float],
       ['continuous', 'double', float],
-      ['continuous', 'boolean', bool]
     ]
 
     for value in values:
@@ -99,6 +98,34 @@ class TestBase(TestCase):
 
         assert isinstance(result, data_type)
 
+  def test_parse_type_value_continuous_boolean(self):
+    template = """
+    <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+      <DataDictionary>
+        <DataField name="test" optype="{}" dataType="{}"/>
+      </DataDictionary>
+    </PMML>"""
+
+    tests = {
+      "1": True,
+      "True": True,
+      "YES": True,
+      1: True,
+      True: True,
+      "0": False,
+      "False": False,
+      0: False
+    }
+
+    for value, expected in tests.items():
+      clf = PMMLBaseEstimator(pmml=StringIO(template.format('continuous', 'boolean')))
+
+      data_dictionary = clf.find(clf.root, "DataDictionary")
+      data_field = clf.find(data_dictionary, "DataField")
+      result = clf.parse_type(value, data_field)
+
+      assert isinstance(result, Boolean)
+      assert result == expected
 
   def test_parse_type_value_exception(self):
     template = """

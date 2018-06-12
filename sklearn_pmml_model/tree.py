@@ -1,6 +1,7 @@
 import numpy as np
+import pandas as pd
 from sklearn_pmml_model.base import *
-
+from sklearn.utils.validation import check_array
 
 class PMMLTreeClassifier(PMMLBaseEstimator):
   def __init__(self, pmml):
@@ -84,8 +85,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
         corresponding row in X.
 
     """
-    if len(X.shape) != 2:
-      X = X.reshape(1, 2)
+    check_array(X)
 
     return np.array(X.apply(lambda x: self.predict_instance(x), axis=1))
 
@@ -105,8 +105,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
         for the corresponding row in X.
 
     """
-    if len(X.shape) != 2:
-      X = X.reshape(1, 2)
+    check_array(X)
 
     return np.array(X.apply(lambda x: self.predict_instance(x, probabilities=True), axis=1))
 
@@ -133,10 +132,10 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
 
       if len(childNodes) == 0:
         if probabilities:
-          return [
+          return pd.Series([
             float(e.get('recordCount')) / float(Node.get('recordCount'))
             for e in self.findall(Node, "ScoreDistribution")
-          ]
+          ])
         else:
           return Node.get('score')
 

@@ -2,6 +2,7 @@ from unittest import TestCase
 from sklearn_pmml_model.tree import PMMLTreeClassifier
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
 from io import StringIO
 import pandas as pd
 import numpy as np
@@ -54,54 +55,55 @@ class TestTree(TestCase):
     """))
 
 
-  def test_predict(self):
-    clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/sklearn2pmml.pmml'))
-    a = clf.predict(Xte)
-    print(a)
-    assert True
+  def test_evatuate_node(self):
+    template = '<Node xmlns="http://www.dmg.org/PMML-4_3"><{}/></Node>'
 
+    tests = {
+      'True': True,
+      'False': False,
+      'SimplePredicate field="f1" operator="equal" value="value2"': True,
+      'CompoundPredicate': Exception('Predicate not implemented'),
+      'SimpleSetPredicate': Exception('Predicate not implemented')
+    }
 
-  # def test_predict_proba(self):
-  #   a = self.clf.predict_proba(Xte)
-  #   print(a)
-  #   assert True
-  #
-  # def test_score(self):
-  #   score = self.clf.score(Xte, yte)
-  #   assert score  == 0.8
-  #
-  # def test_predict_dt(self):
-  #   clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/lightpmmlpredictor.pmml'))
-  #
-  #   X = pd.DataFrame(data={
-  #     'nom_nivell': ['ESO', 'CFGM Infor', 'ESO'],
-  #     'hora_inici': ['09:15:00', '11:30:00', '09:15:00'],
-  #     'assistenciaMateixaHora1WeekBefore': ['Present', 'Absent', 'NA'],
-  #     'assistenciaMateixaHora2WeekBefore': ['NA', 'Absent', 'NA'],
-  #     'assistenciaMateixaHora3WeekBefore': ['NA', 'Absent', 'NA'],
-  #     'assistenciaaHoraAnterior': ['Present', 'Absent', 'NA']
-  #   })
-  #
-  #   # ('Present', 0.9466557721489436)
-  #   # ('Absent', 0.9154589371980676)
-  #   # ('Present', 0.7301587301587301)
-  #
-  #   print(clf.predict(X))
-  #   print(clf.predict_proba(X))
+    instance = pd.Series(
+      ['value2', 'louder', 4.5, 4.5, 4, True],
+      index = ['f1','f2','f3','f4','f5','f6']
+    )
+
+    for element, expected in tests.items():
+      node = etree.fromstring(template.format(element))
+
+      if isinstance(expected, Exception):
+        with self.assertRaises(Exception) as cm: self.clf.evaluate_node(node, instance)
+        assert str(cm.exception) == str(expected)
+      else:
+        assert self.clf.evaluate_node(node, instance) == expected
+
 
   def test_evaluate_simple_predicate(self):
     template = '<SimplePredicate field="{}" operator="{}" value="{}"/>'
 
     tests = {
       ('f1', 'equal', 'value2'): True,
+      ('f1', 'equal', 'value1'): False,
       ('f1', 'notEqual', 'value1'): True,
       ('f1', 'lessOrEqual', 'value2'): Exception("Invalid operation for categorical value."),
       ('f2', 'lessThan', 'loudest'): True,
       ('f2', 'greaterOrEqual', 'loud'): True,
       ('f2', 'greaterOrEqual', 'loudest'): False,
       ('f3', 'notEqual', 1.5): Exception("Value does not match any interval."),
+      ('f3', 'equal', 4.4): False,
       ('f3', 'notEqual', 4.4): True,
       ('f3', 'equal', 4.5): True,
+      ('f4', 'greaterOrEqual', 4.5): True,
+      ('f4', 'greaterThan', 4.5): False,
+      ('f4', 'greaterThan', 4.4): True,
+      ('f5', 'lessThan', 5): True,
+      ('f5', 'lessOrEqual', 3): False,
+      ('f6', 'equal', 1): True,
+      ('f6', 'equal', 0): False,
+      ('f6', 'lessThan', 0): Exception("Invalid operation for Boolean value.")
     }
 
     instance = pd.Series(
@@ -117,3 +119,44 @@ class TestTree(TestCase):
         assert str(cm.exception) == str(expected)
       else:
         assert self.clf.evaluate_simple_predicate(element, instance) == expected
+
+
+class TestTreeIntegration(TestCase):
+  def setUp(self):
+    self.clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/sklearn2pmml.pmml'))
+    self.reference = DecisionTreeClassifier(random_state=1).fit(Xtr, ytr)
+
+  def test_predict(self):
+    assert np.array_equal(self.reference.predict(Xte), self.clf.predict(Xte))
+
+
+  def test_predict_proba(self):
+    assert np.array_equal(self.reference.predict_proba(Xte), self.clf.predict_proba(Xte))
+
+
+  def test_score(self):
+    assert self.reference.score(Xte, yte) == self.clf.score(Xte, yte)
+
+
+  def test_predict_single(self):
+    with self.assertRaises(Exception) as cm:
+      a = self.clf.predict(Xte.iloc[0])
+    exception = cm.exception
+
+    with self.assertRaises(Exception) as cm:
+      b = self.reference.predict(Xte.iloc[0])
+    rexception = cm.exception
+
+    assert str(exception) == str(rexception)
+
+
+  def test_predict_proba_single(self):
+    with self.assertRaises(Exception) as cm:
+      a = self.clf.predict_proba(Xte.iloc[0])
+    exception = cm.exception
+
+    with self.assertRaises(Exception) as cm:
+      b = self.reference.predict_proba(Xte.iloc[0])
+    rexception = cm.exception
+
+    assert str(exception) == str(rexception)
