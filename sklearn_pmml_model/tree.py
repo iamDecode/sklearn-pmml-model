@@ -30,6 +30,23 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
 
 
   def evaluate_simple_predicate(self, element, instance):
+    """
+    Evaluate <SimplePredicate> PMML tag.
+
+    Parameters
+    ----------
+    element : xml.etree.ElementTree.Element
+        XML Element with tag <SimplePredicate>.
+
+    instance : pd.Series
+        Instance we want to evaluate the predicate on.
+
+    Returns
+    -------
+    bool
+        Indicating whether the predicate holds or not.
+
+    """
     field = element.get('field')
 
     column, mapping = self.field_mapping[field]
@@ -65,6 +82,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     numpy.ndarray
         Array of size len(X), where every row contains a prediction for the
         corresponding row in X.
+
     """
     if len(X.shape) != 2:
       X = X.reshape(1, 2)
@@ -85,6 +103,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     numpy.ndarray
         Array of size len(X), where every row contains a probability for each class
         for the corresponding row in X.
+
     """
     if len(X.shape) != 2:
       X = X.reshape(1, 2)

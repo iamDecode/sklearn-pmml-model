@@ -46,7 +46,6 @@ class TestBase(TestCase):
           <FieldRef field="sepal width (cm)"/>
         </DerivedField>
       </TransformationDictionary>
-      <TreeModel/>
     </PMML>
     """))
 
@@ -143,7 +142,7 @@ class TestBase(TestCase):
       data_field = clf.find(data_dictionary, "DataField")
 
       with self.assertRaises(Exception) as cm: clf.parse_type("not_in_category", data_field)
-      assert str(cm.exception) == "Invalid categorical value."
+      assert str(cm.exception) == "Value does not match any category."
       assert clf.parse_type("setosa", data_field) == "setosa"
       assert clf.parse_type("versicolor", data_field) == "versicolor"
       assert clf.parse_type("virginica", data_field) == "virginica"
@@ -156,7 +155,7 @@ class TestBase(TestCase):
           <DataField name="Volume" optype="ordinal" dataType="string">
             <Value value="loud"/>
             <Value value="louder"/>
-            <Value value="insane"/>
+            <Value value="loudest"/>
           </DataField>
         </DataDictionary>
       </PMML>"""
@@ -166,13 +165,13 @@ class TestBase(TestCase):
     data_field = clf.find(data_dictionary, "DataField")
 
     with self.assertRaises(Exception)as cm: clf.parse_type("not_in_category", data_field)
-    assert str(cm.exception) == "Invalid ordinal value."
+    assert str(cm.exception) == "Value does not match any category."
     assert clf.parse_type("loud", data_field) == "loud"
     assert clf.parse_type("louder", data_field) == "louder"
-    assert clf.parse_type("insane", data_field) == "insane"
+    assert clf.parse_type("loudest", data_field) == "loudest"
 
     assert clf.parse_type("loud", data_field) < clf.parse_type("louder", data_field)
-    assert clf.parse_type("louder", data_field) < clf.parse_type("insane", data_field)
+    assert clf.parse_type("louder", data_field) < clf.parse_type("loudest", data_field)
 
 
   def test_parse_type_interval(self):

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sklearn.base import BaseEstimator, ClassifierMixin
 from xml.etree import cElementTree as etree
 from cached_property import cached_property
@@ -16,12 +18,13 @@ class Interval():
     self.rightMargin = float(rightMargin or math.inf)
 
   def __eq__(self, other):
-    if isinstance(other, type(self.value)):
-      return other == self.value and other in self
+    if isinstance(other, Interval):
+      return self.leftMargin == other.leftMargin \
+             and self.rightMargin == other.rightMargin \
+             and self.closure == other.closure \
+             and self.value == other.value
 
-    return self.leftMargin == other.leftMargin \
-           and self.rightMargin == other.rightMargin \
-           and self.closure == other.closure
+    return other == self.value and other in self
 
   def __contains__(self, item):
     if isinstance(item, float) or isinstance(item, int):
@@ -49,9 +52,24 @@ class Category():
     return self.value == other
 
   def __lt__(self, other):
-    # TODO: isCyclic
     if self.ordered:
       return self.categories.index(self) < self.categories.index(other)
+    raise Exception("Invalid operation for categorical value.")
+
+  def __le__(self, other):
+    if self.ordered:
+      return self.categories.index(self) <= self.categories.index(other)
+    raise Exception("Invalid operation for categorical value.")
+
+  def __gt__(self, other):
+    if self.ordered:
+      return self.categories.index(self) > self.categories.index(other)
+    raise Exception("Invalid operation for categorical value.")
+
+  def __ge__(self, other):
+    if self.ordered:
+      return self.categories.index(self) >= self.categories.index(other)
+    raise Exception("Invalid operation for categorical value.")
 
 
 class PMMLBaseEstimator(BaseEstimator,ClassifierMixin):
@@ -80,12 +98,12 @@ class PMMLBaseEstimator(BaseEstimator,ClassifierMixin):
         instance X, applying transformations defined in the pipeline and returning that value.
 
     """
-    dataDict = self.find(self.root, 'DataDictionary')
+    data_dictionary = self.find(self.root, 'DataDictionary')
 
     feature_mapping = {
       e.get('name'): (e.get('name'), lambda value, e=e:
                                        self.parse_type(value, e))
-      for e in dataDict
+      for e in data_dictionary
       if e.tag == f'{{{self.namespace}}}DataField'
     }
 
@@ -140,37 +158,49 @@ class PMMLBaseEstimator(BaseEstimator,ClassifierMixin):
     if opType not in ['categorical', 'ordinal', 'continuous']:
       raise Exception("Unsupported operation type.")
 
-    if opType == 'continuous':
-      return type_mapping[dataType](value)
+    value = type_mapping[dataType](value)
 
-    else:
-      labels = [
-        e.get('value')
-        for e in dataField
-        if e.tag == f'{{{self.namespace}}}Value'
-      ]
-      categories = [
-        Category(label, labels, ordered = (opType == 'ordinal'))
-        for label in labels
-      ]
+    # Check categories
+    labels = [
+      e.get('value')
+      for e in dataField
+      if e.tag == f'{{{self.namespace}}}Value'
+    ]
 
-      categories += [
-        Interval(
-          value = value,
-          leftMargin = e.get('leftMargin'),
-          rightMargin = e.get('rightMargin'),
-          closure = e.get('closure')
-        )
-        for e in dataField
-        if e.tag == f'{{{self.namespace}}}Interval'
-      ]
+    categories = [
+      Category(label, labels, ordered = (opType == 'ordinal'))
+      for label in labels
+    ]
 
-      value = next((x for x in categories if x == value), None)
+    intervals = [
+      Interval(
+        value = value,
+        leftMargin = e.get('leftMargin'),
+        rightMargin = e.get('rightMargin'),
+        closure = e.get('closure')
+      )
+      for e in dataField
+      if e.tag == f'{{{self.namespace}}}Interval'
+    ]
 
-      if value is None:
-        raise Exception(f"Invalid {opType} value.")
+    if len(categories) != 0:
+      category = next((x for x in categories if x == value), None)
 
-      return value
+      if category is None:
+        raise Exception("Value does not match any category.")
+      else:
+        return category
+
+    if len(intervals) != 0:
+      interval = next((x for x in intervals if value in x), None)
+
+      if interval is None:
+        raise Exception("Value does not match any interval.")
+      else:
+        interval.value = value
+        return interval
+
+    return value
 
 
   def fit(self, X, y):
