@@ -1,5 +1,6 @@
 from unittest import TestCase
-from sklearn_pmml_model.base import *
+from sklearn_pmml_model.base import PMMLBaseEstimator
+from sklearn_pmml_model.datatypes import Category, Boolean, Interval
 from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np
@@ -21,10 +22,8 @@ df = pd.concat([X, y], axis=1)
 
 
 class TestBase(TestCase):
-
   def setUp(self):
     pass
-
 
   def test_evaluate_feature_mapping(self):
     clf = PMMLBaseEstimator(pmml=StringIO("""
@@ -70,7 +69,6 @@ class TestBase(TestCase):
           assert mapped_value.categories == ["setosa", "versicolor", "virginica"]
         else:
           assert mapped_value == result.type(df.iloc[i][column])
-
 
   def test_parse_type_value_continuous(self):
     template = """
@@ -151,7 +149,6 @@ class TestBase(TestCase):
     with self.assertRaises(Exception) as cm: clf.parse_type("test", data_field)
     assert str(cm.exception) == "Unsupported operation type."
 
-
   def test_parse_type_value_categorical(self):
       template = """
       <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
@@ -173,7 +170,6 @@ class TestBase(TestCase):
       assert clf.parse_type("setosa", data_field) == "setosa"
       assert clf.parse_type("versicolor", data_field) == "versicolor"
       assert clf.parse_type("virginica", data_field) == "virginica"
-
 
   def test_parse_type_value_ordinal(self):
     template = """
@@ -200,7 +196,6 @@ class TestBase(TestCase):
     assert clf.parse_type("loud", data_field) < clf.parse_type("louder", data_field)
     assert clf.parse_type("louder", data_field) < clf.parse_type("loudest", data_field)
 
-
   def test_parse_type_interval(self):
     template = """
     <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
@@ -225,10 +220,9 @@ class TestBase(TestCase):
     assert clf.parse_type(2.5, data_field) == Interval(2.5, leftMargin=2.5, rightMargin=3.5, closure='closedOpen')
     assert clf.parse_type(3.5, data_field) == Interval(3.5, leftMargin=3.5, closure='closedClosed')
 
+  def test_fit_exception(self):
+    clf = PMMLBaseEstimator(pmml=StringIO('<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>'))
+    with self.assertRaises(Exception) as cm:
+      clf.fit(X, y)
 
-  def test_interval_exception(self):
-    with self.assertRaises(Exception): Interval(1, closure='openOpen')
-
-
-  def test_category_exception(self):
-    with self.assertRaises(Exception): Category('1', [1, 2])
+    assert str(cm.exception) == "Not supported."

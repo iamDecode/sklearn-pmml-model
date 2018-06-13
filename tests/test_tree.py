@@ -26,9 +26,7 @@ Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
 df = pd.concat([Xte, yte], axis=1)
 
 
-
 class TestTree(TestCase):
-
   def setUp(self):
     self.clf = PMMLTreeClassifier(pmml=StringIO("""
     <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
@@ -54,7 +52,6 @@ class TestTree(TestCase):
     </PMML>
     """))
 
-
   def test_evatuate_node(self):
     template = '<Node xmlns="http://www.dmg.org/PMML-4_3"><{}/></Node>'
 
@@ -63,7 +60,8 @@ class TestTree(TestCase):
       'False': False,
       'SimplePredicate field="f1" operator="equal" value="value2"': True,
       'CompoundPredicate': Exception('Predicate not implemented'),
-      'SimpleSetPredicate': Exception('Predicate not implemented')
+      'SimpleSetPredicate': Exception('Predicate not implemented'),
+      'does_not_exist': False
     }
 
     instance = pd.Series(
@@ -79,7 +77,6 @@ class TestTree(TestCase):
         assert str(cm.exception) == str(expected)
       else:
         assert self.clf.evaluate_node(node, instance) == expected
-
 
   def test_evaluate_simple_predicate(self):
     template = '<SimplePredicate field="{}" operator="{}" value="{}"/>'
@@ -120,6 +117,14 @@ class TestTree(TestCase):
       else:
         assert self.clf.evaluate_simple_predicate(element, instance) == expected
 
+  def test_invalid_tree(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLTreeClassifier(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>
+      """))
+
+    assert str(cm.exception) == 'PMML model does not contain TreeModel.'
+
 
 class TestTreeIntegration(TestCase):
   def setUp(self):
@@ -129,14 +134,11 @@ class TestTreeIntegration(TestCase):
   def test_predict(self):
     assert np.array_equal(self.reference.predict(Xte), self.clf.predict(Xte))
 
-
   def test_predict_proba(self):
     assert np.array_equal(self.reference.predict_proba(Xte), self.clf.predict_proba(Xte))
 
-
   def test_score(self):
     assert self.reference.score(Xte, yte) == self.clf.score(Xte, yte)
-
 
   def test_predict_single(self):
     with self.assertRaises(Exception) as cm:
@@ -148,7 +150,6 @@ class TestTreeIntegration(TestCase):
     rexception = cm.exception
 
     assert str(exception) == str(rexception)
-
 
   def test_predict_proba_single(self):
     with self.assertRaises(Exception) as cm:

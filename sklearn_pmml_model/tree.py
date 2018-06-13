@@ -1,7 +1,9 @@
 import numpy as np
 import pandas as pd
-from sklearn_pmml_model.base import *
+import operator as op
+from sklearn_pmml_model.base import PMMLBaseEstimator
 from sklearn.utils.validation import check_array
+
 
 class PMMLTreeClassifier(PMMLBaseEstimator):
   def __init__(self, pmml):
@@ -10,8 +12,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     self.tree = self.find(self.root, 'TreeModel')
 
     if self.tree is None:
-      raise Exception("PMML model does not contain TreeModel.")
-
+      raise Exception('PMML model does not contain TreeModel.')
 
   def evaluate_node(self, node, instance):
     predicates = {
@@ -28,7 +29,6 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
         return evaluate(element, instance)
 
     return False
-
 
   def evaluate_simple_predicate(self, element, instance):
     """
@@ -67,7 +67,6 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
     }
 
     return operators[operator](a, b)
-
 
   def predict(self, X):
     """
@@ -111,12 +110,15 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
 
   def predict_instance(self, instance, probabilities=False):
     """
-    Perdiction for a single instance.
+    Prediction for a single instance.
 
     Parameters
     ----------
     instance : pd.Series
         Instance to be classified.
+
+    probabilities : bool (default: False)
+        Whether the method should return class probabilities or just the predicted class.
 
     Returns
     -------
@@ -124,25 +126,21 @@ class PMMLTreeClassifier(PMMLBaseEstimator):
         Prediction values or class probabilities.
 
     """
-
-    Node = self.tree
+    node = self.tree
 
     while True:
-      childNodes = self.findall(Node, 'Node')
+      childNodes = self.findall(node, 'Node')
 
       if len(childNodes) == 0:
         if probabilities:
           return pd.Series([
-            float(e.get('recordCount')) / float(Node.get('recordCount'))
-            for e in self.findall(Node, "ScoreDistribution")
+            float(e.get('recordCount')) / float(node.get('recordCount'))
+            for e in self.findall(node, 'ScoreDistribution')
           ])
         else:
-          return Node.get('score')
-
+          return node.get('score')
 
       for childNode in childNodes:
         if self.evaluate_node(childNode, instance):
-          Node = childNode
+          node = childNode
           break
-
-    return None
