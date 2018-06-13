@@ -147,9 +147,9 @@ class TestTreeIntegration(TestCase):
 
     with self.assertRaises(Exception) as cm:
       b = self.reference.predict(Xte.iloc[0])
-    rexception = cm.exception
+    ref_exception = cm.exception
 
-    assert str(exception) == str(rexception)
+    assert str(exception) == str(ref_exception)
 
   def test_predict_proba_single(self):
     with self.assertRaises(Exception) as cm:
@@ -158,6 +158,6 @@ class TestTreeIntegration(TestCase):
 
     with self.assertRaises(Exception) as cm:
       b = self.reference.predict_proba(Xte.iloc[0])
-    rexception = cm.exception
+    ref_exception = cm.exception
 
-    assert str(exception) == str(rexception)
+    assert str(exception) == str(ref_exception)

@@ -14,17 +14,11 @@ class PMMLTreeClassifier(PMMLBaseEstimator, ClassifierMixin):
     if self.tree is None:
       raise Exception('PMML model does not contain TreeModel.')
 
-    mining_schema = self.find(self.tree, "MiningSchema")
-
-    if mining_schema is not None:
-      target = next((s for s in mining_schema if s.get('usageType') in ['target', 'predicted']), None)
-      target_element = self.fields.get(target.get('name'))
-
-      if target_element is not None:
-        self.classes_ = [
-          e.get('value')
-          for e in self.findall(target_element, 'Value')
-        ]
+    if self.target_field is not None:
+      self.classes_ = np.array([
+        e.get('value')
+        for e in self.findall(self.target_field, 'Value')
+      ])
 
   def evaluate_node(self, node, instance):
     predicates = {
@@ -96,9 +90,9 @@ class PMMLTreeClassifier(PMMLBaseEstimator, ClassifierMixin):
         corresponding row in X.
 
     """
-    check_array(X)
+    X = check_array(X)
 
-    return np.array(X.apply(lambda x: self.predict_instance(x), axis=1))
+    return np.ma.apply_along_axis(lambda x: self.predict_instance(x), 1, X)
 
   def predict_proba(self, X):
     """
@@ -116,9 +110,9 @@ class PMMLTreeClassifier(PMMLBaseEstimator, ClassifierMixin):
         for the corresponding row in X.
 
     """
-    check_array(X)
+    X = check_array(X)
 
-    return np.array(X.apply(lambda x: self.predict_instance(x, probabilities=True), axis=1))
+    return np.apply_along_axis(lambda x: self.predict_instance(x, probabilities=True), 1, X)
 
   def predict_instance(self, instance, probabilities=False):
     """

@@ -2,7 +2,7 @@ from sklearn.base import BaseEstimator
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
 from sklearn_pmml_model.datatypes import *
-
+from collections import OrderedDict
 
 class PMMLBaseEstimator(BaseEstimator):
   def __init__(self, pmml):
@@ -27,15 +27,26 @@ class PMMLBaseEstimator(BaseEstimator):
         instance X, applying transformations defined in the pipeline and returning that value.
 
     """
+    fields = self.fields
+    if self.target_field is not None:
+      del fields[self.target_field.get('name')]
+    field_labels = list(self.fields.keys())
+
     field_mapping = {
-      name: (name, lambda value, e=e: self.parse_type(value, e))
-      for name, e in self.fields.items()
+      name: (
+        field_labels.index(name),
+        lambda value, e=e: self.parse_type(value, e)
+      )
+      for name, e in fields.items()
       if e.tag == f'{{{self.namespace}}}DataField'
     }
 
     field_mapping.update({
-      name: (self.find(e, 'FieldRef').get('field'), lambda value, e=e: self.parse_type(value, e))
-      for name, e in self.fields.items()
+      name: (
+        field_labels.index(self.find(e, 'FieldRef').get('field')),
+        lambda value, e=e: self.parse_type(value, e)
+      )
+      for name, e in fields.items()
       if e.tag == f'{{{self.namespace}}}DerivedField'
     })
 
@@ -46,10 +57,10 @@ class PMMLBaseEstimator(BaseEstimator):
     data_dictionary = self.find(self.root, 'DataDictionary')
     transform_dict = self.find(self.root, 'TransformationDictionary')
 
-    fields = {
+    fields = OrderedDict({
       e.get('name'): e
       for e in self.findall(data_dictionary, 'DataField')
-    }
+    })
 
     if transform_dict is not None:
       fields.update({
@@ -58,6 +69,18 @@ class PMMLBaseEstimator(BaseEstimator):
       })
 
     return fields
+
+  @cached_property
+  def target_field(self):
+    mining_schema = next(self.root.iter(f'{{{self.namespace}}}MiningSchema'), None)
+
+    if mining_schema is not None:
+      mining_field = next((s for s in mining_schema if s.get('usageType') in ['target', 'predicted']), None)
+
+      if mining_field is not None:
+        return self.fields[mining_field.get('name')]
+
+    return None
 
   def parse_type(self, value, data_field):
     """

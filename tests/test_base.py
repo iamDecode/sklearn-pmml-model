@@ -45,16 +45,18 @@ class TestBase(TestCase):
           <FieldRef field="sepal width (cm)"/>
         </DerivedField>
       </TransformationDictionary>
+      <MiningSchema>
+			  <MiningField name="Class" usageType="target"/>
+      </MiningSchema>
     </PMML>
     """))
 
     Result = namedtuple('Result', 'column type')
     tests = {
-      'Class':                     Result(column='Class', type=Category),
-      'sepal length (cm)':         Result(column='sepal length (cm)', type=float),
-      'sepal width (cm)':          Result(column='sepal width (cm)', type=float),
-      'integer(sepal length (cm))':Result(column='sepal length (cm)', type=int),
-      'double(sepal width (cm))':  Result(column='sepal width (cm)', type=float)
+      'sepal length (cm)':         Result(column=0, type=float),
+      'sepal width (cm)':          Result(column=1, type=float),
+      'integer(sepal length (cm))':Result(column=0, type=int),
+      'double(sepal width (cm))':  Result(column=1, type=float)
     }
 
     for i in range(0, len(df)):
