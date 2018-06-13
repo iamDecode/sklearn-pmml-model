@@ -1,10 +1,10 @@
-from sklearn.base import BaseEstimator, ClassifierMixin
+from sklearn.base import BaseEstimator
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
 from sklearn_pmml_model.datatypes import *
 
 
-class PMMLBaseEstimator(BaseEstimator, ClassifierMixin):
+class PMMLBaseEstimator(BaseEstimator):
   def __init__(self, pmml):
     self.root = eTree.parse(pmml).getroot()
     self.namespace = self.root.tag[1:self.root.tag.index('}')]
@@ -27,24 +27,37 @@ class PMMLBaseEstimator(BaseEstimator, ClassifierMixin):
         instance X, applying transformations defined in the pipeline and returning that value.
 
     """
-    data_dictionary = self.find(self.root, 'DataDictionary')
-
-    feature_mapping = {
-      e.get('name'): (e.get('name'), lambda value, e=e: self.parse_type(value, e))
-      for e in data_dictionary
+    field_mapping = {
+      name: (name, lambda value, e=e: self.parse_type(value, e))
+      for name, e in self.fields.items()
       if e.tag == f'{{{self.namespace}}}DataField'
     }
 
-    transformDict = self.find(self.root, 'TransformationDictionary')
+    field_mapping.update({
+      name: (self.find(e, 'FieldRef').get('field'), lambda value, e=e: self.parse_type(value, e))
+      for name, e in self.fields.items()
+      if e.tag == f'{{{self.namespace}}}DerivedField'
+    })
 
-    if transformDict is not None:
-      feature_mapping.update({
-        e.get('name'): (self.find(e, 'FieldRef').get('field'), lambda value, e=e: self.parse_type(value, e))
-        for e in transformDict
-        if e.tag == f'{{{self.namespace}}}DerivedField'
+    return field_mapping
+
+  @cached_property
+  def fields(self):
+    data_dictionary = self.find(self.root, 'DataDictionary')
+    transform_dict = self.find(self.root, 'TransformationDictionary')
+
+    fields = {
+      e.get('name'): e
+      for e in self.findall(data_dictionary, 'DataField')
+    }
+
+    if transform_dict is not None:
+      fields.update({
+        e.get('name'): e
+        for e in self.findall(transform_dict, 'DerivedField')
       })
 
-    return feature_mapping
+    return fields
 
   def parse_type(self, value, data_field):
     """
@@ -90,8 +103,7 @@ class PMMLBaseEstimator(BaseEstimator, ClassifierMixin):
     # Check categories
     labels = [
       e.get('value')
-      for e in data_field
-      if e.tag == f'{{{self.namespace}}}Value'
+      for e in self.findall(data_field, 'Value')
     ]
 
     categories = [
@@ -106,8 +118,7 @@ class PMMLBaseEstimator(BaseEstimator, ClassifierMixin):
         rightMargin=e.get('rightMargin'),
         closure=e.get('closure')
       )
-      for e in data_field
-      if e.tag == f'{{{self.namespace}}}Interval'
+      for e in self.findall(data_field, 'Interval')
     ]
 
     if len(categories) != 0:
