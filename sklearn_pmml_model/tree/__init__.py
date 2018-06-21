@@ -18,7 +18,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
       raise Exception('Sklearn only supports binary classification models.')
 
     self.classes_ = np.array([
-      e.get('value')
+      self.parse_type(e.get('value'), self.target_field)
       for e in self.findall(self.target_field, 'Value')
     ])
 
