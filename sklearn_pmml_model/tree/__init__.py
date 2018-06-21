@@ -6,8 +6,8 @@ from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDE
 from sklearn.tree import DecisionTreeClassifier
 
 class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
-  def __init__(self, pmml):
-    super().__init__(pmml)
+  def __init__(self, pmml, field_labels=None):
+    super().__init__(pmml, field_labels=field_labels)
 
     self.tree = self.find(self.root, 'TreeModel')
 

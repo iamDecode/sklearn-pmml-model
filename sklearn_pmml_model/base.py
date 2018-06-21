@@ -5,9 +5,10 @@ from sklearn_pmml_model.datatypes import *
 from collections import OrderedDict
 
 class PMMLBaseEstimator(BaseEstimator):
-  def __init__(self, pmml):
+  def __init__(self, pmml, field_labels=None):
     self.root = eTree.parse(pmml).getroot()
     self.namespace = self.root.tag[1:self.root.tag.index('}')]
+    self.field_labels = field_labels
 
   def find(self, element, path):
     return element.find(f"PMML:{path}", namespaces={"PMML": self.namespace})
@@ -29,7 +30,7 @@ class PMMLBaseEstimator(BaseEstimator):
     """
     target = self.target_field.get('name')
     fields = { name: field for name, field in self.fields.items() if name != target }
-    field_labels = list(fields.keys())
+    field_labels = self.field_labels or list(fields.keys())
 
     field_mapping = {
       name: (
