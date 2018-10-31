@@ -88,7 +88,7 @@ $ pytest tests/
 
 ## Contributing
 
-Feel free to make a contribution. Please read [CONTRIBUTING.md]() for details on the code of conduct, and the process for submitting pull requests.
+Feel free to make a contribution. Please read [CONTRIBUTING.md](CONTRIBUTING.md) for details on the code of conduct, and the process for submitting pull requests.
 
 ## License
 
