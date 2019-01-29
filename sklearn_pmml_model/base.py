@@ -89,7 +89,7 @@ class PMMLBaseEstimator(BaseEstimator):
 
     return None
 
-  def parse_type(self, value, data_field):
+  def parse_type(self, value, data_field, force_native=False):
     """
     Parse type defined in <DataField> object, and convert value to that type.
 
@@ -132,7 +132,7 @@ class PMMLBaseEstimator(BaseEstimator):
 
     # Check categories
     labels = [
-      e.get('value')
+      type_mapping[dataType](e.get('value'))
       for e in self.findall(data_field, 'Value')
     ]
 
@@ -157,7 +157,7 @@ class PMMLBaseEstimator(BaseEstimator):
       if category is None:
         raise Exception('Value does not match any category.')
       else:
-        return category
+        return category if not force_native else category.value
 
     if len(intervals) != 0:
       interval = next((x for x in intervals if value in x), None)
@@ -166,7 +166,7 @@ class PMMLBaseEstimator(BaseEstimator):
         raise Exception('Value does not match any interval.')
       else:
         interval.value = value
-        return interval
+        return interval if not force_native else interval.value
 
     return value
 
