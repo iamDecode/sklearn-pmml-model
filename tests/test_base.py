@@ -18,13 +18,9 @@ X = pd.DataFrame(iris.data[:, pair])
 X.columns = np.array(iris.feature_names)[pair]
 y = pd.Series(np.array(iris.target_names)[iris.target])
 y.name = "Class"
-df = pd.concat([X, y], axis=1)
 
 
 class TestBase(TestCase):
-  def setUp(self):
-    pass
-
   def test_evaluate_feature_mapping(self):
     clf = PMMLBaseEstimator(pmml=StringIO("""
     <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
@@ -53,24 +49,49 @@ class TestBase(TestCase):
 
     Result = namedtuple('Result', 'column type')
     tests = {
-      'sepal length (cm)':         Result(column=0, type=float),
-      'sepal width (cm)':          Result(column=1, type=float),
-      'integer(sepal length (cm))':Result(column=0, type=int),
-      'double(sepal width (cm))':  Result(column=1, type=float)
+      'sepal length (cm)':          Result(column=0, type=float),
+      'sepal width (cm)':           Result(column=1, type=float),
+      'integer(sepal length (cm))': Result(column=0, type=int),
+      'double(sepal width (cm))':   Result(column=1, type=float),
+      'Class':                      Result(column=None, type=Category),
     }
 
-    for i in range(0, len(df)):
+    for i in range(0, X.shape[0]):
       for feature, result in tests.items():
         column, mapping = clf.field_mapping[feature]
         assert column == result.column
-        mapped_value = mapping(df.iloc[i][column])
+        mapped_value = mapping(X.iloc[i][column]) if column is not None else mapping(y.iloc[i])
         assert type(mapped_value) == result.type
 
         if result.type == Category:
-          assert mapped_value.value == df.iloc[i][column]
+          assert mapped_value.value == y.iloc[i]
           assert mapped_value.categories == ["setosa", "versicolor", "virginica"]
         else:
-          assert mapped_value == result.type(df.iloc[i][column])
+          assert mapped_value == result.type(X.iloc[i][column])
+
+  def test_target_field(self):
+    clf = PMMLBaseEstimator(pmml=StringIO("""
+    <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>
+    """))
+    assert clf.target_field == None
+
+    clf = PMMLBaseEstimator(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Class" optype="categorical" dataType="string">
+            <Value value="setosa"/>
+            <Value value="versicolor"/>
+            <Value value="virginica"/>
+          </DataField>
+        </DataDictionary>
+        <MiningSchema>
+          <MiningField name="Class" usageType="target"/>
+        </MiningSchema>
+      </PMML>
+      """))
+    assert clf.target_field.get('name') == 'Class'
+    assert clf.target_field.get('optype') == 'categorical'
+    assert clf.target_field.get('dataType') == 'string'
 
   def test_parse_type_value_continuous(self):
     template = """
@@ -172,6 +193,8 @@ class TestBase(TestCase):
       assert clf.parse_type("setosa", data_field) == "setosa"
       assert clf.parse_type("versicolor", data_field) == "versicolor"
       assert clf.parse_type("virginica", data_field) == "virginica"
+      assert isinstance(clf.parse_type("virginica", data_field), Category)
+      assert isinstance(clf.parse_type("virginica", data_field, force_native=True), str)
 
   def test_parse_type_value_ordinal(self):
     template = """
@@ -194,6 +217,8 @@ class TestBase(TestCase):
     assert clf.parse_type("loud", data_field) == "loud"
     assert clf.parse_type("louder", data_field) == "louder"
     assert clf.parse_type("loudest", data_field) == "loudest"
+    assert isinstance(clf.parse_type("loudest", data_field), Category)
+    assert isinstance(clf.parse_type("loudest", data_field, force_native=True), str)
 
     assert clf.parse_type("loud", data_field) < clf.parse_type("louder", data_field)
     assert clf.parse_type("louder", data_field) < clf.parse_type("loudest", data_field)
@@ -221,6 +246,7 @@ class TestBase(TestCase):
     assert clf.parse_type(2, data_field) == Interval(2, leftMargin=1.5, rightMargin=2.5, closure='openOpen')
     assert clf.parse_type(2.5, data_field) == Interval(2.5, leftMargin=2.5, rightMargin=3.5, closure='closedOpen')
     assert clf.parse_type(3.5, data_field) == Interval(3.5, leftMargin=3.5, closure='closedClosed')
+    assert clf.parse_type(3.5, data_field, force_native=True) == 3.5
 
   def test_fit_exception(self):
     clf = PMMLBaseEstimator(pmml=StringIO('<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>'))
