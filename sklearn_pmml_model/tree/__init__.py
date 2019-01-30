@@ -1,0 +1,82 @@
+import numpy as np
+import pandas as pd
+import operator as op
+from sklearn_pmml_model.base import PMMLBaseEstimator
+from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
+from sklearn.tree import DecisionTreeClassifier
+
+class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
+  def __init__(self, pmml):
+    super().__init__(pmml)
+
+    self.tree = self.find(self.root, 'TreeModel')
+
+    if self.tree is None:
+      raise Exception('PMML model does not contain TreeModel.')
+
+    if self.tree.get('splitCharacteristic') != 'binarySplit':
+      raise Exception('Sklearn only supports binary classification models.')
+
+    self.classes_ = np.array([
+      e.get('value')
+      for e in self.findall(self.target_field, 'Value')
+    ])
+
+    target = self.target_field.get('name')
+    fields = [ field for name, field in self.fields.items() if name != target ]
+
+    if field_labels is not None:
+      self.n_features_ = len(field_labels)
+    else:
+      self.n_features_ = len([field for field in fields if field.tag == f'{{{self.namespace}}}DataField'])
+
+    self.n_outputs_ = 1
+    self.n_classes_ = len(self.classes_)
+    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]), self.n_outputs_)
+
+    firstNode = self.find(self.tree, 'Node')
+    nodes, values = self.constructTree(firstNode)
+
+    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
+    value_ndarray = np.ascontiguousarray(values)
+    max_depth = None
+    state = {
+      'max_depth': (2 ** 31) - 1 if max_depth is None else max_depth,
+      'node_count': node_ndarray.shape[0],
+      'nodes': node_ndarray,
+      'values': value_ndarray
+    }
+    self.tree_.__setstate__(state)
+
+  def constructTree(self, node, i = 0):
+    childNodes = self.findall(node, 'Node')
+
+    if len(childNodes) == 0:
+      impurity = 0 # TODO: impurity is not really required for anything, but would be nice to have
+      node_count = int(float(node.get('recordCount')))
+      node_count_weighted = float(node.get('recordCount'))
+
+      return [
+        [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, TREE_UNDEFINED, impurity, node_count, node_count_weighted)],
+        np.array([[[float(e.get('recordCount')) for e in self.findall(node, 'ScoreDistribution')]]])
+      ]
+
+    left_node, left_value = self.constructTree(childNodes[0], i + 1)
+    offset = len(left_node)
+    right_node, right_value = self.constructTree(childNodes[1], i + 1 + offset)
+
+    children = left_node + right_node
+    distributions = np.concatenate((left_value, right_value))
+
+    predicate = self.find(childNodes[0], 'SimplePredicate')
+    column, mapping = self.field_mapping[predicate.get('field')]
+    value = mapping(predicate.get('value'))
+    impurity = 0 # TODO: not really necessary, but do it anyway
+
+    distributions_children = distributions[[0, offset]]
+    distribution = np.sum(distributions_children, axis=0)
+    node_count = int(np.sum(distribution))
+    node_count_weighted = float(np.sum(distribution))
+
+    return [(i + 1, i + 1 + offset, column, value, impurity, node_count, node_count_weighted)] + children, \
+           np.concatenate((np.array([distribution]), distributions))

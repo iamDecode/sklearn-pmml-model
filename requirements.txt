@@ -5,3 +5,4 @@ cached-property==1.4.2
 pytest==3.6.1
 pandas==0.23.0
 pytest-cov==2.5.1
+Cython==0.29.3

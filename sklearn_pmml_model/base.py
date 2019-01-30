@@ -27,10 +27,9 @@ class PMMLBaseEstimator(BaseEstimator):
         instance X, applying transformations defined in the pipeline and returning that value.
 
     """
-    fields = self.fields
-    if self.target_field is not None:
-      del fields[self.target_field.get('name')]
-    field_labels = list(self.fields.keys())
+    target = self.target_field.get('name')
+    fields = { name: field for name, field in self.fields.items() if name != target }
+    field_labels = list(fields.keys())
 
     field_mapping = {
       name: (
@@ -48,6 +47,13 @@ class PMMLBaseEstimator(BaseEstimator):
       )
       for name, e in fields.items()
       if e.tag == f'{{{self.namespace}}}DerivedField'
+    })
+
+    field_mapping.update({
+      self.target_field.get('name'): (
+        None,
+        lambda value, e=self.target_field: self.parse_type(value, e)
+      )
     })
 
     return field_mapping

@@ -1,4 +1,7 @@
 import setuptools
+import numpy as np
+from distutils.extension import Extension
+from Cython.Build import cythonize
 
 with open("README.md", "r") as fh:
   long_description = fh.read()
@@ -28,5 +31,12 @@ setuptools.setup(
     'scipy',
     'scikit-learn',
     'cached-property'
-  ]
+  ],
+  ext_modules = cythonize([
+    Extension("sklearn_pmml_model.tree._tree", ["sklearn_pmml_model/tree/_tree.pyx"], include_dirs=[np.get_include()]),
+    Extension("sklearn_pmml_model.tree.quad_tree", ["sklearn_pmml_model/tree/quad_tree.pyx"], include_dirs=[np.get_include()]),
+    Extension("sklearn_pmml_model.tree._criterion", ["sklearn_pmml_model/tree/_criterion.pyx"], include_dirs=[np.get_include()]),
+    Extension("sklearn_pmml_model.tree._splitter", ["sklearn_pmml_model/tree/_splitter.pyx"], include_dirs=[np.get_include()]),
+    Extension("sklearn_pmml_model.tree._utils", ["sklearn_pmml_model/tree/_utils.pyx"], include_dirs=[np.get_include()]),
+  ])
 )

@@ -128,6 +128,8 @@ class TestTree(TestCase):
 
 class TestTreeIntegration(TestCase):
   def setUp(self):
+    from sklearn_pmml_model.tree import PMMLTreeClassifier2
+    self.clf2 = PMMLTreeClassifier2(pmml=path.join(path.dirname(__file__), '../models/sklearn2pmml.pmml'))
     self.clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/sklearn2pmml.pmml'))
     self.reference = DecisionTreeClassifier(random_state=1).fit(Xtr, ytr)
 
@@ -161,3 +163,13 @@ class TestTreeIntegration(TestCase):
     ref_exception = cm.exception
 
     assert str(exception) == str(ref_exception)
+
+
+  def test_predict2(self):
+    assert np.array_equal(self.reference.predict(Xte), self.clf2.predict(Xte))
+
+  def test_predict_proba2(self):
+    assert np.array_equal(self.reference.predict_proba(Xte), self.clf2.predict_proba(Xte))
+
+  def test_score2(self):
+     assert self.reference.score(Xte, yte) == self.clf2.score(Xte, yte)
