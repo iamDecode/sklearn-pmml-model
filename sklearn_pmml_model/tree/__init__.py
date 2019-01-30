@@ -1,6 +1,4 @@
 import numpy as np
-import pandas as pd
-import operator as op
 from sklearn_pmml_model.base import PMMLBaseEstimator
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
 from sklearn.tree import DecisionTreeClassifier
@@ -49,6 +47,27 @@ class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
     self.tree_.__setstate__(state)
 
   def constructTree(self, node, i = 0):
+    """
+    Generator for nodes and values used for constructing cython Tree class.
+
+    Parameters
+    ----------
+    node : eTree.Element
+        XML Node element representing the current node.
+
+    i : int
+        Index of the node in the result list.
+
+    Returns
+    -------
+    nodes : [[int, int, int, Any, float, int, int]]
+        List of nodes represented by: left child, right child, feature, value, impurity, sample count and
+        sample count weighted.
+
+    values : [[]]
+        List with the distribution of training samples at this node in the tree.
+
+    """
     childNodes = self.findall(node, 'Node')
 
     if len(childNodes) == 0:
@@ -71,12 +90,12 @@ class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
     predicate = self.find(childNodes[0], 'SimplePredicate')
     column, mapping = self.field_mapping[predicate.get('field')]
     value = mapping(predicate.get('value'))
-    impurity = 0 # TODO: not really necessary, but do it anyway
+    impurity = 0 # TODO: impurity is not really required for anything, but would be nice to have
 
     distributions_children = distributions[[0, offset]]
     distribution = np.sum(distributions_children, axis=0)
-    node_count = int(np.sum(distribution))
-    node_count_weighted = float(np.sum(distribution))
+    sample_count = int(np.sum(distribution))
+    sample_count_weighted = float(np.sum(distribution))
 
-    return [(i + 1, i + 1 + offset, column, value, impurity, node_count, node_count_weighted)] + children, \
+    return [(i + 1, i + 1 + offset, column, value, impurity, sample_count, sample_count_weighted)] + children, \
            np.concatenate((np.array([distribution]), distributions))

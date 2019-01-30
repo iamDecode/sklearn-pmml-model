@@ -26,6 +26,7 @@ class TestTree(TestCase):
 
     assert str(cm.exception) == 'Sklearn only supports binary classification models.'
 
+
 class TestIrisTreeIntegration(TestCase):
   def setUp(self):
     pair = [0, 1]
@@ -52,6 +53,7 @@ class TestIrisTreeIntegration(TestCase):
   def test_score(self):
     Xte, yte = self.test
     assert self.reference.score(Xte, yte) == self.clf.score(Xte, yte)
+
 
 class TestDigitsTreeIntegration(TestCase):
   def setUp(self):

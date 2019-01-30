@@ -23,7 +23,7 @@ class PMMLBaseEstimator(BaseEstimator):
 
     Returns
     -------
-    dict {str: (str,lamba<pd.Series>)}
+    dict { str: (int, lambda<pandas.Series>) }
         Where keys indicate column names, and values are anonymous functions selecting the associated column from
         instance X, applying transformations defined in the pipeline and returning that value.
 
@@ -61,6 +61,15 @@ class PMMLBaseEstimator(BaseEstimator):
 
   @cached_property
   def fields(self):
+    """
+    Cached property containing an ordered mapping from field name to XML DataField or DerivedField element.
+
+    Returns
+    -------
+    OrderedDict { str: eTree.Element }
+        Where keys indicate field names, and values are XML elements.
+
+    """
     data_dictionary = self.find(self.root, 'DataDictionary')
     transform_dict = self.find(self.root, 'TransformationDictionary')
 
@@ -79,6 +88,16 @@ class PMMLBaseEstimator(BaseEstimator):
 
   @cached_property
   def target_field(self):
+    """
+    Cached property containing a reference to the XML DataField or DerivedField element corresponding to the
+    classification target.
+
+    Returns
+    -------
+    eTree.Element
+        Representing the target field for classification, or None if no MiningSchema or MiningField specified.
+
+    """
     mining_schema = next(self.root.iter(f'{{{self.namespace}}}MiningSchema'), None)
 
     if mining_schema is not None:
@@ -98,8 +117,12 @@ class PMMLBaseEstimator(BaseEstimator):
     value : Any
         Value that needs to be converted.
 
-    data_field: xml.etree.ElementTree.Element
+    data_field : eTree.Element
         <DataField> or <DerivedField> XML element that describes a column.
+
+    force_native : bool
+        Boolean indicating whether native datatypes should be forced. Practically this means returning the base type of
+        the field rather than sklearn_pmml_model datatype like Category or Interval.
 
     Returns
     -------
