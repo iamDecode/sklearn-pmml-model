@@ -1,3 +1,4 @@
+# cython: language_level=3
 # cython: cdivision=True
 # cython: boundscheck=False
 # cython: wraparound=False
@@ -24,15 +25,15 @@ np.import_array()
 # Helper functions
 # =============================================================================
 
-cdef realloc_ptr safe_realloc(realloc_ptr* p, size_t nelems) nogil except *:
+cdef realloc_ptr safe_realloc(realloc_ptr* p, size_t nelems, size_t nbytes_elem) nogil except *:
     # sizeof(realloc_ptr[0]) would be more like idiomatic C, but causes Cython
     # 0.20.1 to crash.
-    cdef size_t nbytes = nelems * sizeof(p[0][0])
-    if nbytes / sizeof(p[0][0]) != nelems:
+    cdef size_t nbytes = nelems * nbytes_elem
+    if nbytes / nbytes_elem != nelems:
         # Overflow in the multiplication
         with gil:
             raise MemoryError("could not allocate (%d * %d) bytes"
-                              % (nelems, sizeof(p[0][0])))
+                              % (nelems, nbytes_elem))
     cdef realloc_ptr tmp = <realloc_ptr>realloc(p[0], nbytes)
     if tmp == NULL:
         with gil:
@@ -46,7 +47,7 @@ def _realloc_test():
     # Helper for tests. Tries to allocate <size_t>(-1) / 2 * sizeof(size_t)
     # bytes, which will always overflow.
     cdef SIZE_t* p = NULL
-    safe_realloc(&p, <size_t>(-1) / 2)
+    safe_realloc(&p, <size_t>(-1) / 2, sizeof(SIZE_t))
     if p != NULL:
         free(p)
         assert False
@@ -69,6 +70,13 @@ cdef inline np.ndarray sizet_ptr_to_ndarray(SIZE_t* data, SIZE_t size):
     return np.PyArray_SimpleNewFromData(1, shape, np.NPY_INTP, data).copy()
 
 
+cdef inline np.ndarray int32_ptr_to_ndarray(INT32_t* data, SIZE_t size):
+    """Encapsulate data into a 1D numpy array of int32's."""
+    cdef np.npy_intp shape[1]
+    shape[0] = <np.npy_intp> size
+    return np.PyArray_SimpleNewFromData(1, shape, np.NPY_INT32, data)
+
+
 cdef inline SIZE_t rand_int(SIZE_t low, SIZE_t high,
                             UINT32_t* random_state) nogil:
     """Generate a random integer in [low; end)."""
@@ -84,6 +92,49 @@ cdef inline double rand_uniform(double low, double high,
 
 cdef inline double log(double x) nogil:
     return ln(x) / ln(2.0)
+
+
+cdef inline void setup_cat_cache(UINT32_t *cachebits, UINT64_t cat_split,
+                                 INT32_t n_categories) nogil:
+    """Populate the bits of the category cache from a split.
+    """
+    cdef INT32_t j
+    cdef UINT32_t rng_seed, val
+
+    if n_categories > 0:
+        # NOTE: Disabled because this breaks functionality. It seems that all bits need to be shifted one place,
+        #       as cat_split & 1 below breaks the first category.
+
+        # if cat_split & 1:
+        #     # RandomSplitter
+        #     for j in range((n_categories + 31) // 32):
+        #         cachebits[j] = 0
+        #     rng_seed = cat_split >> 32
+        #     for j in range(n_categories):
+        #         val = rand_int(0, 2, &rng_seed)
+        #         cachebits[j // 32] |= val << (j % 32)
+        # else:
+        # BestSplitter
+        for j in range((n_categories + 31) // 32):
+            cachebits[j] = (cat_split >> (j * 32)) & <UINT64_t> 0xFFFFFFFF
+
+
+cdef inline bint goes_left(DTYPE_t feature_value, SplitValue split,
+                           INT32_t n_categories, UINT32_t* cachebits) nogil:
+    """Determine whether a sample goes to the left or right child node."""
+    cdef SIZE_t idx, shift
+
+    if n_categories < 1:
+        # Non-categorical feature
+        return feature_value <= split.threshold
+    else:
+        # Categorical feature, using bit cache
+        if (<SIZE_t> feature_value) < n_categories:
+            idx = (<SIZE_t> feature_value) // 32
+            shift = (<SIZE_t> feature_value) % 32
+            return (cachebits[idx] >> shift) & 1
+        else:
+            return 0
 
 
 # =============================================================================
@@ -132,7 +183,7 @@ cdef class Stack:
         if top >= self.capacity:
             self.capacity *= 2
             # Since safe_realloc can raise MemoryError, use `except -1`
-            safe_realloc(&self.stack_, self.capacity)
+            safe_realloc(&self.stack_, self.capacity, sizeof(StackRecord))
 
         stack = self.stack_
         stack[top].start = start
@@ -192,7 +243,7 @@ cdef class PriorityHeap:
     def __cinit__(self, SIZE_t capacity):
         self.capacity = capacity
         self.heap_ptr = 0
-        safe_realloc(&self.heap_, capacity)
+        safe_realloc(&self.heap_, capacity, sizeof(PriorityHeapRecord))
 
     def __dealloc__(self):
         free(self.heap_)
@@ -248,7 +299,7 @@ cdef class PriorityHeap:
         if heap_ptr >= self.capacity:
             self.capacity *= 2
             # Since safe_realloc can raise MemoryError, use `except -1`
-            safe_realloc(&self.heap_, self.capacity)
+            safe_realloc(&self.heap_, self.capacity, sizeof(PriorityHeapRecord))
 
         # Put element as last element of heap
         heap = self.heap_
@@ -318,7 +369,7 @@ cdef class WeightedPQueue:
     def __cinit__(self, SIZE_t capacity):
         self.capacity = capacity
         self.array_ptr = 0
-        safe_realloc(&self.array_, capacity)
+        safe_realloc(&self.array_, capacity, sizeof(WeightedPQueueRecord))
 
     def __dealloc__(self):
         free(self.array_)
@@ -331,7 +382,7 @@ cdef class WeightedPQueue:
         """
         self.array_ptr = 0
         # Since safe_realloc can raise MemoryError, use `except *`
-        safe_realloc(&self.array_, self.capacity)
+        safe_realloc(&self.array_, self.capacity, sizeof(WeightedPQueueRecord))
         return 0
 
     cdef bint is_empty(self) nogil:
@@ -354,7 +405,7 @@ cdef class WeightedPQueue:
         if array_ptr >= self.capacity:
             self.capacity *= 2
             # Since safe_realloc can raise MemoryError, use `except -1`
-            safe_realloc(&self.array_, self.capacity)
+            safe_realloc(&self.array_, self.capacity, sizeof(WeightedPQueueRecord))
 
         # Put element as last element of array
         array = self.array_

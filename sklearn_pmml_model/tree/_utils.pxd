@@ -1,3 +1,5 @@
+# cython: language_level=3
+
 # Authors: Gilles Louppe <g.louppe@gmail.com>
 #          Peter Prettenhofer <peter.prettenhofer@gmail.com>
 #          Arnaud Joly <arnaud.v.joly@gmail.com>
@@ -10,14 +12,63 @@
 
 import numpy as np
 cimport numpy as np
-from _tree cimport Node
-from quad_tree cimport Cell
+
+from .quad_tree cimport Cell
 
 ctypedef np.npy_float32 DTYPE_t          # Type of X
 ctypedef np.npy_float64 DOUBLE_t         # Type of y, sample_weight
 ctypedef np.npy_intp SIZE_t              # Type for indices and counters
 ctypedef np.npy_int32 INT32_t            # Signed 32 bit integer
 ctypedef np.npy_uint32 UINT32_t          # Unsigned 32 bit integer
+ctypedef np.npy_uint64 UINT64_t          # Unsigned 64 bit integer
+
+ctypedef union SplitValue:
+    # Union type to generalize the concept of a threshold to
+    # categorical features. For non-categorical features, use the
+    # threshold member. It acts just as before, where feature values
+    # less than or equal to the threshold go left, and values greater
+    # than the threshold go right.
+    #
+    # For categorical features, use the cat_split member. It works in
+    # one of two ways, indicated by the value of its least significant
+    # bit (LSB). If the LSB is 0, then cat_split acts as a bitfield
+    # for up to 64 categories, sending samples left if the bit
+    # corresponding to their category is 1 or right if it is 0. If the
+    # LSB is 1, then the more significant 32 bits of cat_split is a
+    # random seed. To evaluate a sample, use the random seed to flip a
+    # coin (category_value + 1) times and send it left if the last
+    # flip gives 1; otherwise right. This second method allows up to
+    # 2**31 category values, but can only be used for RandomSplitter.
+    DOUBLE_t threshold
+    UINT64_t cat_split
+
+
+ctypedef struct SplitRecord:
+    # Data to track sample split
+    SIZE_t feature         # Which feature to split on.
+    SIZE_t pos             # Split samples array at the given position,
+                           # i.e. count of samples below threshold for feature.
+                           # pos is >= end if the node is a leaf.
+    SplitValue split_value # Generalized threshold for categorical and
+                           # non-categorical features
+    double improvement     # Impurity improvement given parent node.
+    double impurity_left   # Impurity of the left split.
+    double impurity_right  # Impurity of the right split.
+
+
+cdef struct Node:
+    # Base storage structure for the nodes in a Tree object
+
+    SIZE_t left_child                    # id of the left child of the node
+    SIZE_t right_child                   # id of the right child of the node
+    SIZE_t feature                       # Feature used for splitting the node
+    SplitValue split_value               # Generalized threshold for categorical and
+                                         # non-categorical features
+    DOUBLE_t impurity                    # Impurity of the node (i.e., the value of the criterion)
+    SIZE_t n_node_samples                # Number of samples at the node
+    DOUBLE_t weighted_n_node_samples     # Weighted number of samples at the node
+
+# cdef struct Node  # Forward declaration
 
 cdef enum:
     # Max value for our rand_r replacement (near the bottom).
@@ -38,18 +89,21 @@ ctypedef fused realloc_ptr:
     (unsigned char*)
     (WeightedPQueueRecord*)
     (DOUBLE_t*)
-    (DOUBLE_t**)
     (Node*)
     (Cell*)
     (Node**)
     (StackRecord*)
     (PriorityHeapRecord*)
+    (void**)
+    (INT32_t*)
+    (UINT32_t*)
 
-cdef realloc_ptr safe_realloc(realloc_ptr* p, size_t nelems) nogil except *
+cdef realloc_ptr safe_realloc(realloc_ptr* p, size_t nelems, size_t elem_bytes) nogil except *
 
 
 cdef np.ndarray sizet_ptr_to_ndarray(SIZE_t* data, SIZE_t size)
 
+cdef np.ndarray int32_ptr_to_ndarray(INT32_t* data, SIZE_t size)
 
 cdef SIZE_t rand_int(SIZE_t low, SIZE_t high,
                      UINT32_t* random_state) nogil
@@ -60,6 +114,15 @@ cdef double rand_uniform(double low, double high,
 
 
 cdef double log(double x) nogil
+
+
+cdef void setup_cat_cache(UINT32_t* cachebits, UINT64_t cat_split,
+                          INT32_t n_categories) nogil
+
+
+cdef bint goes_left(DTYPE_t feature_value, SplitValue split,
+                    INT32_t n_categories, UINT32_t* cachebits) nogil
+
 
 # =============================================================================
 # Stack data structure

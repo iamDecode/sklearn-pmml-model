@@ -1,7 +1,8 @@
 import math
 import operator as op
 
-class Interval():
+
+class Interval:
   def __init__(self, value, closure, leftMargin=None, rightMargin=None):
     assert leftMargin is not None or rightMargin is not None
     assert closure in ['openClosed', 'openOpen', 'closedOpen', 'closedClosed']
