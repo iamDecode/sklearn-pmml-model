@@ -5,9 +5,10 @@ from sklearn_pmml_model.datatypes import *
 from collections import OrderedDict
 
 class PMMLBaseEstimator(BaseEstimator):
-  def __init__(self, pmml):
+  def __init__(self, pmml, field_labels=None):
     self.root = eTree.parse(pmml).getroot()
     self.namespace = self.root.tag[1:self.root.tag.index('}')]
+    self.field_labels = field_labels
 
   def find(self, element, path):
     return element.find(f"PMML:{path}", namespaces={"PMML": self.namespace})
@@ -22,15 +23,14 @@ class PMMLBaseEstimator(BaseEstimator):
 
     Returns
     -------
-    dict {str: (str,lamba<pd.Series>)}
+    dict { str: (int, lambda<pandas.Series>) }
         Where keys indicate column names, and values are anonymous functions selecting the associated column from
         instance X, applying transformations defined in the pipeline and returning that value.
 
     """
-    fields = self.fields
-    if self.target_field is not None:
-      del fields[self.target_field.get('name')]
-    field_labels = list(self.fields.keys())
+    target = self.target_field.get('name')
+    fields = { name: field for name, field in self.fields.items() if name != target }
+    field_labels = self.field_labels or list(fields.keys())
 
     field_mapping = {
       name: (
@@ -50,10 +50,26 @@ class PMMLBaseEstimator(BaseEstimator):
       if e.tag == f'{{{self.namespace}}}DerivedField'
     })
 
+    field_mapping.update({
+      self.target_field.get('name'): (
+        None,
+        lambda value, e=self.target_field: self.parse_type(value, e)
+      )
+    })
+
     return field_mapping
 
   @cached_property
   def fields(self):
+    """
+    Cached property containing an ordered mapping from field name to XML DataField or DerivedField element.
+
+    Returns
+    -------
+    OrderedDict { str: eTree.Element }
+        Where keys indicate field names, and values are XML elements.
+
+    """
     data_dictionary = self.find(self.root, 'DataDictionary')
     transform_dict = self.find(self.root, 'TransformationDictionary')
 
@@ -72,6 +88,16 @@ class PMMLBaseEstimator(BaseEstimator):
 
   @cached_property
   def target_field(self):
+    """
+    Cached property containing a reference to the XML DataField or DerivedField element corresponding to the
+    classification target.
+
+    Returns
+    -------
+    eTree.Element
+        Representing the target field for classification, or None if no MiningSchema or MiningField specified.
+
+    """
     mining_schema = next(self.root.iter(f'{{{self.namespace}}}MiningSchema'), None)
 
     if mining_schema is not None:
@@ -82,7 +108,7 @@ class PMMLBaseEstimator(BaseEstimator):
 
     return None
 
-  def parse_type(self, value, data_field):
+  def parse_type(self, value, data_field, force_native=False):
     """
     Parse type defined in <DataField> object, and convert value to that type.
 
@@ -91,8 +117,12 @@ class PMMLBaseEstimator(BaseEstimator):
     value : Any
         Value that needs to be converted.
 
-    data_field: xml.etree.ElementTree.Element
+    data_field : eTree.Element
         <DataField> or <DerivedField> XML element that describes a column.
+
+    force_native : bool
+        Boolean indicating whether native datatypes should be forced. Practically this means returning the base type of
+        the field rather than sklearn_pmml_model datatype like Category or Interval.
 
     Returns
     -------
@@ -125,7 +155,7 @@ class PMMLBaseEstimator(BaseEstimator):
 
     # Check categories
     labels = [
-      e.get('value')
+      type_mapping[dataType](e.get('value'))
       for e in self.findall(data_field, 'Value')
     ]
 
@@ -150,7 +180,7 @@ class PMMLBaseEstimator(BaseEstimator):
       if category is None:
         raise Exception('Value does not match any category.')
       else:
-        return category
+        return category if not force_native else category.value
 
     if len(intervals) != 0:
       interval = next((x for x in intervals if value in x), None)
@@ -159,7 +189,7 @@ class PMMLBaseEstimator(BaseEstimator):
         raise Exception('Value does not match any interval.')
       else:
         interval.value = value
-        return interval
+        return interval if not force_native else interval.value
 
     return value
 

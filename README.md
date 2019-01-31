@@ -25,10 +25,6 @@ This library is very alpha, and currently only supports a small part of the [spe
 - TransformationDictionary
   - DerivedField
 - TreeModel
-  - Node
-    - SimplePredicate (eq, neq, lt, le, gt, ge)
-    
-For a minimum viable beta we like to at least add `SimpleSetPredicate` and support for all dataTypes (date, time, dateTime etc).
 
 ## Example
 A minimal working example is shown below:
@@ -43,7 +39,6 @@ from sklearn_pmml_model.tree import PMMLTreeClassifier
 # Prepare data
 iris = load_iris()
 
-# We only take the two corresponding features
 X = pd.DataFrame(iris.data)
 X.columns = np.array(iris.feature_names)
 y = pd.Series(np.array(iris.target_names)[iris.target])
@@ -83,7 +78,7 @@ $ pip install -r requirements.txt
 
 You can execute tests with py.test by running:
 ```
-$ pytest tests/
+$ python setup.py pytest
 ```
 
 ## Contributing
