@@ -19,7 +19,7 @@ class PMMLBaseEstimator(BaseEstimator):
   @cached_property
   def field_mapping(self):
     """
-    Mapping from field name to column name and lambda function to process value.
+    Mapping from field name to column index and lambda function to process value.
 
     Returns
     -------
