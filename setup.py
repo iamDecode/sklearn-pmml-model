@@ -32,6 +32,12 @@ setuptools.setup(
     'scikit-learn',
     'cached-property'
   ],
+  setup_requires = [
+    'pytest-runner',
+  ],
+  tests_require = [
+    'pytest',
+  ],
   ext_modules = cythonize([
     Extension("sklearn_pmml_model.tree._tree", ["sklearn_pmml_model/tree/_tree.pyx"], include_dirs=[np.get_include()]),
     Extension("sklearn_pmml_model.tree.quad_tree", ["sklearn_pmml_model/tree/quad_tree.pyx"], include_dirs=[np.get_include()]),

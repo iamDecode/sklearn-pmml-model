@@ -78,7 +78,7 @@ $ pip install -r requirements.txt
 
 You can execute tests with py.test by running:
 ```
-$ pytest tests/
+$ python setup.py pytest
 ```
 
 ## Contributing
