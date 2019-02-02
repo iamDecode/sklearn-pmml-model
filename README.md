@@ -17,7 +17,11 @@ $ pip install sklearn-pmml-model
 ```
 
 ## Status
-This library is very alpha, and currently only supports a small part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html):
+This library is very alpha, and currently only supports a limited number of models. The library currently supports the following models:
+- [Decision Trees](sklearn_pmml_model/tree) (`sklearn_pmml_model.tree.PMMLTreeClassifier`)
+- [Random Forests](sklearn_pmml_model/ensemble) (`sklearn_pmml_model.ensemble.PMMLForestClassifier`)
+
+A small part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html) is covered:
 - DataDictionary
   - DataField (continuous, categorical, ordinal)
     - Value
@@ -25,7 +29,10 @@ This library is very alpha, and currently only supports a small part of the [spe
 - TransformationDictionary
   - DerivedField
 - TreeModel
-
+  - SimplePredicate
+  - SimpleSetPredicate
+- Segmentation ('majorityVote' only, for Random Forests)
+  
 ## Example
 A minimal working example is shown below:
 
@@ -34,25 +41,22 @@ from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
-from sklearn_pmml_model.tree import PMMLTreeClassifier
+from sklearn_pmml_model.ensemble import PMMLForestClassifier
 
 # Prepare data
 iris = load_iris()
-
 X = pd.DataFrame(iris.data)
 X.columns = np.array(iris.feature_names)
 y = pd.Series(np.array(iris.target_names)[iris.target])
 y.name = "Class"
-
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
 
-df = pd.concat([Xte, yte], axis=1)
-
-clf = PMMLTreeClassifier(pmml="models/sklearn2pmml.pmml")
+clf = PMMLForestClassifier(pmml="models/randomForest.pmml")
 clf.predict(Xte)
 clf.score(Xte, yte)
 ```
 
+More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble).
 ## Development
 
 ### Prerequisites
@@ -87,4 +91,4 @@ Feel free to make a contribution. Please read [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## License
 
-This project is licensed under the BSD 2-Clause License - see the [LICENSE.md](LICENSE.md) file for details.
+This project is licensed under the BSD 2-Clause License - see the [LICENSE.md](LICENSE) file for details.
