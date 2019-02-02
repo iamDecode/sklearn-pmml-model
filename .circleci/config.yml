@@ -43,7 +43,8 @@ jobs:
           name: run tests
           command: |
             . venv/bin/activate
-            python setup.py pytest
+            python setup.py build_ext --inplace
+            pytest --cov=./sklearn_pmml_model tests/
 
       - run:
           name: coverage report
