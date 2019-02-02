@@ -1,4 +1,5 @@
 from unittest import TestCase
+import sklearn_pmml_model
 from sklearn_pmml_model.tree import PMMLTreeClassifier
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
@@ -10,10 +11,26 @@ from os import path
 from sklearn.datasets import load_digits
 
 
+BASE_DIR = path.dirname(sklearn_pmml_model.__file__)
+
+
 class TestTree(TestCase):
   def test_invalid_tree(self):
     with self.assertRaises(Exception) as cm:
-      PMMLTreeClassifier(pmml=StringIO("""<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>"""))
+      PMMLTreeClassifier(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Class" optype="categorical" dataType="string">
+            <Value value="setosa"/>
+            <Value value="versicolor"/>
+            <Value value="virginica"/>
+          </DataField>
+        </DataDictionary>
+        <MiningSchema>
+          <MiningField name="Class" usageType="target"/>
+        </MiningSchema>
+      </PMML>
+      """))
 
     assert str(cm.exception) == 'PMML model does not contain TreeModel.'
 
@@ -21,11 +38,28 @@ class TestTree(TestCase):
     with self.assertRaises(Exception) as cm:
       PMMLTreeClassifier(pmml=StringIO("""
       <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Class" optype="categorical" dataType="string">
+            <Value value="setosa"/>
+            <Value value="versicolor"/>
+            <Value value="virginica"/>
+          </DataField>
+        </DataDictionary>
+        <MiningSchema>
+          <MiningField name="Class" usageType="target"/>
+        </MiningSchema>
         <TreeModel splitCharacteristic="multiSplit" />
       </PMML>
       """))
 
-    assert str(cm.exception) == 'Sklearn only supports binary classification models.'
+    assert str(cm.exception) == 'Sklearn only supports binary tree models.'
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/sklearn2pmml.pmml'))
+      clf.fit(np.array([[]]),np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
 
 
 class TestIrisTreeIntegration(TestCase):
@@ -40,7 +74,7 @@ class TestIrisTreeIntegration(TestCase):
     Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/sklearn2pmml.pmml'))
+    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/sklearn2pmml.pmml'))
     self.reference = DecisionTreeClassifier(random_state=1).fit(Xtr, ytr)
 
   def test_predict(self):
@@ -66,7 +100,7 @@ class TestDigitsTreeIntegration(TestCase):
     Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/digits.pmml'), field_labels=np.array(X.columns).astype('U').tolist())
+    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/digits.pmml'), field_labels=np.array(X.columns).astype('U').tolist())
     self.reference = DecisionTreeClassifier(random_state=1).fit(Xtr, ytr)
 
   def test_predict(self):
@@ -84,7 +118,7 @@ class TestDigitsTreeIntegration(TestCase):
 
 class TestCategoricalTreeIntegration(TestCase):
   def setUp(self):
-    self.clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/cat.pmml'))
+    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/cat.pmml'))
 
   def test_predict(self):
     Xte = np.array([[0],[1],[2]])
@@ -93,7 +127,7 @@ class TestCategoricalTreeIntegration(TestCase):
 
 class TestCategoricalPimaTreeIntegration(TestCase):
   def setUp(self):
-    df = pd.read_csv(path.join(path.dirname(__file__), '../models/categorical-test.csv'))
+    df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
     cats = np.unique(df['age'])
     df['age'] = pd.Categorical(df['age'], categories=cats)
     df['age'] = df['age'].cat.codes
@@ -101,7 +135,7 @@ class TestCategoricalPimaTreeIntegration(TestCase):
     yte = df.iloc[:,0]
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(pmml=path.join(path.dirname(__file__), '../models/categorical.pmml'))
+    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/categorical.pmml'))
 
   def test_predict_proba(self):
     Xte, _ = self.test
@@ -164,5 +198,4 @@ class TestCategoricalPimaTreeIntegration(TestCase):
   def test_score(self):
     Xte, yte = self.test
     reference = 0.7692307692307693
-    print(self.clf.score(Xte, yte))
     assert reference == self.clf.score(Xte, yte)

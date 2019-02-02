@@ -3,6 +3,6 @@ The :mod:`sklearn_pmml_model.tree` module includes decision tree-based models fo
 classification and regression.
 """
 
-from .tree import PMMLTreeClassifier
+from .tree import PMMLTreeClassifier, PMMLBaseTreeEstimator
 
-__all__ = ["PMMLTreeClassifier"]
+__all__ = ["PMMLTreeClassifier", "PMMLBaseTreeEstimator"]

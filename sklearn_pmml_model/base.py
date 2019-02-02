@@ -12,9 +12,11 @@ class PMMLBaseEstimator(BaseEstimator):
     self.field_labels = field_labels
 
   def find(self, element, path):
+    if element is None: return None
     return element.find(f"PMML:{path}", namespaces={"PMML": self.namespace})
 
   def findall(self, element, path):
+    if element is None: return []
     return element.findall(f"PMML:{path}", namespaces={"PMML": self.namespace})
 
   @cached_property
@@ -175,14 +177,6 @@ class PMMLBaseEstimator(BaseEstimator):
       for e in self.findall(data_field, 'Interval')
     ]
 
-    if len(categories) != 0:
-      category = next((x for x in categories if x == value), None)
-
-      if category is None:
-        raise Exception('Value does not match any category.')
-      else:
-        return category if not force_native else category.value
-
     if len(intervals) != 0:
       interval = next((x for x in intervals if value in x), None)
 
@@ -191,6 +185,14 @@ class PMMLBaseEstimator(BaseEstimator):
       else:
         interval.value = value
         return interval if not force_native else interval.value
+
+    if opType != 'continuous':
+      category = next((x for x in categories if x == value), None)
+
+      if category is None:
+        raise Exception('Value does not match any category.')
+      else:
+        return category if not force_native else category.value
 
     return value
 
