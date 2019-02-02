@@ -1,3 +1,5 @@
+# cython: language_level=3
+
 # Authors: Gilles Louppe <g.louppe@gmail.com>
 #          Peter Prettenhofer <peter.prettenhofer@gmail.com>
 #          Brian Holt <bdholt1@gmail.com>
@@ -12,6 +14,8 @@
 import numpy as np
 cimport numpy as np
 
+from ._utils cimport SplitValue, SplitRecord
+
 from ._criterion cimport Criterion
 
 ctypedef np.npy_float32 DTYPE_t          # Type of X
@@ -19,17 +23,7 @@ ctypedef np.npy_float64 DOUBLE_t         # Type of y, sample_weight
 ctypedef np.npy_intp SIZE_t              # Type for indices and counters
 ctypedef np.npy_int32 INT32_t            # Signed 32 bit integer
 ctypedef np.npy_uint32 UINT32_t          # Unsigned 32 bit integer
-
-cdef struct SplitRecord:
-    # Data to track sample split
-    SIZE_t feature         # Which feature to split on.
-    SIZE_t pos             # Split samples array at the given position,
-                           # i.e. count of samples below threshold for feature.
-                           # pos is >= end if the node is a leaf.
-    double threshold       # Threshold to split at.
-    double improvement     # Impurity improvement given parent node.
-    double impurity_left   # Impurity of the left split.
-    double impurity_right  # Impurity of the right split.
+ctypedef np.npy_uint64 UINT64_t          # Unsigned 64 bit integer
 
 cdef class Splitter:
     # The splitter searches in the input space for a feature and a threshold
@@ -59,10 +53,15 @@ cdef class Splitter:
 
     cdef bint presort                    # Whether to use presorting, only
                                          # allowed on dense data
+    cdef bint breiman_shortcut           # Whether decision trees are allowed to use the
+                                         # Breiman shortcut for categorical features
 
     cdef DOUBLE_t* y
     cdef SIZE_t y_stride
     cdef DOUBLE_t* sample_weight
+    cdef INT32_t *n_categories           # (n_features,) array giving number of
+                                         # categories (<0 for non-categorical)
+    cdef UINT32_t* cat_cache             # Cache buffer for fast categorical split evaluation
 
     # The samples vector `samples` is maintained by the Splitter object such
     # that the samples contained in a node are contiguous. With this setting,
@@ -83,6 +82,7 @@ cdef class Splitter:
     # Methods
     cdef int init(self, object X, np.ndarray y,
                   DOUBLE_t* sample_weight,
+                  INT32_t* n_categories,
                   np.ndarray X_idx_sorted=*) except -1
 
     cdef int node_reset(self, SIZE_t start, SIZE_t end,

@@ -1,3 +1,4 @@
+# cython: language_level=3
 # cython: cdivision=True
 # cython: boundscheck=False
 # cython: wraparound=False
@@ -33,6 +34,8 @@ from ._utils cimport rand_int
 from ._utils cimport rand_uniform
 from ._utils cimport RAND_R_MAX
 from ._utils cimport safe_realloc
+from ._utils cimport setup_cat_cache
+from ._utils cimport goes_left
 
 cdef double INFINITY = np.inf
 
@@ -48,7 +51,7 @@ cdef inline void _init_split(SplitRecord* self, SIZE_t start_pos) nogil:
     self.impurity_right = INFINITY
     self.pos = start_pos
     self.feature = 0
-    self.threshold = 0.
+    self.split_value.threshold = 0.
     self.improvement = -INFINITY
 
 cdef class Splitter:
@@ -60,7 +63,7 @@ cdef class Splitter:
 
     def __cinit__(self, Criterion criterion, SIZE_t max_features,
                   SIZE_t min_samples_leaf, double min_weight_leaf,
-                  object random_state, bint presort):
+                  object random_state, bint presort, bint breiman_shortcut):
         """
         Parameters
         ----------
@@ -95,12 +98,15 @@ cdef class Splitter:
         self.y = NULL
         self.y_stride = 0
         self.sample_weight = NULL
+        self.n_categories = NULL
+        self.cat_cache = NULL
 
         self.max_features = max_features
         self.min_samples_leaf = min_samples_leaf
         self.min_weight_leaf = min_weight_leaf
         self.random_state = random_state
         self.presort = presort
+        self.breiman_shortcut = breiman_shortcut
 
     def __dealloc__(self):
         """Destructor."""
@@ -109,6 +115,8 @@ cdef class Splitter:
         free(self.features)
         free(self.constant_features)
         free(self.feature_values)
+        free(self.n_categories)
+        free(self.cat_cache)
 
     def __getstate__(self):
         return {}
@@ -120,6 +128,7 @@ cdef class Splitter:
                    object X,
                    np.ndarray[DOUBLE_t, ndim=2, mode="c"] y,
                    DOUBLE_t* sample_weight,
+                   INT32_t* n_categories,
                    np.ndarray X_idx_sorted=None) except -1:
         """Initialize the splitter.
 
@@ -140,6 +149,10 @@ cdef class Splitter:
             The weights of the samples, where higher weighted samples are fit
             closer than lower weight samples. If not provided, all samples
             are assumed to have uniform weight.
+
+        n_categories : array of INT32_t, shape=(n_features,)
+            Number of categories for categorical features, or -1 for
+            non-categorical features
         """
 
         self.rand_r_state = self.random_state.randint(0, RAND_R_MAX)
@@ -147,7 +160,7 @@ cdef class Splitter:
 
         # Create a new array which will be used to store nonzero
         # samples from the feature of interest
-        cdef SIZE_t* samples = safe_realloc(&self.samples, n_samples)
+        cdef SIZE_t* samples = safe_realloc(&self.samples, n_samples, sizeof(SIZE_t))
 
         cdef SIZE_t i, j
         cdef double weighted_n_samples = 0.0
@@ -169,20 +182,34 @@ cdef class Splitter:
         self.weighted_n_samples = weighted_n_samples
 
         cdef SIZE_t n_features = X.shape[1]
-        cdef SIZE_t* features = safe_realloc(&self.features, n_features)
+        cdef SIZE_t* features = safe_realloc(&self.features, n_features, sizeof(SIZE_t))
 
         for i in range(n_features):
             features[i] = i
 
         self.n_features = n_features
 
-        safe_realloc(&self.feature_values, n_samples)
-        safe_realloc(&self.constant_features, n_features)
+        safe_realloc(&self.feature_values, n_samples, sizeof(DTYPE_t))
+        safe_realloc(&self.constant_features, n_features, sizeof(SIZE_t))
 
         self.y = <DOUBLE_t*> y.data
         self.y_stride = <SIZE_t> y.strides[0] / <SIZE_t> y.itemsize
 
         self.sample_weight = sample_weight
+
+        # Initialize the number of categories for each feature
+        # A value of -1 indicates a non-categorical feature
+        safe_realloc(&self.n_categories, n_features, sizeof(INT32_t))
+        for i in range(n_features):
+            self.n_categories[i] = (-1 if n_categories == NULL
+                                    else n_categories[i])
+
+        # If needed, allocate cache space for categorical splits
+        cdef INT32_t max_n_categories = max(
+            [self.n_categories[i] for i in range(n_features)])
+        if max_n_categories > 0:
+            safe_realloc(&self.cat_cache, (max_n_categories + 31) // 32, sizeof(UINT32_t))
+
         return 0
 
     cdef int node_reset(self, SIZE_t start, SIZE_t end,
@@ -252,7 +279,7 @@ cdef class BaseDenseSplitter(Splitter):
 
     def __cinit__(self, Criterion criterion, SIZE_t max_features,
                   SIZE_t min_samples_leaf, double min_weight_leaf,
-                  object random_state, bint presort):
+                  object random_state, bint presort, bint breiman_shortcut):
 
         self.X = NULL
         self.X_sample_stride = 0
@@ -271,6 +298,7 @@ cdef class BaseDenseSplitter(Splitter):
                   object X,
                   np.ndarray[DOUBLE_t, ndim=2, mode="c"] y,
                   DOUBLE_t* sample_weight,
+                  INT32_t* n_categories,
                   np.ndarray X_idx_sorted=None) except -1:
         """Initialize the splitter
 
@@ -279,7 +307,7 @@ cdef class BaseDenseSplitter(Splitter):
         """
 
         # Call parent init
-        Splitter.init(self, X, y, sample_weight)
+        Splitter.init(self, X, y, sample_weight, n_categories)
 
         # Initialize X
         cdef np.ndarray X_ndarray = X
@@ -295,7 +323,7 @@ cdef class BaseDenseSplitter(Splitter):
                                         <SIZE_t> self.X_idx_sorted.itemsize)
 
             self.n_total_samples = X.shape[0]
-            safe_realloc(&self.sample_mask, self.n_total_samples)
+            safe_realloc(&self.sample_mask, self.n_total_samples, sizeof(SIZE_t))
             memset(self.sample_mask, 0, self.n_total_samples*sizeof(SIZE_t))
 
         return 0
@@ -310,6 +338,49 @@ cdef class BestSplitter(BaseDenseSplitter):
                                self.min_weight_leaf,
                                self.random_state,
                                self.presort), self.__getstate__())
+
+
+    cdef void _breiman_sort_categories(self, SIZE_t start, SIZE_t end, INT32_t ncat,
+                                       SIZE_t ncat_present, const INT32_t *cat_offs,
+                                       SIZE_t *sorted_cat) nogil:
+        """The Breiman shortcut for finding the best split involves a
+        preprocessing step wherein we sort the categories by
+        increasing (weighted) mean of the outcome y (whether 0/1
+        binary for classification or quantitative for
+        regression). This function implements this preprocessing step
+        and produces a sorted list of category values.
+        """
+        cdef:
+            SIZE_t *samples = self.samples
+            DTYPE_t *Xf = self.feature_values
+            DOUBLE_t *y = self.y
+            SIZE_t y_stride = self.y_stride
+            DOUBLE_t *sample_weight = self.sample_weight
+            DOUBLE_t w
+            SIZE_t cat, localcat
+            SIZE_t q, partition_end
+            DTYPE_t sort_value[64]
+            DTYPE_t sort_den[64]
+
+        for cat in range(ncat):
+            sort_value[cat] = 0
+            sort_den[cat] = 0
+
+        for q in range(start, end):
+            cat = <SIZE_t> Xf[q]
+            w = sample_weight[samples[q]] if sample_weight else 1.0
+            sort_value[cat] += w * (y[y_stride * samples[q]])
+            sort_den[cat] += w
+
+        for localcat in range(ncat_present):
+            cat = localcat + cat_offs[localcat]
+            if sort_den[cat] == 0:  # Avoid dividing zero by zero
+                sort_den[cat] = 1
+            sort_value[localcat] = sort_value[cat] / sort_den[cat]
+            sorted_cat[localcat] = cat
+
+        sort(&sort_value[0], sorted_cat, ncat_present)
+
 
     cdef int node_split(self, double impurity, SplitRecord* split,
                         SIZE_t* n_constant_features) nogil except -1:
@@ -345,12 +416,12 @@ cdef class BestSplitter(BaseDenseSplitter):
 
         cdef SIZE_t f_i = n_features
         cdef SIZE_t f_j
-        cdef SIZE_t tmp
         cdef SIZE_t p
         cdef SIZE_t feature_idx_offset
         cdef SIZE_t feature_offset
         cdef SIZE_t i
         cdef SIZE_t j
+        cdef UINT64_t ui # unsigned long int i
 
         cdef SIZE_t n_visited_features = 0
         # Number of features discovered to be constant during the split search
@@ -362,6 +433,11 @@ cdef class BestSplitter(BaseDenseSplitter):
         cdef SIZE_t n_total_constants = n_known_constants
         cdef DTYPE_t current_feature_value
         cdef SIZE_t partition_end
+        cdef bint is_categorical
+        cdef UINT64_t cat_split, cat_idx, ncat_present
+        cdef INT32_t cat_offs[64]
+        cdef bint breiman_shortcut = self.breiman_shortcut
+        cdef SIZE_t sorted_cat[64]
 
         _init_split(&best, end)
 
@@ -403,9 +479,8 @@ cdef class BestSplitter(BaseDenseSplitter):
 
             if f_j < n_known_constants:
                 # f_j in the interval [n_drawn_constants, n_known_constants[
-                tmp = features[f_j]
-                features[f_j] = features[n_drawn_constants]
-                features[n_drawn_constants] = tmp
+                features[f_j], features[n_drawn_constants] = (
+                    features[n_drawn_constants], features[f_j])
 
                 n_drawn_constants += 1
 
@@ -447,66 +522,133 @@ cdef class BestSplitter(BaseDenseSplitter):
                     f_i -= 1
                     features[f_i], features[f_j] = features[f_j], features[f_i]
 
+                    # Identify the number of categories present in this node
+                    is_categorical = self.n_categories[current.feature] > 0
+                    if is_categorical:
+                        cat_split = 0
+                        ncat_present = 0
+                        for i in range(start, end):
+                            # Xf[i] < 64 already verified in tree.py
+                            cat_split |= (<UINT64_t> 1) << (<SIZE_t> Xf[i])
+                        for i in range(self.n_categories[current.feature]):
+                            if (cat_split >> i) & 1:
+                                cat_offs[ncat_present] = i - ncat_present
+                                ncat_present += 1
+                        if ncat_present <= 3:
+                            breiman_shortcut = False  # No benefit for small N
+                        if breiman_shortcut:
+                            self._breiman_sort_categories(
+                                start, end, self.n_categories[current.feature],
+                                ncat_present, cat_offs, &sorted_cat[0])
+
                     # Evaluate all splits
                     self.criterion.reset()
                     p = start
+                    cat_idx = 0
 
-                    while p < end:
-                        while (p + 1 < end and
-                               Xf[p + 1] <= Xf[p] + FEATURE_THRESHOLD):
+                    while True:
+                        if is_categorical:
+                            cat_idx += 1
+                            if breiman_shortcut:
+                                if cat_idx >= ncat_present:
+                                    break
+
+                                cat_split = 0
+                                for ui in range(cat_idx):
+                                    cat_split |= (<UINT64_t> 1) << sorted_cat[ui]
+                                if cat_split & 1:
+                                    cat_split = (~cat_split) & (
+                                        (~(<UINT64_t> 0)) >> (64 - self.n_categories[current.feature]))
+                            else:
+                                if cat_idx >= (<UINT64_t> 1) << (ncat_present - 1):
+                                    break
+
+                                # Expand the bits of (2 * cat_idx) out into cat_split
+                                # We double cat_idx to avoid double-counting equivalent splits
+                                # This also ensures that cat_split & 1 == 0 as required
+                                cat_split = 0
+                                for ui in range(ncat_present):
+                                    cat_split |= ((cat_idx << 1) &
+                                                  ((<UINT64_t> 1) << ui)) << cat_offs[ui]
+
+                            # Partition
+                            j = start
+                            partition_end = end
+                            while j < partition_end:
+                                if (cat_split >> (<SIZE_t> Xf[j])) & 1:
+                                    j += 1
+                                else:
+                                    partition_end -= 1
+                                    Xf[j], Xf[partition_end] = Xf[partition_end], Xf[j]
+                                    samples[j], samples[partition_end] = (
+                                        samples[partition_end], samples[j])
+                            current.pos = j
+
+                            # Must reset criterion since we've reordered the samples
+                            self.criterion.reset()
+                        else:
+                            # Non-categorical feature
+                            while (p + 1 < end and
+                                   Xf[p + 1] <= Xf[p] + FEATURE_THRESHOLD):
+                                p += 1
+
+                            # (p + 1 >= end) or (X[samples[p + 1], current.feature] >
+                            #                    X[samples[p], current.feature])
                             p += 1
+                            # (p >= end) or (X[samples[p], current.feature] >
+                            #                X[samples[p - 1], current.feature])
 
-                        # (p + 1 >= end) or (X[samples[p + 1], current.feature] >
-                        #                    X[samples[p], current.feature])
-                        p += 1
-                        # (p >= end) or (X[samples[p], current.feature] >
-                        #                X[samples[p - 1], current.feature])
+                            if p >= end:
+                                break
 
-                        if p < end:
                             current.pos = p
 
-                            # Reject if min_samples_leaf is not guaranteed
-                            if (((current.pos - start) < min_samples_leaf) or
-                                    ((end - current.pos) < min_samples_leaf)):
-                                continue
+                        # Reject if min_samples_leaf is not guaranteed
+                        if (((current.pos - start) < min_samples_leaf) or
+                                ((end - current.pos) < min_samples_leaf)):
+                            continue
 
-                            self.criterion.update(current.pos)
+                        self.criterion.update(current.pos)
 
-                            # Reject if min_weight_leaf is not satisfied
-                            if ((self.criterion.weighted_n_left < min_weight_leaf) or
-                                    (self.criterion.weighted_n_right < min_weight_leaf)):
-                                continue
+                        # Reject if min_weight_leaf is not satisfied
+                        if ((self.criterion.weighted_n_left < min_weight_leaf) or
+                                (self.criterion.weighted_n_right < min_weight_leaf)):
+                            continue
 
-                            current_proxy_improvement = self.criterion.proxy_impurity_improvement()
+                        current_proxy_improvement = self.criterion.proxy_impurity_improvement()
 
-                            if current_proxy_improvement > best_proxy_improvement:
-                                best_proxy_improvement = current_proxy_improvement
-                                # sum of halves is used to avoid infinite value
-                                current.threshold = Xf[p - 1] / 2.0 + Xf[p] / 2.0
+                        if current_proxy_improvement > best_proxy_improvement:
+                            best_proxy_improvement = current_proxy_improvement
+                            if is_categorical:
+                                current.split_value.cat_split = cat_split
+                            else:
+                                current.split_value.threshold = (Xf[p - 1] + Xf[p]) / 2.0
+                            if (current.split_value.threshold == Xf[p]
+                                or current.split_value.threshold == INFINITY
+                                or current.split_value.threshold == -INFINITY):
+                                current.split_value.threshold = Xf[p - 1]
 
-                                if ((current.threshold == Xf[p]) or
-                                    (current.threshold == INFINITY) or
-                                    (current.threshold == -INFINITY)):
-                                    current.threshold = Xf[p - 1]
-
-                                best = current  # copy
+                            best = current  # copy
 
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]
         if best.pos < end:
+            setup_cat_cache(self.cat_cache, best.split_value.cat_split,
+                            self.n_categories[best.feature])
             feature_offset = X_feature_stride * best.feature
             partition_end = end
             p = start
 
             while p < partition_end:
-                if X[X_sample_stride * samples[p] + feature_offset] <= best.threshold:
+                if goes_left(X[X_sample_stride * samples[p] + feature_offset],
+                             best.split_value, self.n_categories[best.feature],
+                             self.cat_cache):
                     p += 1
 
                 else:
                     partition_end -= 1
 
-                    tmp = samples[partition_end]
-                    samples[partition_end] = samples[p]
-                    samples[p] = tmp
+                    samples[partition_end], samples[p] = (
+                        samples[p], samples[partition_end])
 
             self.criterion.reset()
             self.criterion.update(best.pos)
@@ -690,8 +832,7 @@ cdef class RandomSplitter(BaseDenseSplitter):
 
         cdef SIZE_t f_i = n_features
         cdef SIZE_t f_j
-        cdef SIZE_t p
-        cdef SIZE_t tmp
+        cdef SIZE_t p, q
         cdef SIZE_t feature_stride
         # Number of features discovered to be constant during the split search
         cdef SIZE_t n_found_constants = 0
@@ -705,6 +846,8 @@ cdef class RandomSplitter(BaseDenseSplitter):
         cdef DTYPE_t max_feature_value
         cdef DTYPE_t current_feature_value
         cdef SIZE_t partition_end
+        cdef bint is_categorical
+        cdef UINT64_t split_seed
 
         _init_split(&best, end)
 
@@ -741,9 +884,8 @@ cdef class RandomSplitter(BaseDenseSplitter):
 
             if f_j < n_known_constants:
                 # f_j in the interval [n_drawn_constants, n_known_constants[
-                tmp = features[f_j]
-                features[f_j] = features[n_drawn_constants]
-                features[n_drawn_constants] = tmp
+                features[f_j], features[n_drawn_constants] = (
+                    features[n_drawn_constants], features[f_j])
 
                 n_drawn_constants += 1
 
@@ -780,32 +922,45 @@ cdef class RandomSplitter(BaseDenseSplitter):
                     f_i -= 1
                     features[f_i], features[f_j] = features[f_j], features[f_i]
 
-                    # Draw a random threshold
-                    current.threshold = rand_uniform(min_feature_value,
-                                                     max_feature_value,
-                                                     random_state)
-
-                    if current.threshold == max_feature_value:
-                        current.threshold = min_feature_value
-
-                    # Partition
-                    partition_end = end
-                    p = start
-                    while p < partition_end:
-                        current_feature_value = Xf[p]
-                        if current_feature_value <= current.threshold:
-                            p += 1
+                    # Repeat split & partition if split is trivial, up to 60 times
+                    # (Can only happen with categorical features)
+                    for q in range(60):
+                        # Construct a random split
+                        is_categorical = self.n_categories[current.feature] > 0
+                        if is_categorical:
+                            split_seed = rand_int(0, <UINT32_t>RAND_R_MAX + 1,
+                                                  random_state)
+                            current.split_value.cat_split = (split_seed << 32) | 1
                         else:
-                            partition_end -= 1
+                            current.split_value.threshold = rand_uniform(
+                                min_feature_value, max_feature_value, random_state)
+                            if current.split_value.threshold == max_feature_value:
+                                current.split_value.threshold = min_feature_value
 
-                            Xf[p] = Xf[partition_end]
-                            Xf[partition_end] = current_feature_value
+                        # Partition
+                        setup_cat_cache(self.cat_cache, current.split_value.cat_split,
+                                        self.n_categories[current.feature])
+                        partition_end = end
+                        p = start
+                        while p < partition_end:
+                            current_feature_value = Xf[p]
+                            if goes_left(current_feature_value, current.split_value,
+                                         self.n_categories[current.feature], self.cat_cache):
+                                p += 1
+                            else:
+                                partition_end -= 1
 
-                            tmp = samples[partition_end]
-                            samples[partition_end] = samples[p]
-                            samples[p] = tmp
+                                Xf[p] = Xf[partition_end]
+                                Xf[partition_end] = current_feature_value
 
-                    current.pos = partition_end
+                                samples[partition_end], samples[p] = (
+                                    samples[p], samples[partition_end])
+
+                        current.pos = partition_end
+
+                        # Break early if the split is non-trivial
+                        if current.pos != start and current.pos != end:
+                            break
 
                     # Reject if min_samples_leaf is not guaranteed
                     if (((current.pos - start) < min_samples_leaf) or
@@ -830,20 +985,23 @@ cdef class RandomSplitter(BaseDenseSplitter):
         # Reorganize into samples[start:best.pos] + samples[best.pos:end]
         feature_stride = X_feature_stride * best.feature
         if best.pos < end:
+            setup_cat_cache(self.cat_cache, best.split_value.cat_split,
+                            self.n_categories[best.feature])
             if current.feature != best.feature:
                 partition_end = end
                 p = start
 
                 while p < partition_end:
-                    if X[X_sample_stride * samples[p] + feature_stride] <= best.threshold:
+                    if goes_left(X[X_sample_stride * samples[p] + feature_stride],
+                                 best.split_value, self.n_categories[best.feature],
+                                 self.cat_cache):
                         p += 1
 
                     else:
                         partition_end -= 1
 
-                        tmp = samples[partition_end]
-                        samples[partition_end] = samples[p]
-                        samples[p] = tmp
+                        samples[partition_end], samples[p] = (
+                            samples[p], samples[partition_end])
 
 
             self.criterion.reset()
@@ -881,7 +1039,7 @@ cdef class BaseSparseSplitter(Splitter):
 
     def __cinit__(self, Criterion criterion, SIZE_t max_features,
                   SIZE_t min_samples_leaf, double min_weight_leaf,
-                  object random_state, bint presort):
+                  object random_state, bint presort, bint breiman_shortcut):
         # Parent __cinit__ is automatically called
 
         self.X_data = NULL
@@ -902,6 +1060,7 @@ cdef class BaseSparseSplitter(Splitter):
                   object X,
                   np.ndarray[DOUBLE_t, ndim=2, mode="c"] y,
                   DOUBLE_t* sample_weight,
+                  INT32_t* n_categories,
                   np.ndarray X_idx_sorted=None) except -1:
         """Initialize the splitter
 
@@ -909,7 +1068,7 @@ cdef class BaseSparseSplitter(Splitter):
         or 0 otherwise.
         """
         # Call parent init
-        Splitter.init(self, X, y, sample_weight)
+        Splitter.init(self, X, y, sample_weight, n_categories)
 
         if not isinstance(X, csc_matrix):
             raise ValueError("X should be in csc format")
@@ -929,8 +1088,8 @@ cdef class BaseSparseSplitter(Splitter):
         self.n_total_samples = n_total_samples
 
         # Initialize auxiliary array used to perform split
-        safe_realloc(&self.index_to_samples, n_total_samples)
-        safe_realloc(&self.sorted_samples, n_samples)
+        safe_realloc(&self.index_to_samples, n_total_samples, sizeof(SIZE_t))
+        safe_realloc(&self.sorted_samples, n_samples, sizeof(SIZE_t))
 
         cdef SIZE_t* index_to_samples = self.index_to_samples
         cdef SIZE_t p
@@ -1237,7 +1396,7 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
         cdef double best_proxy_improvement = - INFINITY
 
         cdef SIZE_t f_i = n_features
-        cdef SIZE_t f_j, p, tmp
+        cdef SIZE_t f_j, p
         cdef SIZE_t n_visited_features = 0
         # Number of features discovered to be constant during the split search
         cdef SIZE_t n_found_constants = 0
@@ -1292,9 +1451,8 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
 
             if f_j < n_known_constants:
                 # f_j in the interval [n_drawn_constants, n_known_constants[
-                tmp = features[f_j]
-                features[f_j] = features[n_drawn_constants]
-                features[n_drawn_constants] = tmp
+                features[f_j], features[n_drawn_constants] = (
+                    features[n_drawn_constants], features[f_j])
 
                 n_drawn_constants += 1
 
@@ -1386,12 +1544,12 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
                             if current_proxy_improvement > best_proxy_improvement:
                                 best_proxy_improvement = current_proxy_improvement
                                 # sum of halves used to avoid infinite values
-                                current.threshold = Xf[p_prev] / 2.0 + Xf[p] / 2.0
+                                current.split_value.threshold = Xf[p_prev] / 2.0 + Xf[p] / 2.0
 
-                                if ((current.threshold == Xf[p]) or
-                                    (current.threshold == INFINITY) or
-                                    (current.threshold == -INFINITY)):
-                                    current.threshold = Xf[p_prev]
+                                if ((current.split_value.threshold == Xf[p]) or
+                                    (current.split_value.threshold == INFINITY) or
+                                    (current.split_value.threshold == -INFINITY)):
+                                    current.split_value.threshold = Xf[p_prev]
 
                                 best = current
 
@@ -1400,7 +1558,7 @@ cdef class BestSparseSplitter(BaseSparseSplitter):
             self.extract_nnz(best.feature, &end_negative, &start_positive,
                              &is_samples_sorted)
 
-            self._partition(best.threshold, end_negative, start_positive,
+            self._partition(best.split_value.threshold, end_negative, start_positive,
                             best.pos)
 
             self.criterion.reset()
@@ -1472,7 +1630,7 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
         cdef DTYPE_t current_feature_value
 
         cdef SIZE_t f_i = n_features
-        cdef SIZE_t f_j, p, tmp
+        cdef SIZE_t f_j, p
         cdef SIZE_t n_visited_features = 0
         # Number of features discovered to be constant during the split search
         cdef SIZE_t n_found_constants = 0
@@ -1528,9 +1686,8 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
 
             if f_j < n_known_constants:
                 # f_j in the interval [n_drawn_constants, n_known_constants[
-                tmp = features[f_j]
-                features[f_j] = features[n_drawn_constants]
-                features[n_drawn_constants] = tmp
+                features[f_j], features[n_drawn_constants] = (
+                    features[n_drawn_constants], features[f_j])
 
                 n_drawn_constants += 1
 
@@ -1587,15 +1744,14 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
                     features[f_i], features[f_j] = features[f_j], features[f_i]
 
                     # Draw a random threshold
-                    current.threshold = rand_uniform(min_feature_value,
-                                                     max_feature_value,
-                                                     random_state)
+                    current.split_value.threshold = rand_uniform(
+                        min_feature_value, max_feature_value, random_state)
 
-                    if current.threshold == max_feature_value:
-                        current.threshold = min_feature_value
+                    if current.split_value.threshold == max_feature_value:
+                        current.split_value.threshold = min_feature_value
 
                     # Partition
-                    current.pos = self._partition(current.threshold,
+                    current.pos = self._partition(current.split_value.threshold,
                                                   end_negative,
                                                   start_positive,
                                                   start_positive +
@@ -1631,7 +1787,7 @@ cdef class RandomSparseSplitter(BaseSparseSplitter):
                 self.extract_nnz(best.feature, &end_negative, &start_positive,
                                  &is_samples_sorted)
 
-                self._partition(best.threshold, end_negative, start_positive,
+                self._partition(best.split_value.threshold, end_negative, start_positive,
                                 best.pos)
 
             self.criterion.reset()

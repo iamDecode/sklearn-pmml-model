@@ -1,7 +1,10 @@
 import numpy as np
+import re
+import struct
 from sklearn_pmml_model.base import PMMLBaseEstimator
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
 from sklearn.tree import DecisionTreeClassifier
+
 
 class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
   def __init__(self, pmml, field_labels=None):
@@ -30,7 +33,11 @@ class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
 
     self.n_outputs_ = 1
     self.n_classes_ = len(self.classes_)
-    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]), self.n_outputs_)
+    categories = np.array([
+      len(self.findall(field, "Value")) if field.get('optype') == 'categorical' else -1
+      for field in fields
+    ]).astype(np.int32)
+    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]), self.n_outputs_, categories)
 
     firstNode = self.find(self.tree, 'Node')
     nodes, values = self.constructTree(firstNode)
@@ -76,7 +83,7 @@ class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
       node_count_weighted = float(node.get('recordCount'))
 
       return [
-        [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, TREE_UNDEFINED, impurity, node_count, node_count_weighted)],
+        [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, struct.pack('d', TREE_UNDEFINED), impurity, node_count, node_count_weighted)],
         np.array([[[float(e.get('recordCount')) for e in self.findall(node, 'ScoreDistribution')]]])
       ]
 
@@ -88,8 +95,32 @@ class PMMLTreeClassifier(PMMLBaseEstimator, DecisionTreeClassifier):
     distributions = np.concatenate((left_value, right_value))
 
     predicate = self.find(childNodes[0], 'SimplePredicate')
-    column, mapping = self.field_mapping[predicate.get('field')]
-    value = mapping(predicate.get('value'))
+    set_predicate = self.find(childNodes[0], 'SimpleSetPredicate')
+
+    if predicate is not None:
+      column, mapping = self.field_mapping[predicate.get('field')]
+      value = mapping(predicate.get('value'))
+      value = struct.pack('d', value) # d = double = float64
+    elif set_predicate is not None:
+      column, mapping = self.field_mapping[set_predicate.get('field')]
+
+      array = self.find(set_predicate, 'Array') # TODO: support <Extension> as well
+      values = [re.sub(r"(?<!\\)\"", '', value).replace('\"', '"') for value in array.text.split()]
+      categories = [mapping(value) for value in values]
+
+      bitmask = 0
+      for category in categories:
+        bitmask |= 1 << (category.categories.index(category))
+
+      value = struct.pack('Q', bitmask) # Q = unsigned long long = uint64
+
+      if set_predicate.get('booleanOperator') == 'isNotIn':
+        value = struct.pack('Q', ~np.uint64(bitmask))
+
+    else:
+      raise Exception("Unsupported tree format: unknown predicate structure in Node {}".format(childNodes[0].get('id')))
+
+
     impurity = 0 # TODO: impurity is not really required for anything, but would be nice to have
 
     distributions_children = distributions[[0, offset]]

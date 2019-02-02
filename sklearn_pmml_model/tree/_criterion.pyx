@@ -1,3 +1,4 @@
+# cython: language_level=3
 # cython: cdivision=True
 # cython: boundscheck=False
 # cython: wraparound=False
@@ -246,7 +247,7 @@ cdef class ClassificationCriterion(Criterion):
         self.sum_right = NULL
         self.n_classes = NULL
 
-        safe_realloc(&self.n_classes, n_outputs)
+        safe_realloc(&self.n_classes, n_outputs, sizeof(SIZE_t))
 
         cdef SIZE_t k = 0
         cdef SIZE_t sum_stride = 0
@@ -1035,7 +1036,7 @@ cdef class MAE(RegressionCriterion):
         self.node_medians = NULL
 
         # Allocate memory for the accumulators
-        safe_realloc(&self.node_medians, n_outputs)
+        safe_realloc(&self.node_medians, n_outputs, sizeof(DOUBLE_t))
 
         self.left_child = np.empty(n_outputs, dtype='object')
         self.right_child = np.empty(n_outputs, dtype='object')

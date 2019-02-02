@@ -1,0 +1,93 @@
+<?xml version="1.0"?>
+<PMML version="4.3" xmlns="http://www.dmg.org/PMML-4_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_3 http://www.dmg.org/pmml/v4-3/pmml-4-3.xsd">
+ <Header copyright="Copyright (c) 2019 dennis" description="RPart Decision Tree Model">
+  <Extension name="user" value="dennis" extender="Rattle/PMML"/>
+  <Application name="Rattle/PMML" version="1.4"/>
+  <Timestamp>2019-02-01 17:43:13</Timestamp>
+ </Header>
+ <DataDictionary numberOfFields="8">
+  <DataField name="type" optype="categorical" dataType="string">
+   <Value value="No"/>
+   <Value value="Yes"/>
+  </DataField>
+  <DataField name="npreg" optype="continuous" dataType="double"/>
+  <DataField name="glu" optype="continuous" dataType="double"/>
+  <DataField name="bp" optype="continuous" dataType="double"/>
+  <DataField name="skin" optype="continuous" dataType="double"/>
+  <DataField name="bmi" optype="continuous" dataType="double"/>
+  <DataField name="ped" optype="continuous" dataType="double"/>
+  <DataField name="age" optype="categorical" dataType="string">
+   <Value value="(20,30]"/>
+   <Value value="(30,40]"/>
+   <Value value="(40,50]"/>
+   <Value value="(50,60]"/>
+   <Value value="(60,70]"/>
+  </DataField>
+ </DataDictionary>
+ <TreeModel modelName="RPart_Model" functionName="classification" algorithmName="rpart" splitCharacteristic="binarySplit" missingValueStrategy="defaultChild" noTrueChildStrategy="returnLastPrediction">
+  <MiningSchema>
+   <MiningField name="type" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="npreg" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="glu" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="bp" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="skin" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="bmi" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="ped" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="age" usageType="active" invalidValueTreatment="returnInvalid"/>
+  </MiningSchema>
+  <Output>
+   <OutputField name="Predicted_type" optype="categorical" dataType="string" feature="predictedValue"/>
+   <OutputField name="Probability_No" optype="continuous" dataType="double" feature="probability" value="No"/>
+   <OutputField name="Probability_Yes" optype="continuous" dataType="double" feature="probability" value="Yes"/>
+  </Output>
+  <Node id="1" score="No" recordCount="128" defaultChild="2">
+   <True/>
+   <ScoreDistribution value="No" recordCount="64" confidence="0.5"/>
+   <ScoreDistribution value="Yes" recordCount="64" confidence="0.5"/>
+   <Node id="2" score="No" recordCount="69" defaultChild="4">
+    <SimpleSetPredicate field="age" booleanOperator="isIn">
+     <Array n="2" type="string">&quot;(20,30]&quot; &quot;(60,70]&quot;</Array>
+    </SimpleSetPredicate>
+    <ScoreDistribution value="No" recordCount="50" confidence="0.72463768115942"/>
+    <ScoreDistribution value="Yes" recordCount="19" confidence="0.27536231884058"/>
+    <Node id="4" score="No" recordCount="35">
+     <SimplePredicate field="skin" operator="lessThan" value="25.18735"/>
+     <ScoreDistribution value="No" recordCount="33" confidence="0.942857142857143"/>
+     <ScoreDistribution value="Yes" recordCount="2" confidence="0.0571428571428571"/>
+    </Node>
+    <Node id="5" score="No" recordCount="34" defaultChild="10">
+     <SimplePredicate field="skin" operator="greaterOrEqual" value="25.18735"/>
+     <ScoreDistribution value="No" recordCount="17" confidence="0.5"/>
+     <ScoreDistribution value="Yes" recordCount="17" confidence="0.5"/>
+     <Node id="10" score="No" recordCount="19">
+      <SimplePredicate field="glu" operator="lessThan" value="125.5"/>
+      <ScoreDistribution value="No" recordCount="14" confidence="0.736842105263158"/>
+      <ScoreDistribution value="Yes" recordCount="5" confidence="0.263157894736842"/>
+     </Node>
+     <Node id="11" score="Yes" recordCount="15">
+      <SimplePredicate field="glu" operator="greaterOrEqual" value="125.5"/>
+      <ScoreDistribution value="No" recordCount="3" confidence="0.2"/>
+      <ScoreDistribution value="Yes" recordCount="12" confidence="0.8"/>
+     </Node>
+    </Node>
+   </Node>
+   <Node id="3" score="Yes" recordCount="59" defaultChild="6">
+    <SimpleSetPredicate field="age" booleanOperator="isIn">
+     <Array n="3" type="string">&quot;(30,40]&quot; &quot;(40,50]&quot; &quot;(50,60]&quot;</Array>
+    </SimpleSetPredicate>
+    <ScoreDistribution value="No" recordCount="14" confidence="0.23728813559322"/>
+    <ScoreDistribution value="Yes" recordCount="45" confidence="0.76271186440678"/>
+    <Node id="6" score="No" recordCount="8">
+     <SimplePredicate field="skin" operator="lessThan" value="20.02033"/>
+     <ScoreDistribution value="No" recordCount="6" confidence="0.75"/>
+     <ScoreDistribution value="Yes" recordCount="2" confidence="0.25"/>
+    </Node>
+    <Node id="7" score="Yes" recordCount="51">
+     <SimplePredicate field="skin" operator="greaterOrEqual" value="20.02033"/>
+     <ScoreDistribution value="No" recordCount="8" confidence="0.156862745098039"/>
+     <ScoreDistribution value="Yes" recordCount="43" confidence="0.843137254901961"/>
+    </Node>
+   </Node>
+  </Node>
+ </TreeModel>
+</PMML>

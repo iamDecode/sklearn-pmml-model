@@ -4,6 +4,7 @@ from cached_property import cached_property
 from sklearn_pmml_model.datatypes import *
 from collections import OrderedDict
 
+
 class PMMLBaseEstimator(BaseEstimator):
   def __init__(self, pmml, field_labels=None):
     self.root = eTree.parse(pmml).getroot()

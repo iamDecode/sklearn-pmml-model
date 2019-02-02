@@ -1,6 +1,7 @@
 from unittest import TestCase
 from sklearn_pmml_model.datatypes import Category, Interval, Boolean
 
+
 class TestInterval(TestCase):
   def test_exception(self):
     with self.assertRaises(Exception) as cm: Interval(1, closure='openOpen')

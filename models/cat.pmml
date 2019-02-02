@@ -1,0 +1,70 @@
+<?xml version="1.0"?>
+<PMML version="4.3" xmlns="http://www.dmg.org/PMML-4_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_3 http://www.dmg.org/pmml/v4-3/pmml-4-3.xsd">
+    <Header copyright="Copyright (c) 2019 dennis" description="RPart Decision Tree Model">
+        <Extension name="user" value="dennis" extender="Rattle/PMML"/>
+        <Application name="Rattle/PMML" version="1.4"/>
+        <Timestamp>2019-02-01 14:07:13</Timestamp>
+    </Header>
+    <DataDictionary numberOfFields="3">
+        <DataField name="type" optype="categorical" dataType="string">
+            <Value value="class1"/>
+            <Value value="class2"/>
+            <Value value="class3"/>
+        </DataField>
+        <DataField name="test" optype="categorical" dataType="string">
+            <Value value="A"/>
+            <Value value="B"/>
+            <Value value="C"/>
+        </DataField>
+    </DataDictionary>
+    <TreeModel modelName="RPart_Model" functionName="classification" algorithmName="rpart" splitCharacteristic="binarySplit" missingValueStrategy="defaultChild" noTrueChildStrategy="returnLastPrediction">
+        <MiningSchema>
+            <MiningField name="type" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="test" usageType="active" invalidValueTreatment="returnInvalid"/>
+        </MiningSchema>
+        <Output>
+            <OutputField name="Predicted_type" optype="categorical" dataType="string" feature="predictedValue"/>
+            <OutputField name="Probability_class1" optype="continuous" dataType="double" feature="probability" value="class1"/>
+            <OutputField name="Probability_class2" optype="continuous" dataType="double" feature="probability" value="class2"/>
+            <OutputField name="Probability_class3" optype="continuous" dataType="double" feature="probability" value="class3"/>
+        </Output>
+        <Node id="1" recordCount="150">
+            <True/>
+
+            <Node id="2" score="class1" recordCount="10">
+                <SimpleSetPredicate field="test" booleanOperator="isIn">
+                    <Array n="1" type="string">&quot;A&quot;</Array>
+                </SimpleSetPredicate>
+
+                <ScoreDistribution value="class1" recordCount="8" />
+                <ScoreDistribution value="class2" recordCount="1" />
+                <ScoreDistribution value="class3" recordCount="1" />
+            </Node>
+
+            <Node id="3" recordCount="2">
+                <SimpleSetPredicate field="test" booleanOperator="isIn">
+                    <Array n="2" type="string">&quot;B&quot; &quot;C&quot;</Array>
+                </SimpleSetPredicate>
+
+                <Node id="4" score="class2" recordCount="40">
+                    <SimpleSetPredicate field="test" booleanOperator="isIn">
+                        <Array n="1" type="string">&quot;B&quot;</Array>
+                    </SimpleSetPredicate>
+                    <ScoreDistribution value="class1" recordCount="1" />
+                    <ScoreDistribution value="class2" recordCount="38" />
+                    <ScoreDistribution value="class3" recordCount="1" />
+                </Node>
+
+                <Node id="5" score="class3" recordCount="100">
+                    <SimpleSetPredicate field="test" booleanOperator="isIn">
+                        <Array n="1" type="string">&quot;C&quot;</Array>
+                    </SimpleSetPredicate>
+                    <ScoreDistribution value="class1" recordCount="1" />
+                    <ScoreDistribution value="class2" recordCount="1" />
+                    <ScoreDistribution value="class3" recordCount="98" />
+                </Node>
+            </Node>
+
+        </Node>
+    </TreeModel>
+</PMML>

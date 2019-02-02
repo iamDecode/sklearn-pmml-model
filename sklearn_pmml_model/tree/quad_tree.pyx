@@ -1,3 +1,4 @@
+# cython: language_level=3
 # cython: boundscheck=False
 # cython: wraparound=False
 # cython: cdivision=True
@@ -11,7 +12,7 @@ from libc.stdlib cimport malloc, free
 from libc.string cimport memcpy
 from libc.stdio cimport printf
 
-from _utils cimport safe_realloc, sizet_ptr_to_ndarray
+from ._utils cimport safe_realloc, sizet_ptr_to_ndarray
 from sklearn.utils import check_array
 
 import numpy as np
@@ -605,7 +606,7 @@ cdef class _QuadTree:
             else:
                 capacity = 2 * self.capacity
 
-        safe_realloc(&self.cells, capacity)
+        safe_realloc(&self.cells, capacity, sizeof(Cell))
 
         # if capacity smaller than cell_count, adjust the counter
         if capacity < self.cell_count:
