@@ -83,7 +83,7 @@ class PMMLBaseTreeEstimator(PMMLBaseEstimator):
     if predicate is not None:
       column, mapping = self.field_mapping[predicate.get('field')]
       value = mapping(predicate.get('value'))
-      value = struct.pack('d', value) # d = double = float64
+      value = struct.pack('d', float(value)) # d = double = float64
     elif set_predicate is not None:
       column, mapping = self.field_mapping[set_predicate.get('field')]
 
