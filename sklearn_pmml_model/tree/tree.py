@@ -2,6 +2,7 @@ import numpy as np
 import re
 import struct
 from sklearn_pmml_model.base import PMMLBaseEstimator
+from sklearn_pmml_model.datatypes import PMMLDType, Interval
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
 from sklearn.tree import DecisionTreeClassifier
 
@@ -83,6 +84,10 @@ class PMMLBaseTreeEstimator(PMMLBaseEstimator):
     if predicate is not None:
       column, mapping = self.field_mapping[predicate.get('field')]
       value = mapping(predicate.get('value'))
+
+      if isinstance(value, PMMLDType):
+        value = value.value
+
       value = struct.pack('d', float(value)) # d = double = float64
     elif set_predicate is not None:
       column, mapping = self.field_mapping[set_predicate.get('field')]

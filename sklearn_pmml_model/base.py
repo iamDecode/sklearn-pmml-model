@@ -47,7 +47,7 @@ class PMMLBaseEstimator(BaseEstimator):
     field_mapping.update({
       name: (
         field_labels.index(self.find(e, 'FieldRef').get('field')),
-        lambda value, e=e: self.parse_type(value, e)
+        lambda value, e=e, d=self.find(e, 'FieldRef').get('field'): self.parse_type(value, e, derives=fields[d])
       )
       for name, e in fields.items()
       if e.tag == f'{{{self.namespace}}}DerivedField'
@@ -111,7 +111,7 @@ class PMMLBaseEstimator(BaseEstimator):
 
     return None
 
-  def parse_type(self, value, data_field, force_native=False):
+  def parse_type(self, value, data_field, derives=None, force_native=False):
     """
     Parse type defined in <DataField> object, and convert value to that type.
 
@@ -159,7 +159,7 @@ class PMMLBaseEstimator(BaseEstimator):
     # Check categories
     labels = [
       type_mapping[dataType](e.get('value'))
-      for e in self.findall(data_field, 'Value')
+      for e in self.findall(data_field, 'Value') + self.findall(derives, 'Value')
     ]
 
     categories = [
@@ -174,7 +174,7 @@ class PMMLBaseEstimator(BaseEstimator):
         rightMargin=e.get('rightMargin'),
         closure=e.get('closure')
       )
-      for e in self.findall(data_field, 'Interval')
+      for e in self.findall(data_field, 'Interval') + self.findall(derives, 'Interval')
     ]
 
     if len(intervals) != 0:

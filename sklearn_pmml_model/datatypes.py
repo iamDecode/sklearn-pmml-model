@@ -1,13 +1,18 @@
 import math
 import operator as op
 
+class PMMLDType:
+  def __init__(self, value):
+    self.value = value
 
-class Interval:
+
+class Interval(PMMLDType):
   def __init__(self, value, closure, leftMargin=None, rightMargin=None):
     assert leftMargin is not None or rightMargin is not None
     assert closure in ['openClosed', 'openOpen', 'closedOpen', 'closedClosed']
 
-    self.value = value
+    super().__init__(value)
+
     self.closure = closure
     self.leftMargin = float(leftMargin or -math.inf)
     self.rightMargin = float(rightMargin or math.inf)
@@ -34,7 +39,7 @@ class Interval:
       return left(self.leftMargin, item) and right(item, self.rightMargin)
 
 
-class Category:
+class Category(PMMLDType):
   def __init__(self, value, categories, ordered = False):
     assert isinstance(categories, list)
     assert isinstance(ordered, bool)
@@ -42,7 +47,8 @@ class Category:
     if value not in categories:
       raise Exception('Invalid categorical value.')
 
-    self.value = value
+    super().__init__(value)
+
     self.categories = categories
     self.ordered = ordered
 
@@ -70,9 +76,11 @@ class Category:
     raise Exception('Invalid operation for categorical value.')
 
 
-class Boolean(int):
+class Boolean(int, PMMLDType):
   def __new__(cls, value):
-    return int.__new__(cls, bool(value))
+    self = int.__new__(cls, bool(value))
+    PMMLDType.__init__(self, value)
+    return self
 
   def __lt__(self, other):
     raise Exception('Invalid operation for Boolean value.')

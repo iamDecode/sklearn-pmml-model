@@ -18,8 +18,12 @@
 			<Value value="versicolor"/>
 			<Value value="virginica"/>
 		</DataField>
-		<DataField name="sepal length (cm)" optype="continuous" dataType="float"/>
-		<DataField name="sepal width (cm)" optype="continuous" dataType="float"/>
+		<DataField name="sepal length (cm)" optype="continuous" dataType="float">
+			<Interval closure="closedClosed" leftMargin="4.3" rightMargin="7.9"/>
+		</DataField>
+		<DataField name="sepal width (cm)" optype="continuous" dataType="float">
+			<Interval closure="closedClosed" leftMargin="2.0" rightMargin="4.4"/>
+		</DataField>
 	</DataDictionary>
 	<TransformationDictionary>
 		<DerivedField name="double(sepal length (cm))" optype="continuous" dataType="double">
