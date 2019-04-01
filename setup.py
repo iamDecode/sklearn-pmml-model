@@ -118,7 +118,7 @@ def declare_cython_extension(extName, use_math=False, use_openmp=False, include_
   """
   extPath = extName.replace(".", os.path.sep)+".pyx"
 
-  if use_math:
+  if use_math and os.name != 'nt': # Windows crashes when using m library
     compile_args = list(my_extra_compile_args_math) # copy
     link_args    = list(my_extra_link_args_math)
     libraries    = ["m"]  # link libm; this is a list of library names without the "lib" prefix
