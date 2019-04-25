@@ -61,6 +61,36 @@ class TestTree(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  def test_unsupported_predicate(self):
+      with self.assertRaises(Exception) as cm:
+        PMMLTreeClassifier(pmml=StringIO("""
+        <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+          <DataDictionary>
+            <DataField name="Class" optype="categorical" dataType="string">
+              <Value value="setosa"/>
+              <Value value="versicolor"/>
+              <Value value="virginica"/>
+            </DataField>
+          </DataDictionary>
+          <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+          </MiningSchema>
+          <TreeModel splitCharacteristic="binarySplit">
+            <Node id="1">
+              <True/>
+              <Node id="2">
+                <UnsupportedPredicate/>
+              </Node>
+              <Node id="3">
+                <UnsupportedPredicate/>
+              </Node>
+            </Node>
+          </TreeModel>
+        </PMML>
+        """))
+
+      assert str(cm.exception) == 'Unsupported tree format: unknown predicate structure in Node 2'
+
 
 class TestIrisTreeIntegration(TestCase):
   def setUp(self):

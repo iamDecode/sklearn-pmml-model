@@ -1,88 +1,46 @@
 from unittest import TestCase
-from sklearn_pmml_model.datatypes import Category, Interval, Boolean
+from sklearn_pmml_model.datatypes import Category, Interval
 
 
 class TestInterval(TestCase):
   def test_exception(self):
-    with self.assertRaises(Exception) as cm: Interval(1, closure='openOpen')
+    with self.assertRaises(Exception) as cm: Interval(closure='openOpen')
     assert type(cm.exception) == AssertionError
 
-    with self.assertRaises(Exception) as cm: Interval(1, closure='non_existing_closure')
+    with self.assertRaises(Exception) as cm: Interval('openOpen', 3, 0)
     assert type(cm.exception) == AssertionError
 
-  def test_equation(self):
-    a = Interval(8, 'closedClosed', 0, 10)
-    b = Interval(9, 'closedClosed', 0, 10)
-    c = Interval(9, 'closedClosed', 0, 10)
+    with self.assertRaises(Exception) as cm: Interval('non_existing_closure', 0)
+    assert type(cm.exception) == AssertionError
 
-    assert a != b
-    assert b == c
+  def test_contains(self):
+    interval = Interval('closedClosed', 1, 10)
 
-    assert 8 == a
-    assert 9 == b
-    assert 9 != a
+    assert 2 in interval
+    assert 0 not in interval
+    assert 10.1 not in interval
 
 class TestCategory(TestCase):
   def test_exception(self):
-    with self.assertRaises(Exception) as cm: Category('1', [1, 2])
-    assert str(cm.exception) == 'Invalid categorical value.'
+    with self.assertRaises(Exception) as cm: Category(str, categories="bad cats")
+    assert type(cm.exception) == AssertionError
 
-  def test_invalid_operation(self):
-    categories = ['value1', 'value2', 'value3']
-    a = Category('value1', categories)
-    b = Category('value2', categories)
-    c = Category('value2', categories)
+    with self.assertRaises(Exception) as cm: Category(str, [1,2], ordered=1)
+    assert type(cm.exception) == AssertionError
 
-    assert a != b
-    assert b == c
-
-    with self.assertRaises(Exception) as cm: a > b
-    lt = cm.exception
-
-    with self.assertRaises(Exception) as cm: a >= b
-    le = cm.exception
-
-    with self.assertRaises(Exception) as cm: a < b
-    gt = cm.exception
-
-    with self.assertRaises(Exception) as cm: a <= b
-    ge = cm.exception
-
-    assert str(lt) == str(le) == str(gt) == str(ge) == 'Invalid operation for categorical value.'
-
-  def test_ordinal_operation(self):
+  def test_contains(self):
     categories = ['loud', 'louder', 'loudest']
-    a = Category('loud', categories, ordered = True)
-    b = Category('louder', categories, ordered = True)
-    c = Category('louder', categories, ordered = True)
+    cat_type = Category(str, categories, ordered = True)
 
-    assert a != b
-    assert b == c
+    assert 'loud' in cat_type
+    assert 'bad' not in cat_type
 
-    assert b > a
-    assert a < b
-    assert b <= c
-    assert b >= c
+  def test_callable(self):
+    categories = ['1', '2', '3']
+    cat_type = Category(int, categories, ordered = True)
 
-class TestBoolean(TestCase):
-  def test_invalid_operation(self):
-    a = Boolean(True)
-    b = Boolean(False)
-    c = Boolean(0)
+    with self.assertRaises(Exception) as cm: cat_type('4')
+    assert str(cm.exception) == 'Invalid categorical value: 4'
 
-    assert a != b
-    assert b == c
-
-    with self.assertRaises(Exception) as cm: a > b
-    lt = cm.exception
-
-    with self.assertRaises(Exception) as cm: a >= b
-    le = cm.exception
-
-    with self.assertRaises(Exception) as cm: a < b
-    gt = cm.exception
-
-    with self.assertRaises(Exception) as cm: a <= b
-    ge = cm.exception
-
-    assert str(lt) == str(le) == str(gt) == str(ge) == 'Invalid operation for Boolean value.'
+    assert isinstance(cat_type('1'), int)
+    assert cat_type('2') == 2

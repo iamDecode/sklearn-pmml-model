@@ -47,8 +47,8 @@
                 </SimpleSetPredicate>
 
                 <Node id="4" score="class2" recordCount="40">
-                    <SimpleSetPredicate field="test" booleanOperator="isIn">
-                        <Array n="1" type="string">&quot;B&quot;</Array>
+                    <SimpleSetPredicate field="test" booleanOperator="isNotIn">
+                        <Array n="2" type="string">&quot;A&quot; &quot;C&quot;</Array>
                     </SimpleSetPredicate>
                     <ScoreDistribution value="class1" recordCount="1" />
                     <ScoreDistribution value="class2" recordCount="38" />

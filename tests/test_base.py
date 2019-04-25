@@ -1,6 +1,6 @@
 from unittest import TestCase
 from sklearn_pmml_model.base import PMMLBaseEstimator
-from sklearn_pmml_model.datatypes import Category, Boolean, Interval
+from sklearn_pmml_model.datatypes import Category, Interval
 from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np
@@ -53,21 +53,14 @@ class TestBase(TestCase):
       'sepal width (cm)':           Result(column=1, type=float),
       'integer(sepal length (cm))': Result(column=0, type=int),
       'double(sepal width (cm))':   Result(column=1, type=float),
-      'Class':                      Result(column=None, type=Category),
+      'Class':                      Result(column=None, type=Category(str, categories=["setosa", "versicolor", "virginica"], ordered=False)),
     }
 
     for i in range(0, X.shape[0]):
       for feature, result in tests.items():
-        column, mapping = clf.field_mapping[feature]
+        column, data_type = clf.field_mapping[feature]
         assert column == result.column
-        mapped_value = mapping(X.iloc[i][column]) if column is not None else mapping(y.iloc[i])
-        assert type(mapped_value) == result.type
-
-        if result.type == Category:
-          assert mapped_value.value == y.iloc[i]
-          assert mapped_value.categories == ["setosa", "versicolor", "virginica"]
-        else:
-          assert mapped_value == result.type(X.iloc[i][column])
+        assert data_type == result.type
 
   def test_target_field(self):
     clf = PMMLBaseEstimator(pmml=StringIO("""
@@ -115,7 +108,7 @@ class TestBase(TestCase):
 
         data_dictionary = clf.find(clf.root, "DataDictionary")
         data_field = clf.find(data_dictionary, "DataField")
-        result = clf.parse_type(value, data_field)
+        result = clf.get_type(data_field)(value)
 
         assert isinstance(result, data_type)
 
@@ -143,12 +136,12 @@ class TestBase(TestCase):
 
       data_dictionary = clf.find(clf.root, "DataDictionary")
       data_field = clf.find(data_dictionary, "DataField")
-      result = clf.parse_type(value, data_field)
+      result = clf.get_type(data_field)(value)
 
-      assert isinstance(result, Boolean)
+      assert isinstance(result, bool)
       assert result == expected
 
-  def test_parse_type_value_exception(self):
+  def test_get_type_exception(self):
     template = """
     <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
       <DataDictionary>
@@ -161,7 +154,7 @@ class TestBase(TestCase):
     data_dictionary = clf.find(clf.root, "DataDictionary")
     data_field = clf.find(data_dictionary, "DataField")
 
-    with self.assertRaises(Exception) as cm: clf.parse_type("test", data_field)
+    with self.assertRaises(Exception) as cm: clf.get_type(data_field)
     assert str(cm.exception) == "Unsupported data type."
 
     # Test invalid operation type
@@ -169,10 +162,10 @@ class TestBase(TestCase):
     data_dictionary = clf.find(clf.root, "DataDictionary")
     data_field = clf.find(data_dictionary, "DataField")
 
-    with self.assertRaises(Exception) as cm: clf.parse_type("test", data_field)
+    with self.assertRaises(Exception) as cm: clf.get_type(data_field)
     assert str(cm.exception) == "Unsupported operation type."
 
-  def test_parse_type_value_categorical(self):
+  def test_get_type_categorical(self):
       template = """
       <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
         <DataDictionary>
@@ -187,16 +180,12 @@ class TestBase(TestCase):
       clf = PMMLBaseEstimator(pmml=StringIO(template))
       data_dictionary = clf.find(clf.root, "DataDictionary")
       data_field = clf.find(data_dictionary, "DataField")
+      data_type = clf.get_type(data_field)
 
-      with self.assertRaises(Exception) as cm: clf.parse_type("not_in_category", data_field)
-      assert str(cm.exception) == "Value does not match any category."
-      assert clf.parse_type("setosa", data_field) == "setosa"
-      assert clf.parse_type("versicolor", data_field) == "versicolor"
-      assert clf.parse_type("virginica", data_field) == "virginica"
-      assert isinstance(clf.parse_type("virginica", data_field), Category)
-      assert isinstance(clf.parse_type("virginica", data_field, force_native=True), str)
+      assert data_type.categories == ['setosa', 'versicolor', 'virginica']
+      assert data_type.ordered == False
 
-  def test_parse_type_value_ordinal(self):
+  def test_get_type_ordinal(self):
     template = """
       <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
         <DataDictionary>
@@ -211,42 +200,10 @@ class TestBase(TestCase):
     clf = PMMLBaseEstimator(pmml=StringIO(template))
     data_dictionary = clf.find(clf.root, "DataDictionary")
     data_field = clf.find(data_dictionary, "DataField")
+    data_type = clf.get_type(data_field)
 
-    with self.assertRaises(Exception)as cm: clf.parse_type("not_in_category", data_field)
-    assert str(cm.exception) == "Value does not match any category."
-    assert clf.parse_type("loud", data_field) == "loud"
-    assert clf.parse_type("louder", data_field) == "louder"
-    assert clf.parse_type("loudest", data_field) == "loudest"
-    assert isinstance(clf.parse_type("loudest", data_field), Category)
-    assert isinstance(clf.parse_type("loudest", data_field, force_native=True), str)
-
-    assert clf.parse_type("loud", data_field) < clf.parse_type("louder", data_field)
-    assert clf.parse_type("louder", data_field) < clf.parse_type("loudest", data_field)
-
-  def test_parse_type_interval(self):
-    template = """
-    <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
-      <DataDictionary>
-        <DataField name="test" optype="ordinal" dataType="float">
-          <Interval closure="openOpen" rightMargin="1"/>
-          <Interval closure="openClosed" leftMargin="1" rightMargin="1.5"/>
-          <Interval closure="openOpen" leftMargin="1.5" rightMargin="2.5"/>
-          <Interval closure="closedOpen" leftMargin="2.5" rightMargin="3.5"/>
-          <Interval closure="closedClosed" leftMargin="3.5" />
-        </DataField>
-      </DataDictionary>
-    </PMML>"""
-
-    clf = PMMLBaseEstimator(pmml=StringIO(template))
-    data_dictionary = clf.find(clf.root, "DataDictionary")
-    data_field = clf.find(data_dictionary, "DataField")
-
-    assert clf.parse_type(-1, data_field) == Interval(-1, rightMargin=1, closure='openOpen')
-    with self.assertRaises(Exception): clf.parse_type(1, data_field)
-    assert clf.parse_type(2, data_field) == Interval(2, leftMargin=1.5, rightMargin=2.5, closure='openOpen')
-    assert clf.parse_type(2.5, data_field) == Interval(2.5, leftMargin=2.5, rightMargin=3.5, closure='closedOpen')
-    assert clf.parse_type(3.5, data_field) == Interval(3.5, leftMargin=3.5, closure='closedClosed')
-    assert clf.parse_type(3.5, data_field, force_native=True) == 3.5
+    assert data_type.categories == ['loud', 'louder', 'loudest']
+    assert data_type.ordered == True
 
   def test_fit_exception(self):
     clf = PMMLBaseEstimator(pmml=StringIO('<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>'))

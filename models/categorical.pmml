@@ -72,8 +72,8 @@
     </Node>
    </Node>
    <Node id="3" score="Yes" recordCount="59" defaultChild="6">
-    <SimpleSetPredicate field="age" booleanOperator="isIn">
-     <Array n="3" type="string">&quot;(30,40]&quot; &quot;(40,50]&quot; &quot;(50,60]&quot;</Array>
+    <SimpleSetPredicate field="age" booleanOperator="isNotIn">
+     <Array n="3" type="string">&quot;(20,30]&quot; &quot;(60,70]&quot;</Array>
     </SimpleSetPredicate>
     <ScoreDistribution value="No" recordCount="14" confidence="0.23728813559322"/>
     <ScoreDistribution value="Yes" recordCount="45" confidence="0.76271186440678"/>

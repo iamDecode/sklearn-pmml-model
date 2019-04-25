@@ -2,7 +2,6 @@ import numpy as np
 import re
 import struct
 from sklearn_pmml_model.base import PMMLBaseEstimator
-from sklearn_pmml_model.datatypes import PMMLDType, Interval
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
 from sklearn.tree import DecisionTreeClassifier
 
@@ -11,8 +10,9 @@ class PMMLBaseTreeEstimator(PMMLBaseEstimator):
   def __init__(self, pmml, field_labels=None):
     super().__init__(pmml, field_labels=field_labels)
 
+    target_type = self.get_type(self.target_field)
     self.classes_ = np.array([
-      self.parse_type(e.get('value'), self.target_field, force_native=True)
+      target_type(e.get('value'))
       for e in self.findall(self.target_field, 'Value')
     ])
 
@@ -82,23 +82,19 @@ class PMMLBaseTreeEstimator(PMMLBaseEstimator):
     set_predicate = self.find(childNodes[0], 'SimpleSetPredicate')
 
     if predicate is not None:
-      column, mapping = self.field_mapping[predicate.get('field')]
-      value = mapping(predicate.get('value'))
-
-      if isinstance(value, PMMLDType):
-        value = value.value
-
+      column, _ = self.field_mapping[predicate.get('field')]
+      value = predicate.get('value') # We do not use field_mapping type as the cython tree only supports floats
       value = struct.pack('d', float(value)) # d = double = float64
     elif set_predicate is not None:
-      column, mapping = self.field_mapping[set_predicate.get('field')]
+      column, type = self.field_mapping[set_predicate.get('field')]
 
       array = self.find(set_predicate, 'Array')
       values = [re.sub(r"(?<!\\)\"", '', value).replace('\"', '"') for value in array.text.split()]
-      categories = [mapping(value) for value in values]
+      categories = [str(value) for value in values]
 
       bitmask = 0
       for category in categories:
-        bitmask |= 1 << (category.categories.index(category))
+        bitmask |= 1 << (type.categories.index(category))
 
       value = struct.pack('Q', bitmask) # Q = unsigned long long = uint64
 

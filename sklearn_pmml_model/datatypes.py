@@ -1,33 +1,20 @@
 import math
 import operator as op
 
-class PMMLDType:
-  def __init__(self, value):
-    self.value = value
 
-
-class Interval(PMMLDType):
-  def __init__(self, value, closure, leftMargin=None, rightMargin=None):
+class Interval:
+  def __init__(self, closure, leftMargin=None, rightMargin=None):
     assert leftMargin is not None or rightMargin is not None
+    if leftMargin is not None and rightMargin is not None:
+      assert leftMargin <= rightMargin
     assert closure in ['openClosed', 'openOpen', 'closedOpen', 'closedClosed']
-
-    super().__init__(value)
 
     self.closure = closure
     self.leftMargin = float(leftMargin or -math.inf)
     self.rightMargin = float(rightMargin or math.inf)
 
-  def __eq__(self, other):
-    if isinstance(other, Interval):
-      return self.leftMargin == other.leftMargin \
-             and self.rightMargin == other.rightMargin \
-             and self.closure == other.closure \
-             and self.value == other.value
-
-    return other == self.value and other in self
-
-  def __contains__(self, item):
-    if isinstance(item, float) or isinstance(item, int):
+  def __contains__(self, value):
+    if isinstance(value, float) or isinstance(value, int):
       closure_mapping = {
         'openClosed': [op.lt, op.le],
         'openOpen': [op.lt, op.lt],
@@ -36,60 +23,32 @@ class Interval(PMMLDType):
       }
 
       left, right = closure_mapping[self.closure]
-      return left(self.leftMargin, item) and right(item, self.rightMargin)
+      return left(self.leftMargin, value) and right(value, self.rightMargin)
 
 
-class Category(PMMLDType):
-  def __init__(self, value, categories, ordered = False):
+class Category:
+  def __init__(self, base_type, categories, ordered = False):
     assert isinstance(categories, list)
     assert isinstance(ordered, bool)
 
-    if value not in categories:
-      raise Exception('Invalid categorical value.')
+    self.base_type = base_type
 
-    super().__init__(value)
-
-    self.categories = categories
+    self.categories = [base_type(cat) for cat in categories]
     self.ordered = ordered
 
   def __eq__(self, other):
-    return self.value == other
+    return type(other) == Category and \
+           self.base_type == other.base_type and \
+           self.categories == other.categories and \
+           self.ordered == other.ordered
 
-  def __lt__(self, other):
-    if self.ordered:
-      return self.categories.index(self) < self.categories.index(other)
-    raise Exception('Invalid operation for categorical value.')
+  def __contains__(self, item):
+    return item in self.categories
 
-  def __le__(self, other):
-    if self.ordered:
-      return self.categories.index(self) <= self.categories.index(other)
-    raise Exception('Invalid operation for categorical value.')
+  def __call__(self, value):
+    value = self.base_type(value)
 
-  def __gt__(self, other):
-    if self.ordered:
-      return self.categories.index(self) > self.categories.index(other)
-    raise Exception('Invalid operation for categorical value.')
+    if not value in self:
+      raise Exception(f'Invalid categorical value: {value}')
 
-  def __ge__(self, other):
-    if self.ordered:
-      return self.categories.index(self) >= self.categories.index(other)
-    raise Exception('Invalid operation for categorical value.')
-
-
-class Boolean(int, PMMLDType):
-  def __new__(cls, value):
-    self = int.__new__(cls, bool(value))
-    PMMLDType.__init__(self, value)
-    return self
-
-  def __lt__(self, other):
-    raise Exception('Invalid operation for Boolean value.')
-
-  def __le__(self, other):
-    raise Exception('Invalid operation for Boolean value.')
-
-  def __gt__(self, other):
-    raise Exception('Invalid operation for Boolean value.')
-
-  def __ge__(self, other):
-    raise Exception('Invalid operation for Boolean value.')
+    return value
