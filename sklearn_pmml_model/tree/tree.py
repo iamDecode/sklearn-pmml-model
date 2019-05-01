@@ -1,10 +1,11 @@
 import numpy as np
-import re
 import struct
 from sklearn_pmml_model.base import PMMLBaseEstimator
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
 from sklearn.tree import DecisionTreeClassifier
+from operator import add
 
+SPLIT_UNDEFINED = struct.pack('d', TREE_UNDEFINED)
 
 class PMMLBaseTreeEstimator(PMMLBaseEstimator):
   def __init__(self, pmml, field_labels=None):
@@ -54,90 +55,94 @@ class PMMLBaseTreeEstimator(PMMLBaseEstimator):
 
     """
     childNodes = self.findall(node, 'Node')
+    impurity = 0 # TODO: impurity is not really required for anything, but would be nice to have
+    i += 1
 
-    if len(childNodes) == 0:
-      impurity = 0 # TODO: impurity is not really required for anything, but would be nice to have
+    if not childNodes:
+      record_count = node.get('recordCount')
 
-      if node.get('recordCount') is not None:
-        node_count = int(float(node.get('recordCount')))
-        node_count_weighted = float(node.get('recordCount'))
-        votes = np.array([[[float(e.get('recordCount')) for e in self.findall(node, 'ScoreDistribution')]]])
+      if record_count is not None:
+        node_count_weighted = float(record_count)
+        node_count = int(node_count_weighted)
+        votes = [[[float(e.get('recordCount')) for e in node.findall('ScoreDistribution')]]]
       else:
-        node_count, node_count_weighted = (0, float(0.0))
-        votes = np.array([[[float(1) if str(c) == node.get('score') else float(0) for c in self.classes_]]])
+        score = node.get('score')
 
-      return [
-        [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, struct.pack('d', TREE_UNDEFINED), impurity, node_count, node_count_weighted)],
-        votes
-      ]
+        if score is not None:
+          node_count, node_count_weighted = (0, 0.0)
+          votes = [[[1.0 if str(c) == score else 0.0 for c in self.classes_]]]
+        else:
+          raise Exception("Node has insufficient information to determine score: recordCount or score attributed expected")
 
-    left_node, left_value = self.construct_tree(childNodes[0], i + 1)
+      return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, SPLIT_UNDEFINED, impurity, node_count, node_count_weighted)], \
+             votes
+
+    left_node, left_value = self.construct_tree(childNodes[0], i)
     offset = len(left_node)
-    right_node, right_value = self.construct_tree(childNodes[1], i + 1 + offset)
+    right_node, right_value = self.construct_tree(childNodes[1], i + offset)
 
     children = left_node + right_node
-    distributions = np.concatenate((left_value, right_value))
+    distributions = left_value + right_value
 
     predicate = self.find(childNodes[0], 'SimplePredicate')
-    set_predicate = self.find(childNodes[0], 'SimpleSetPredicate')
 
     if predicate is not None:
       column, _ = self.field_mapping[predicate.get('field')]
       value = predicate.get('value') # We do not use field_mapping type as the cython tree only supports floats
       value = struct.pack('d', float(value)) # d = double = float64
-    elif set_predicate is not None:
-      column, type = self.field_mapping[set_predicate.get('field')]
-
-      array = self.find(set_predicate, 'Array')
-      values = [re.sub(r"(?<!\\)\"", '', value).replace('\"', '"') for value in array.text.split()]
-      categories = [str(value) for value in values]
-
-      bitmask = 0
-      for category in categories:
-        bitmask |= 1 << (type.categories.index(category))
-
-      value = struct.pack('Q', bitmask) # Q = unsigned long long = uint64
-
-      if set_predicate.get('booleanOperator') == 'isNotIn':
-        value = struct.pack('Q', ~np.uint64(bitmask))
     else:
-      raise Exception("Unsupported tree format: unknown predicate structure in Node {}".format(childNodes[0].get('id')))
+      set_predicate = self.find(childNodes[0], 'SimpleSetPredicate')
 
-    impurity = 0 # TODO: impurity is not really required for anything, but would be nice to have
+      if set_predicate is not None:
+        column, type = self.field_mapping[set_predicate.get('field')]
 
-    distributions_children = distributions[[0, offset]]
-    distribution = np.sum(distributions_children, axis=0)
-    sample_count = int(np.sum(distribution))
-    sample_count_weighted = float(np.sum(distribution))
+        array = set_predicate.find('Array')
+        categories = [value.replace('\\"', '▲').replace('"', '').replace('▲', '"') for value in array.text.split()]
 
-    return [(i + 1, i + 1 + offset, column, value, impurity, sample_count, sample_count_weighted)] + children, \
-           np.concatenate((np.array([distribution]), distributions))
+        mask = 0
+        for category in categories:
+          mask |= 1 << (type.categories.index(category))
+
+        value = struct.pack('Q', mask) # Q = unsigned long long = uint64
+
+        if set_predicate.get('booleanOperator') == 'isNotIn':
+          value = struct.pack('Q', ~np.uint64(mask))
+      else:
+        raise Exception("Unsupported tree format: unknown predicate structure in Node {}".format(childNodes[0].get('id')))
+
+    distribution = [list(map(add, distributions[0][0], distributions[offset][0]))]
+    sample_count_weighted = sum(distribution[0])
+    sample_count = int(sample_count_weighted)
+
+    return [(i, i + offset, column, value, impurity, sample_count, sample_count_weighted)] + children, \
+           [distribution] + distributions
 
 
 class PMMLTreeClassifier(PMMLBaseTreeEstimator, DecisionTreeClassifier):
-    def __init__(self, pmml, field_labels=None):
-      super().__init__(pmml, field_labels=field_labels)
+  def __init__(self, pmml, field_labels=None):
+    super().__init__(pmml, field_labels=field_labels)
 
-      self.tree = self.find(self.root, 'TreeModel')
+    tree_model = self.root.find('TreeModel')
 
-      if self.tree is None:
-        raise Exception('PMML model does not contain TreeModel.')
+    if tree_model is None:
+      raise Exception('PMML model does not contain TreeModel.')
 
-      if self.tree.get('splitCharacteristic') != 'binarySplit':
-        raise Exception('Sklearn only supports binary tree models.')
+    if tree_model.get('splitCharacteristic') != 'binarySplit':
+      raise Exception('Sklearn only supports binary tree models.')
 
-      self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]), self.n_outputs_, self.n_categories)
+    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]), self.n_outputs_, self.n_categories)
 
-      firstNode = self.find(self.tree, 'Node')
-      nodes, values = self.construct_tree(firstNode)
+    first_node = tree_model.find('Node')
+    nodes, values = self.construct_tree(first_node)
 
-      node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
-      value_ndarray = np.ascontiguousarray(values)
-      max_depth = None
-      state = {
-        'max_depth': (2 ** 31) - 1 if max_depth is None else max_depth,
-        'node_count': node_ndarray.shape[0],
-        'nodes': node_ndarray,
-        'values': value_ndarray
-      }
-      self.tree_.__setstate__(state)
+    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
+    value_ndarray = np.ascontiguousarray(values)
+    max_depth = None
+
+    state = {
+      'max_depth': (2 ** 31) - 1 if max_depth is None else max_depth,
+      'node_count': node_ndarray.shape[0],
+      'nodes': node_ndarray,
+      'values': value_ndarray
+    }
+    self.tree_.__setstate__(state)
