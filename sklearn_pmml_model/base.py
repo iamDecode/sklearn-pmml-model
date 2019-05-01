@@ -8,17 +8,21 @@ import datetime
 
 class PMMLBaseEstimator(BaseEstimator):
   def __init__(self, pmml, field_labels=None):
-    self.root = eTree.parse(pmml).getroot()
-    self.namespace = self.root.tag[1:self.root.tag.index('}')]
+    it = eTree.iterparse(pmml)
+    ns_offset = None
+    for _, el in it:
+      if ns_offset is None: ns_offset = el.tag.find('}') + 1
+      el.tag = el.tag[ns_offset:] # strip all namespaces
+    self.root = it.root
     self.field_labels = field_labels
 
   def find(self, element, path):
     if element is None: return None
-    return element.find(f"PMML:{path}", namespaces={"PMML": self.namespace})
+    return element.find(path)
 
   def findall(self, element, path):
     if element is None: return []
-    return element.findall(f"PMML:{path}", namespaces={"PMML": self.namespace})
+    return element.findall(path)
 
   @cached_property
   def field_mapping(self):
@@ -41,7 +45,7 @@ class PMMLBaseEstimator(BaseEstimator):
         self.get_type(e)
       )
       for name, e in fields.items()
-      if e.tag == f'{{{self.namespace}}}DataField'
+      if e.tag == 'DataField'
     }
 
     field_mapping.update({
@@ -50,7 +54,7 @@ class PMMLBaseEstimator(BaseEstimator):
         self.get_type(e, derives=fields[self.find(e, 'FieldRef').get('field')])
       )
       for name, e in fields.items()
-      if e.tag == f'{{{self.namespace}}}DerivedField'
+      if e.tag == 'DerivedField'
     })
 
     field_mapping.update({
@@ -101,7 +105,7 @@ class PMMLBaseEstimator(BaseEstimator):
         Representing the target field for classification, or None if no MiningSchema or MiningField specified.
 
     """
-    mining_schema = next(self.root.iter(f'{{{self.namespace}}}MiningSchema'), None)
+    mining_schema = next(self.root.iter('MiningSchema'), None)
 
     if mining_schema is not None:
       mining_field = next((s for s in mining_schema if s.get('usageType') in ['target', 'predicted']), None)

@@ -22,7 +22,7 @@ class PMMLBaseTreeEstimator(PMMLBaseEstimator):
     if field_labels is not None:
       self.n_features_ = len(field_labels)
     else:
-      self.n_features_ = len([field for field in fields if field.tag == f'{{{self.namespace}}}DataField'])
+      self.n_features_ = len([field for field in fields if field.tag == 'DataField'])
 
     self.n_outputs_ = 1
     self.n_classes_ = len(self.classes_)
