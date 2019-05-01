@@ -61,6 +61,31 @@ class TestTree(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  def test_incomplete_node(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLTreeClassifier(pmml=StringIO("""
+          <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+            <DataDictionary>
+              <DataField name="Class" optype="categorical" dataType="string">
+                <Value value="setosa"/>
+                <Value value="versicolor"/>
+                <Value value="virginica"/>
+              </DataField>
+            </DataDictionary>
+            <MiningSchema>
+              <MiningField name="Class" usageType="target"/>
+            </MiningSchema>
+            <TreeModel splitCharacteristic="binarySplit">
+              <Node id="1">
+                <True/>
+                <Node id="2"/>
+              </Node>
+            </TreeModel>
+          </PMML>
+          """))
+
+    assert str(cm.exception) == 'Node has insufficient information to determine score: recordCount or score attributed expected'
+
   def test_unsupported_predicate(self):
       with self.assertRaises(Exception) as cm:
         PMMLTreeClassifier(pmml=StringIO("""
@@ -78,10 +103,10 @@ class TestTree(TestCase):
           <TreeModel splitCharacteristic="binarySplit">
             <Node id="1">
               <True/>
-              <Node id="2">
+              <Node id="2" score="setosa">
                 <UnsupportedPredicate/>
               </Node>
-              <Node id="3">
+              <Node id="3" score="versicolor">
                 <UnsupportedPredicate/>
               </Node>
             </Node>
