@@ -1,6 +1,6 @@
 from unittest import TestCase
-from sklearn_pmml_model.base import PMMLBaseEstimator
-from sklearn_pmml_model.datatypes import Category, Interval
+from sklearn_pmml_model.base import PMMLBaseEstimator, get_type
+from sklearn_pmml_model.datatypes import Category
 from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np
@@ -42,18 +42,21 @@ class TestBase(TestCase):
         </DerivedField>
       </TransformationDictionary>
       <MiningSchema>
-			  <MiningField name="Class" usageType="target"/>
+        <MiningField name="Class" usageType="target"/>
       </MiningSchema>
     </PMML>
     """))
 
     Result = namedtuple('Result', 'column type')
+    category = Category(str,
+                        categories=['setosa', 'versicolor', 'virginica'],
+                        ordered=False)
     tests = {
       'sepal length (cm)':          Result(column=0, type=float),
       'sepal width (cm)':           Result(column=1, type=float),
       'integer(sepal length (cm))': Result(column=0, type=int),
       'double(sepal width (cm))':   Result(column=1, type=float),
-      'Class':                      Result(column=None, type=Category(str, categories=["setosa", "versicolor", "virginica"], ordered=False)),
+      'Class':                      Result(column=None, type=category),
     }
 
     for i in range(0, X.shape[0]):
@@ -66,7 +69,7 @@ class TestBase(TestCase):
     clf = PMMLBaseEstimator(pmml=StringIO("""
     <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>
     """))
-    assert clf.target_field == None
+    assert clf.target_field is None
 
     clf = PMMLBaseEstimator(pmml=StringIO("""
       <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
@@ -102,13 +105,13 @@ class TestBase(TestCase):
     ]
 
     for value in values:
-      for type in types:
-        optype, pmml_type, data_type = type
-        clf = PMMLBaseEstimator(pmml=StringIO(template.format(optype, pmml_type)))
+      for field_type in types:
+        op_type, pmml_type, data_type = field_type
+        clf = PMMLBaseEstimator(StringIO(template.format(op_type, pmml_type)))
 
         data_dictionary = clf.root.find("DataDictionary")
         data_field = data_dictionary.find("DataField")
-        result = clf.get_type(data_field)(value)
+        result = get_type(data_field)(value)
 
         assert isinstance(result, data_type)
 
@@ -132,11 +135,12 @@ class TestBase(TestCase):
     }
 
     for value, expected in tests.items():
-      clf = PMMLBaseEstimator(pmml=StringIO(template.format('continuous', 'boolean')))
+      pmml = StringIO(template.format('continuous', 'boolean'))
+      clf = PMMLBaseEstimator(pmml)
 
       data_dictionary = clf.root.find("DataDictionary")
       data_field = data_dictionary.find("DataField")
-      result = clf.get_type(data_field)(value)
+      result = get_type(data_field)(value)
 
       assert isinstance(result, bool)
       assert result == expected
@@ -150,19 +154,23 @@ class TestBase(TestCase):
     </PMML>"""
 
     # Test invalid data type
-    clf = PMMLBaseEstimator(pmml=StringIO(template.format("continuous", "does_not_exist")))
+    pmml = StringIO(template.format("continuous", "does_not_exist"))
+    clf = PMMLBaseEstimator(pmml)
     data_dictionary = clf.root.find("DataDictionary")
     data_field = data_dictionary.find("DataField")
 
-    with self.assertRaises(Exception) as cm: clf.get_type(data_field)
+    with self.assertRaises(Exception) as cm:
+      get_type(data_field)
     assert str(cm.exception) == "Unsupported data type."
 
     # Test invalid operation type
-    clf = PMMLBaseEstimator(pmml=StringIO(template.format("does_not_exist", "string")))
+    pmml = StringIO(template.format("does_not_exist", "string"))
+    clf = PMMLBaseEstimator(pmml)
     data_dictionary = clf.root.find("DataDictionary")
     data_field = data_dictionary.find("DataField")
 
-    with self.assertRaises(Exception) as cm: clf.get_type(data_field)
+    with self.assertRaises(Exception) as cm:
+      get_type(data_field)
     assert str(cm.exception) == "Unsupported operation type."
 
   def test_get_type_categorical(self):
@@ -180,10 +188,10 @@ class TestBase(TestCase):
       clf = PMMLBaseEstimator(pmml=StringIO(template))
       data_dictionary = clf.root.find("DataDictionary")
       data_field = data_dictionary.find("DataField")
-      data_type = clf.get_type(data_field)
+      data_type: Category = get_type(data_field)
 
       assert data_type.categories == ['setosa', 'versicolor', 'virginica']
-      assert data_type.ordered == False
+      assert not data_type.ordered
 
   def test_get_type_ordinal(self):
     template = """
@@ -200,13 +208,15 @@ class TestBase(TestCase):
     clf = PMMLBaseEstimator(pmml=StringIO(template))
     data_dictionary = clf.root.find("DataDictionary")
     data_field = data_dictionary.find("DataField")
-    data_type = clf.get_type(data_field)
+    data_type: Category = get_type(data_field)
 
     assert data_type.categories == ['loud', 'louder', 'loudest']
-    assert data_type.ordered == True
+    assert data_type.ordered
 
   def test_fit_exception(self):
-    clf = PMMLBaseEstimator(pmml=StringIO('<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>'))
+    pmml = StringIO('<PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3"/>')
+    clf = PMMLBaseEstimator(pmml)
+
     with self.assertRaises(Exception) as cm:
       clf.fit(X, y)
 

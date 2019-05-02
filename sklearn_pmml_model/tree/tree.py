@@ -38,12 +38,14 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     if tree_model.get('splitCharacteristic') != 'binarySplit':
       raise Exception('Sklearn only supports binary tree models.')
 
-    # Parse tree
     n_categories = np.asarray([
-      len(type.categories) if hasattr(type, 'categories') else -1
-      for _, type in self.field_mapping.values()
+      len(t.categories) if hasattr(t, 'categories') else -1
+      for _, t in self.field_mapping.values()
     ], dtype=np.int32)
-    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]), self.n_outputs_, n_categories)
+
+    # Parse tree
+    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]),
+                      self.n_outputs_, n_categories)
 
     first_node = tree_model.find('Node')
     nodes, values = construct_tree(first_node, self.classes_, self.field_mapping)
@@ -61,7 +63,7 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     self.tree_.__setstate__(state)
 
 
-def construct_tree(node, classes, field_mapping, i = 0):
+def construct_tree(node, classes, field_mapping, i=0):
   """
   Generator for nodes and values used for constructing cython Tree class.
 
@@ -84,19 +86,20 @@ def construct_tree(node, classes, field_mapping, i = 0):
   -------
   (nodes, values) : tuple
 
-      nodes : [[int, int, int, Any, float, int, int]]
-          List of nodes represented by: left child, right child, feature, value,
-          impurity, sample count and sample count weighted.
+      nodes : [()]
+          List of nodes represented by: left child (int), right child (int),
+          feature (int), value (int for categorical, float for continuous),
+          impurity (float), sample count (int) and weighted sample count (int).
 
       values : [[]]
           List with training sample distributions at this node in the tree.
 
   """
-  childNodes = node.findall('Node')
-  impurity = 0 # TODO: impurity is not really required for anything, but would be nice to have
+  child_nodes = node.findall('Node')
+  impurity = 0  # TODO: impurity doesnt affect predictions, but is nice to have
   i += 1
 
-  if not childNodes:
+  if not child_nodes:
     record_count = node.get('recordCount')
 
     if record_count is not None:
@@ -110,43 +113,49 @@ def construct_tree(node, classes, field_mapping, i = 0):
         node_count, node_count_weighted = (0, 0.0)
         votes = [[[1.0 if str(c) == score else 0.0 for c in classes]]]
       else:
-        raise Exception("Node has insufficient information to determine score: recordCount or score attributed expected")
+        raise Exception('Node has insufficient information to determine output:'
+                        + ' recordCount or score attributes expected')
 
-    return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, SPLIT_UNDEFINED, impurity, node_count, node_count_weighted)], \
-           votes
+    return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, SPLIT_UNDEFINED, impurity,
+             node_count, node_count_weighted)], votes
 
-  left_node, left_value = construct_tree(childNodes[0], classes, field_mapping, i)
+  left_node, left_value = construct_tree(child_nodes[0], classes, field_mapping, i)
   offset = len(left_node)
-  right_node, right_value = construct_tree(childNodes[1], classes, field_mapping, i + offset)
+  right_node, right_value = construct_tree(child_nodes[1], classes, field_mapping, i + offset)
 
   children = left_node + right_node
   distributions = left_value + right_value
 
-  predicate = childNodes[0].find('SimplePredicate')
+  predicate = child_nodes[0].find('SimplePredicate')
 
   if predicate is not None:
     column, _ = field_mapping[predicate.get('field')]
-    value = predicate.get('value') # We do not use field_mapping type as the cython tree only supports floats
-    value = struct.pack('d', float(value)) # d = double = float64
+    # We do not use field_mapping type as the Cython tree only supports floats
+    value = predicate.get('value')
+    value = struct.pack('d', float(value))  # d = double = float64
   else:
-    set_predicate = childNodes[0].find('SimpleSetPredicate')
+    set_predicate = child_nodes[0].find('SimpleSetPredicate')
 
     if set_predicate is not None:
-      column, type = field_mapping[set_predicate.get('field')]
+      column, field_type = field_mapping[set_predicate.get('field')]
 
       array = set_predicate.find('Array')
-      categories = [value.replace('\\"', '▲').replace('"', '').replace('▲', '"') for value in array.text.split()]
+      categories = [
+        value.replace('\\"', '▲').replace('"', '').replace('▲', '"')
+        for value in array.text.split()
+      ]
 
       mask = 0
       for category in categories:
-        mask |= 1 << (type.categories.index(category))
+        mask |= 1 << (field_type.categories.index(category))
 
-      value = struct.pack('Q', mask) # Q = unsigned long long = uint64
+      value = struct.pack('Q', mask)  # Q = unsigned long long = uint64
 
       if set_predicate.get('booleanOperator') == 'isNotIn':
         value = struct.pack('Q', ~np.uint64(mask))
     else:
-      raise Exception("Unsupported tree format: unknown predicate structure in Node {}".format(childNodes[0].get('id')))
+      raise Exception("Unsupported tree format: unknown predicate structure in Node {}"
+                      .format(child_nodes[0].get('id')))
 
   distribution = [list(map(add, distributions[0][0], distributions[offset][0]))]
   sample_count_weighted = sum(distribution[0])

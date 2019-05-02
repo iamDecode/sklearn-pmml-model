@@ -3,15 +3,15 @@ import operator as op
 
 
 class Interval:
-  def __init__(self, closure, leftMargin=None, rightMargin=None):
-    assert leftMargin is not None or rightMargin is not None
-    if leftMargin is not None and rightMargin is not None:
-      assert leftMargin <= rightMargin
+  def __init__(self, closure, left_margin=None, right_margin=None):
+    assert left_margin is not None or right_margin is not None
+    if left_margin is not None and right_margin is not None:
+      assert left_margin <= right_margin
     assert closure in ['openClosed', 'openOpen', 'closedOpen', 'closedClosed']
 
     self.closure = closure
-    self.leftMargin = float(leftMargin or -math.inf)
-    self.rightMargin = float(rightMargin or math.inf)
+    self.leftMargin = float(left_margin or -math.inf)
+    self.rightMargin = float(right_margin or math.inf)
 
   def __contains__(self, value):
     if isinstance(value, float) or isinstance(value, int):
@@ -27,7 +27,7 @@ class Interval:
 
 
 class Category:
-  def __init__(self, base_type, categories, ordered = False):
+  def __init__(self, base_type, categories, ordered=False):
     assert isinstance(categories, list)
     assert isinstance(ordered, bool)
 
@@ -48,7 +48,7 @@ class Category:
   def __call__(self, value):
     value = self.base_type(value)
 
-    if not value in self:
+    if value not in self:
       raise Exception(f'Invalid categorical value: {value}')
 
     return value

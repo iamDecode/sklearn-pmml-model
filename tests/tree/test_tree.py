@@ -56,7 +56,8 @@ class TestTree(TestCase):
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
-      clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/sklearn2pmml.pmml'))
+      pmml = path.join(BASE_DIR, '../models/sklearn2pmml.pmml')
+      clf = PMMLTreeClassifier(pmml=pmml)
       clf.fit(np.array([[]]), np.array([]))
 
     assert str(cm.exception) == 'Not supported.'
@@ -84,7 +85,9 @@ class TestTree(TestCase):
           </PMML>
           """))
 
-    assert str(cm.exception) == 'Node has insufficient information to determine score: recordCount or score attributed expected'
+    assert str(cm.exception) == 'Node has insufficient information to ' \
+                                'determine output: recordCount or score ' \
+                                'attributes expected'
 
   def test_unsupported_predicate(self):
       with self.assertRaises(Exception) as cm:
@@ -114,7 +117,8 @@ class TestTree(TestCase):
         </PMML>
         """))
 
-      assert str(cm.exception) == 'Unsupported tree format: unknown predicate structure in Node 2'
+      assert str(cm.exception) == 'Unsupported tree format: unknown predicate' \
+                                  ' structure in Node 2'
 
 
 class TestIrisTreeIntegration(TestCase):
@@ -126,59 +130,74 @@ class TestIrisTreeIntegration(TestCase):
     X.columns = np.array(data.feature_names)[pair]
     y = pd.Series(np.array(data.target_names)[data.target])
     y.name = "Class"
-    Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
+    X, Xte, y, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/sklearn2pmml.pmml'))
-    self.reference = DecisionTreeClassifier(random_state=1).fit(Xtr, ytr)
+    pmml = path.join(BASE_DIR, '../models/sklearn2pmml.pmml')
+    self.clf = PMMLTreeClassifier(pmml=pmml)
+    self.ref = DecisionTreeClassifier(random_state=1).fit(X, y)
 
   def test_predict(self):
     Xte, _ = self.test
-    assert np.array_equal(self.reference.predict(Xte), self.clf.predict(Xte))
+    assert np.array_equal(self.ref.predict(Xte), self.clf.predict(Xte))
 
   def test_predict_proba(self):
     Xte, _ = self.test
-    assert np.array_equal(self.reference.predict_proba(Xte), self.clf.predict_proba(Xte))
+    assert np.array_equal(
+      self.ref.predict_proba(Xte),
+      self.clf.predict_proba(Xte)
+    )
 
   def test_score(self):
     Xte, yte = self.test
-    assert self.reference.score(Xte, yte) == self.clf.score(Xte, yte)
+    assert self.ref.score(Xte, yte) == self.clf.score(Xte, yte)
 
 
 class TestDigitsTreeIntegration(TestCase):
   def setUp(self):
     data = load_digits()
 
-    self.columns = [2,3,4,5,6,7,9,10,13,14,17,18,19,20,21,25,26,27,28,29,30,33,34,35,36,37,38,41,42,43,45,46,50,51,52,53,54,55,57,58,59,60,61,62,63]
+    self.columns = [2, 3, 4, 5, 6, 7, 9, 10, 13, 14, 17, 18, 19, 20, 21, 25, 26,
+                    27, 28, 29, 30, 33, 34, 35, 36, 37, 38, 41, 42, 43, 45, 46,
+                    50, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63]
     X = pd.DataFrame(data.data)
     y = pd.Series(np.array(data.target_names)[data.target])
     y.name = "Class"
-    Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
+    X, Xte, y, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/digits.pmml'))
-    self.reference = DecisionTreeClassifier(random_state=1).fit(Xtr, ytr)
+    self.clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/digits.pmml'))
+    self.ref = DecisionTreeClassifier(random_state=1).fit(X, y)
 
   def test_predict(self):
     Xte, _ = self.test
-    assert np.array_equal(self.reference.predict(Xte), self.clf.predict(Xte[self.columns]).astype(np.int64))
+    assert np.array_equal(
+      self.ref.predict(Xte),
+      self.clf.predict(Xte[self.columns]).astype(np.int64)
+    )
 
   def test_predict_proba(self):
     Xte, _ = self.test
-    assert np.array_equal(self.reference.predict_proba(Xte), self.clf.predict_proba(Xte[self.columns]))
+    assert np.array_equal(
+      self.ref.predict_proba(Xte),
+      self.clf.predict_proba(Xte[self.columns])
+    )
 
   def test_score(self):
     Xte, yte = self.test
-    assert self.reference.score(Xte, yte) == self.clf.score(Xte[self.columns], yte)
+    assert self.ref.score(Xte, yte) == self.clf.score(Xte[self.columns], yte)
 
 
 class TestCategoricalTreeIntegration(TestCase):
   def setUp(self):
-    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/cat.pmml'))
+    self.clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/cat.pmml'))
 
   def test_predict(self):
-    Xte = np.array([[0],[1],[2]])
-    assert np.array_equal(np.array(['class1','class2','class3']), self.clf.predict(Xte))
+    Xte = np.array([[0], [1], [2]])
+    assert np.array_equal(
+      np.array(['class1', 'class2', 'class3']),
+      self.clf.predict(Xte)
+    )
 
 
 class TestCategoricalPimaTreeIntegration(TestCase):
@@ -187,15 +206,16 @@ class TestCategoricalPimaTreeIntegration(TestCase):
     cats = np.unique(df['age'])
     df['age'] = pd.Categorical(df['age'], categories=cats)
     df['age'] = df['age'].cat.codes
-    Xte = df.iloc[:,1:]
-    yte = df.iloc[:,0]
+    Xte = df.iloc[:, 1:]
+    yte = df.iloc[:, 0]
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/categorical.pmml'))
+    pmml = path.join(BASE_DIR, '../models/categorical.pmml')
+    self.clf = PMMLTreeClassifier(pmml)
 
   def test_predict_proba(self):
     Xte, _ = self.test
-    reference = np.array([
+    ref = np.array([
       [0.1568627450980392, 0.84313725490196079],
       [0.7500000000000000, 0.25000000000000000],
       [0.1568627450980392, 0.84313725490196079],
@@ -249,9 +269,9 @@ class TestCategoricalPimaTreeIntegration(TestCase):
       [0.7368421052631579, 0.26315789473684209],
       [0.2000000000000000, 0.80000000000000004]
     ])
-    assert np.array_equal(reference, self.clf.predict_proba(Xte))
+    assert np.array_equal(ref, self.clf.predict_proba(Xte))
 
   def test_score(self):
     Xte, yte = self.test
-    reference = 0.7692307692307693
-    assert reference == self.clf.score(Xte, yte)
+    ref = 0.7692307692307693
+    assert ref == self.clf.score(Xte, yte)

@@ -7,15 +7,6 @@ import datetime
 import numpy as np
 
 
-def find(element, path):
-  if element is None: return None
-  return element.find(path)
-
-def findall(element, path):
-  if element is None: return []
-  return element.findall(path)
-
-
 class PMMLBaseEstimator(BaseEstimator):
   """
   Base class for estimators, saving basic information on DataFields.
@@ -30,8 +21,9 @@ class PMMLBaseEstimator(BaseEstimator):
     it = eTree.iterparse(pmml)
     ns_offset = None
     for _, el in it:
-      if ns_offset is None: ns_offset = el.tag.find('}') + 1
-      el.tag = el.tag[ns_offset:] # strip all namespaces
+      if ns_offset is None:
+        ns_offset = el.tag.find('}') + 1
+      el.tag = el.tag[ns_offset:]  # strip all namespaces
     self.root = it.root
 
     self.n_features_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
@@ -49,13 +41,13 @@ class PMMLBaseEstimator(BaseEstimator):
 
     """
     target = self.target_field.get('name')
-    fields = { name: field for name, field in self.fields.items() if name != target }
+    fields = {name: field for name, field in self.fields.items() if name != target}
     field_labels = list(fields.keys())
 
     field_mapping = {
       name: (
         field_labels.index(name),
-        self.get_type(e)
+        get_type(e)
       )
       for name, e in fields.items()
       if e.tag == 'DataField'
@@ -64,7 +56,7 @@ class PMMLBaseEstimator(BaseEstimator):
     field_mapping.update({
       name: (
         field_labels.index(e.find('FieldRef').get('field')),
-        self.get_type(e, derives=fields[e.find('FieldRef').get('field')])
+        get_type(e, derives=fields[e.find('FieldRef').get('field')])
       )
       for name, e in fields.items()
       if e.tag == 'DerivedField'
@@ -73,7 +65,7 @@ class PMMLBaseEstimator(BaseEstimator):
     field_mapping.update({
       self.target_field.get('name'): (
         None,
-        self.get_type(self.target_field)
+        get_type(self.target_field)
       )
     })
 
@@ -82,7 +74,8 @@ class PMMLBaseEstimator(BaseEstimator):
   @cached_property
   def fields(self):
     """
-    Cached property containing an ordered mapping from field name to XML DataField or DerivedField element.
+    Cached property containing an ordered mapping from field name to XML
+    DataField or DerivedField element.
 
     Returns
     -------
@@ -109,89 +102,94 @@ class PMMLBaseEstimator(BaseEstimator):
   @cached_property
   def target_field(self):
     """
-    Cached property containing a reference to the XML DataField or DerivedField element corresponding to the
-    classification target.
+    Cached property containing a reference to the XML DataField or DerivedField
+    element corresponding to the classification target.
 
     Returns
     -------
     eTree.Element
-        Representing the target field for classification, or None if no MiningSchema or MiningField specified.
+        Representing the target field for classification, or None if no
+        MiningSchema or MiningField specified.
 
     """
     mining_schema = next(self.root.iter('MiningSchema'), None)
 
     if mining_schema is not None:
-      mining_field = next((s for s in mining_schema if s.get('usageType') in ['target', 'predicted']), None)
+      mining_field = next(
+        (s for s in mining_schema if s.get('usageType') in ['target', 'predicted']),
+        None
+      )
 
       if mining_field is not None:
         return self.fields[mining_field.get('name')]
 
     return None
 
-  def get_type(self, data_field, derives=None):
-    """
-    Parse type defined in <DataField> object and returns it.
-
-    Parameters
-    ----------
-    data_field : eTree.Element
-        <DataField> or <DerivedField> XML element that describes a column.
-
-    derives : eTree.Element
-        <DataField> XML element that the derived field derives.
-
-    Returns
-    -------
-    callable
-        Type of the value, as a callable function.
-
-    """
-    data_type = data_field.get('dataType')
-
-    type_mapping = {
-      'string': str,
-      'integer': int,
-      'float': float,
-      'double': float,
-      'boolean': lambda x: x.lower() in ['1', 'true', 'yes'] if type(x) is str else bool(x),
-      'date': datetime.date,
-      'time': datetime.time,
-      'dateTime': datetime.datetime,
-      'dateDaysSince0': int,
-      'dateDaysSince1960': int,
-      'dateDaysSince1970': int,
-      'dateDaysSince1980': int,
-      'timeSeconds': int,
-      'dateTimeSecondsSince0': int,
-      'dateTimeSecondsSince1960': int,
-      'dateTimeSecondsSince1970': int,
-      'dateTimeSecondsSince1980': int,
-    }
-
-    if type_mapping.get(data_type) is None:
-      raise Exception('Unsupported data type.')
-
-    op_type = data_field.get('optype')
-
-    if op_type not in ['categorical', 'ordinal', 'continuous']:
-      raise Exception('Unsupported operation type.')
-
-    if op_type == 'continuous':
-      return type_mapping.get(data_type)
-    else:
-      categories = [
-        e.get('value')
-        for e in findall(data_field, 'Value') + findall(derives, 'Value')
-      ]
-
-      return Category(type_mapping[data_type], categories=categories, ordered=op_type == 'ordinal')
-
-  def fit(self, X, y):
+  def fit(self, x, y):
     """
     This method is not supported: PMML models are already fitted.
 
     """
     raise Exception('Not supported.')
+
+
+def get_type(data_field, derives=None):
+  """
+  Parse type defined in <DataField> object and returns it.
+
+  Parameters
+  ----------
+  data_field : eTree.Element
+      <DataField> or <DerivedField> XML element that describes a column.
+
+  derives : eTree.Element
+      <DataField> XML element that the derived field derives.
+
+  Returns
+  -------
+  callable
+      Type of the value, as a callable function.
+
+  """
+  data_type = data_field.get('dataType')
+
+  type_mapping = {
+    'string': str,
+    'integer': int,
+    'float': float,
+    'double': float,
+    'boolean': lambda x: x.lower() in ['1', 'true', 'yes'] if type(x) is str else bool(x),
+    'date': datetime.date,
+    'time': datetime.time,
+    'dateTime': datetime.datetime,
+    'dateDaysSince0': int,
+    'dateDaysSince1960': int,
+    'dateDaysSince1970': int,
+    'dateDaysSince1980': int,
+    'timeSeconds': int,
+    'dateTimeSecondsSince0': int,
+    'dateTimeSecondsSince1960': int,
+    'dateTimeSecondsSince1970': int,
+    'dateTimeSecondsSince1980': int,
+  }
+
+  if type_mapping.get(data_type) is None:
+    raise Exception('Unsupported data type.')
+
+  op_type = data_field.get('optype')
+
+  if op_type not in ['categorical', 'ordinal', 'continuous']:
+    raise Exception('Unsupported operation type.')
+
+  if op_type == 'continuous':
+    return type_mapping.get(data_type)
+  else:
+    categories = [
+      e.get('value')
+      for e in findall(data_field, 'Value') + findall(derives, 'Value')
+    ]
+
+    return Category(type_mapping[data_type], categories=categories, ordered=op_type == 'ordinal')
 
 
 class PMMLBaseClassifier(PMMLBaseEstimator):
@@ -207,7 +205,15 @@ class PMMLBaseClassifier(PMMLBaseEstimator):
   def __init__(self, pmml):
     super().__init__(pmml)
 
-    target_type = self.get_type(self.target_field)
+    target_type: Category = get_type(self.target_field)
     self.classes_ = np.array(target_type.categories)
     self.n_classes_ = len(self.classes_)
     self.n_outputs_ = 1
+
+
+# Helper methods
+
+def findall(element, path):
+  if element is None:
+    return []
+  return element.findall(path)

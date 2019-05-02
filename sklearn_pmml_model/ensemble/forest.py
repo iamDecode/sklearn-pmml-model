@@ -53,7 +53,10 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     valid_segments = [segment for segment in segments if segment.find('True') is not None]
 
     if len(valid_segments) < len(segments):
-      warnings.warn("Warning: {} segment(s) ignored because of unsupported predicate.".format(len(segments) - len(valid_segments)))
+      warnings.warn(
+        'Warning: {} segment(s) ignored because of unsupported predicate.'
+        .format(len(segments) - len(valid_segments))
+      )
 
     n_estimators = len(valid_segments)
     RandomForestClassifier.__init__(self, n_estimators=n_estimators, n_jobs=n_jobs)
@@ -65,8 +68,8 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     clf.n_outputs_ = self.n_outputs_
     clf.n_classes_ = self.n_classes_
     clf.n_categories = np.asarray([
-      len(type.categories) if hasattr(type, 'categories') else -1
-      for _, type in self.field_mapping.values()
+      len(t.categories) if hasattr(t, 'categories') else -1
+      for _, t in self.field_mapping.values()
     ], dtype=np.int32)
     self.template_estimator = clf
 
@@ -88,7 +91,7 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
         The sklearn decision tree instance imported from the provided segment.
 
     """
-    tree  = clone(self.template_estimator)
+    tree = clone(self.template_estimator)
 
     tree_model = segment.find("TreeModel")
 
@@ -116,31 +119,27 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     return tree
 
 
-def clone(estimator, safe=True):
+def clone(est, safe=True):
   """
   Helper method to clone a DecisionTreeClassifier, including private properties
   that are ignored in sklearn.base.clone.
 
   Parameters
   ----------
-  estimator : estimator object, or list, tuple or set of objects
-      The estimator or group of estimators to be cloned
+  est : BaseEstimator
+      The estimator or group of estimators to be cloned.
 
   safe : boolean, optional
       If safe is false, clone will fall back to a deep copy on objects
       that are not estimators.
 
   """
-  clone = _clone(estimator, safe=safe)
-  clone.classes_ = estimator.classes_
-  clone.n_features_ = estimator.n_features_
-  clone.n_outputs_ = estimator.n_outputs_
-  clone.n_classes_ = estimator.n_classes_
-  clone.n_categories = estimator.n_categories
-  clone.tree_ = Tree(
-    estimator.n_features_,
-    np.asarray([estimator.n_classes_]),
-    estimator.n_outputs_,
-    estimator.n_categories
-  )
-  return clone
+  new_object = _clone(est, safe=safe)
+  new_object.classes_ = est.classes_
+  new_object.n_features_ = est.n_features_
+  new_object.n_outputs_ = est.n_outputs_
+  new_object.n_classes_ = est.n_classes_
+  new_object.n_categories = est.n_categories
+  new_object.tree_ = Tree(est.n_features_, np.asarray([est.n_classes_]),
+                          est.n_outputs_, est.n_categories)
+  return new_object
