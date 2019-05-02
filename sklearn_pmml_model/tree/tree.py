@@ -4,6 +4,8 @@ from sklearn_pmml_model.base import PMMLBaseClassifier
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
 from sklearn.tree import DecisionTreeClassifier
 from operator import add
+from warnings import warn
+
 
 SPLIT_UNDEFINED = struct.pack('d', TREE_UNDEFINED)
 
@@ -147,6 +149,11 @@ def construct_tree(node, classes, field_mapping, i=0):
 
       mask = 0
       for category in categories:
+        if category not in field_type.categories:
+          field_type.categories.append(category)
+          warn('Categorical values are missing in the PMML document, '
+               + 'attempting to infer from decision tree splits.')
+
         mask |= 1 << (field_type.categories.index(category))
 
       value = struct.pack('Q', mask)  # Q = unsigned long long = uint64
