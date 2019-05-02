@@ -2,13 +2,40 @@ import numpy as np
 import warnings
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE
 from sklearn.ensemble import RandomForestClassifier
-from sklearn_pmml_model.tree import PMMLBaseTreeEstimator
+from sklearn_pmml_model.base import PMMLBaseClassifier
+from sklearn_pmml_model.tree import construct_tree
 from sklearn.base import clone as _clone
 
 
-class PMMLForestClassifier(PMMLBaseTreeEstimator, RandomForestClassifier):
-  def __init__(self, pmml, field_labels=None, n_jobs=None):
-    PMMLBaseTreeEstimator.__init__(self, pmml, field_labels=field_labels)
+class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
+  """
+  A random forest classifier.
+
+  A random forest is a meta estimator that fits a number of decision tree
+  classifiers on various sub-samples of the dataset and uses averaging to
+  improve the predictive accuracy and control over-fitting.
+
+  The PMML model consists out of a <Segmentation> element, that contains
+  various <Segment> elements. Each segment contains it's own <TreeModel>.
+  For Random Forests, only segments with a <True/> predicate are supported.
+
+  Parameters
+  ----------
+  pmml : str, object
+      Filename or file object containing PMML data.
+
+  n_jobs : int or None, optional (default=None)
+      The number of jobs to run in parallel for the `predict` method.
+      ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
+      ``-1`` means using all processors.
+
+  See more
+  --------
+  http://dmg.org/pmml/v4-3/MultipleModels.html
+
+  """
+  def __init__(self, pmml, n_jobs=None):
+    PMMLBaseClassifier.__init__(self, pmml)
 
     mining_model = self.find(self.root, 'MiningModel')
     if mining_model is None:
@@ -37,12 +64,30 @@ class PMMLForestClassifier(PMMLBaseTreeEstimator, RandomForestClassifier):
     clf.n_features_ = self.n_features_
     clf.n_outputs_ = self.n_outputs_
     clf.n_classes_ = self.n_classes_
-    clf.n_categories = self.n_categories
+    clf.n_categories = np.asarray([
+      len(type.categories) if hasattr(type, 'categories') else -1
+      for _, type in self.field_mapping.values()
+    ], dtype=np.int32)
     self.template_estimator = clf
 
     self.estimators_ = [self.get_tree(s) for s in valid_segments]
 
   def get_tree(self, segment):
+    """
+    Method to train a single tree for a <Segment> PMML element.
+
+    Parameters
+    ----------
+    segment : eTree.Element
+        <Segment> element containing the decision tree to be imported.
+        Only segments with a <True/> predicate are supported.
+
+    Returns
+    -------
+    tree : sklearn.tree.DecisionTreeClassifier
+        The sklearn decision tree instance imported from the provided segment.
+
+    """
     tree  = clone(self.template_estimator)
 
     tree_model = segment.find("TreeModel")
@@ -54,7 +99,7 @@ class PMMLForestClassifier(PMMLBaseTreeEstimator, RandomForestClassifier):
       raise Exception('Sklearn only supports binary tree models.')
 
     first_node = tree_model.find('Node')
-    nodes, values = self.construct_tree(first_node)
+    nodes, values = construct_tree(first_node, tree.classes_, self.field_mapping)
 
     node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
     value_ndarray = np.ascontiguousarray(values)
@@ -70,11 +115,32 @@ class PMMLForestClassifier(PMMLBaseTreeEstimator, RandomForestClassifier):
 
     return tree
 
-def clone(estimator):
-  clone = _clone(estimator)
+
+def clone(estimator, safe=True):
+  """
+  Helper method to clone a DecisionTreeClassifier, including private properties
+  that are ignored in sklearn.base.clone.
+
+  Parameters
+  ----------
+  estimator : estimator object, or list, tuple or set of objects
+      The estimator or group of estimators to be cloned
+
+  safe : boolean, optional
+      If safe is false, clone will fall back to a deep copy on objects
+      that are not estimators.
+
+  """
+  clone = _clone(estimator, safe=safe)
+  clone.classes_ = estimator.classes_
   clone.n_features_ = estimator.n_features_
   clone.n_outputs_ = estimator.n_outputs_
   clone.n_classes_ = estimator.n_classes_
   clone.n_categories = estimator.n_categories
-  clone.tree_ = Tree(estimator.n_features_, np.asarray([estimator.n_classes_]), estimator.n_outputs_, estimator.n_categories)
+  clone.tree_ = Tree(
+    estimator.n_features_,
+    np.asarray([estimator.n_classes_]),
+    estimator.n_outputs_,
+    estimator.n_categories
+  )
   return clone

@@ -57,7 +57,7 @@ class TestTree(TestCase):
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
       clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/sklearn2pmml.pmml'))
-      clf.fit(np.array([[]]),np.array([]))
+      clf.fit(np.array([[]]), np.array([]))
 
     assert str(cm.exception) == 'Not supported.'
 
@@ -149,26 +149,27 @@ class TestDigitsTreeIntegration(TestCase):
   def setUp(self):
     data = load_digits()
 
+    self.columns = [2,3,4,5,6,7,9,10,13,14,17,18,19,20,21,25,26,27,28,29,30,33,34,35,36,37,38,41,42,43,45,46,50,51,52,53,54,55,57,58,59,60,61,62,63]
     X = pd.DataFrame(data.data)
     y = pd.Series(np.array(data.target_names)[data.target])
     y.name = "Class"
     Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/digits.pmml'), field_labels=np.array(X.columns).astype('U').tolist())
+    self.clf = PMMLTreeClassifier(pmml=path.join(BASE_DIR, '../models/digits.pmml'))
     self.reference = DecisionTreeClassifier(random_state=1).fit(Xtr, ytr)
 
   def test_predict(self):
     Xte, _ = self.test
-    assert np.array_equal(self.reference.predict(Xte), self.clf.predict(Xte).astype(np.int64))
+    assert np.array_equal(self.reference.predict(Xte), self.clf.predict(Xte[self.columns]).astype(np.int64))
 
   def test_predict_proba(self):
     Xte, _ = self.test
-    assert np.array_equal(self.reference.predict_proba(Xte), self.clf.predict_proba(Xte))
+    assert np.array_equal(self.reference.predict_proba(Xte), self.clf.predict_proba(Xte[self.columns]))
 
   def test_score(self):
     Xte, yte = self.test
-    assert self.reference.score(Xte, yte) == self.clf.score(Xte, yte)
+    assert self.reference.score(Xte, yte) == self.clf.score(Xte[self.columns], yte)
 
 
 class TestCategoricalTreeIntegration(TestCase):

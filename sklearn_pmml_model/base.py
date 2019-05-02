@@ -4,17 +4,28 @@ from cached_property import cached_property
 from sklearn_pmml_model.datatypes import *
 from collections import OrderedDict
 import datetime
+import numpy as np
 
 
 class PMMLBaseEstimator(BaseEstimator):
-  def __init__(self, pmml, field_labels=None):
+  """
+  Base class for estimators, saving basic information on DataFields.
+
+  Parameters
+  ----------
+  pmml : str, object
+      Filename or file object containing PMML data.
+
+  """
+  def __init__(self, pmml):
     it = eTree.iterparse(pmml)
     ns_offset = None
     for _, el in it:
       if ns_offset is None: ns_offset = el.tag.find('}') + 1
       el.tag = el.tag[ns_offset:] # strip all namespaces
     self.root = it.root
-    self.field_labels = field_labels
+
+    self.n_features_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
 
   def find(self, element, path):
     if element is None: return None
@@ -31,13 +42,14 @@ class PMMLBaseEstimator(BaseEstimator):
 
     Returns
     -------
-    dict { str: (int, callable) }
-        Where keys indicate column names, and values are tuples with 1) index of column, 2) type of the column.
+    { str: (int, callable) }
+        Dictionary mapping column names to tuples with 1) index of the column
+        and 2) type of the column.
 
     """
     target = self.target_field.get('name')
     fields = { name: field for name, field in self.fields.items() if name != target }
-    field_labels = self.field_labels or list(fields.keys())
+    field_labels = list(fields.keys())
 
     field_mapping = {
       name: (
@@ -176,5 +188,25 @@ class PMMLBaseEstimator(BaseEstimator):
   def fit(self, X, y):
     """
     This method is not supported: PMML models are already fitted.
+
     """
     raise Exception('Not supported.')
+
+
+class PMMLBaseClassifier(PMMLBaseEstimator):
+  """
+  Base class for classifiers, preparing classes, target fields
+
+  Parameters
+  ----------
+  pmml : str, object
+      Filename or file object containing PMML data.
+
+  """
+  def __init__(self, pmml):
+    super().__init__(pmml)
+
+    target_type = self.get_type(self.target_field)
+    self.classes_ = np.array(target_type.categories)
+    self.n_classes_ = len(self.classes_)
+    self.n_outputs_ = 1
