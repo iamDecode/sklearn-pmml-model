@@ -7,6 +7,15 @@ import datetime
 import numpy as np
 
 
+def find(element, path):
+  if element is None: return None
+  return element.find(path)
+
+def findall(element, path):
+  if element is None: return []
+  return element.findall(path)
+
+
 class PMMLBaseEstimator(BaseEstimator):
   """
   Base class for estimators, saving basic information on DataFields.
@@ -26,14 +35,6 @@ class PMMLBaseEstimator(BaseEstimator):
     self.root = it.root
 
     self.n_features_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
-
-  def find(self, element, path):
-    if element is None: return None
-    return element.find(path)
-
-  def findall(self, element, path):
-    if element is None: return []
-    return element.findall(path)
 
   @cached_property
   def field_mapping(self):
@@ -62,8 +63,8 @@ class PMMLBaseEstimator(BaseEstimator):
 
     field_mapping.update({
       name: (
-        field_labels.index(self.find(e, 'FieldRef').get('field')),
-        self.get_type(e, derives=fields[self.find(e, 'FieldRef').get('field')])
+        field_labels.index(e.find('FieldRef').get('field')),
+        self.get_type(e, derives=fields[e.find('FieldRef').get('field')])
       )
       for name, e in fields.items()
       if e.tag == 'DerivedField'
@@ -89,18 +90,18 @@ class PMMLBaseEstimator(BaseEstimator):
         Where keys indicate field names, and values are XML elements.
 
     """
-    data_dictionary = self.find(self.root, 'DataDictionary')
-    transform_dict = self.find(self.root, 'TransformationDictionary')
+    data_dictionary = self.root.find('DataDictionary')
+    transform_dict = self.root.find('TransformationDictionary')
 
     fields = OrderedDict({
       e.get('name'): e
-      for e in self.findall(data_dictionary, 'DataField')
+      for e in findall(data_dictionary, 'DataField')
     })
 
     if transform_dict is not None:
       fields.update({
         e.get('name'): e
-        for e in self.findall(transform_dict, 'DerivedField')
+        for e in findall(transform_dict, 'DerivedField')
       })
 
     return fields
@@ -180,7 +181,7 @@ class PMMLBaseEstimator(BaseEstimator):
     else:
       categories = [
         e.get('value')
-        for e in self.findall(data_field, 'Value') + self.findall(derives, 'Value')
+        for e in findall(data_field, 'Value') + findall(derives, 'Value')
       ]
 
       return Category(type_mapping[data_type], categories=categories, ordered=op_type == 'ordinal')

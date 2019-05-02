@@ -106,8 +106,8 @@ class TestBase(TestCase):
         optype, pmml_type, data_type = type
         clf = PMMLBaseEstimator(pmml=StringIO(template.format(optype, pmml_type)))
 
-        data_dictionary = clf.find(clf.root, "DataDictionary")
-        data_field = clf.find(data_dictionary, "DataField")
+        data_dictionary = clf.root.find("DataDictionary")
+        data_field = data_dictionary.find("DataField")
         result = clf.get_type(data_field)(value)
 
         assert isinstance(result, data_type)
@@ -134,8 +134,8 @@ class TestBase(TestCase):
     for value, expected in tests.items():
       clf = PMMLBaseEstimator(pmml=StringIO(template.format('continuous', 'boolean')))
 
-      data_dictionary = clf.find(clf.root, "DataDictionary")
-      data_field = clf.find(data_dictionary, "DataField")
+      data_dictionary = clf.root.find("DataDictionary")
+      data_field = data_dictionary.find("DataField")
       result = clf.get_type(data_field)(value)
 
       assert isinstance(result, bool)
@@ -151,16 +151,16 @@ class TestBase(TestCase):
 
     # Test invalid data type
     clf = PMMLBaseEstimator(pmml=StringIO(template.format("continuous", "does_not_exist")))
-    data_dictionary = clf.find(clf.root, "DataDictionary")
-    data_field = clf.find(data_dictionary, "DataField")
+    data_dictionary = clf.root.find("DataDictionary")
+    data_field = data_dictionary.find("DataField")
 
     with self.assertRaises(Exception) as cm: clf.get_type(data_field)
     assert str(cm.exception) == "Unsupported data type."
 
     # Test invalid operation type
     clf = PMMLBaseEstimator(pmml=StringIO(template.format("does_not_exist", "string")))
-    data_dictionary = clf.find(clf.root, "DataDictionary")
-    data_field = clf.find(data_dictionary, "DataField")
+    data_dictionary = clf.root.find("DataDictionary")
+    data_field = data_dictionary.find("DataField")
 
     with self.assertRaises(Exception) as cm: clf.get_type(data_field)
     assert str(cm.exception) == "Unsupported operation type."
@@ -178,8 +178,8 @@ class TestBase(TestCase):
       </PMML>"""
 
       clf = PMMLBaseEstimator(pmml=StringIO(template))
-      data_dictionary = clf.find(clf.root, "DataDictionary")
-      data_field = clf.find(data_dictionary, "DataField")
+      data_dictionary = clf.root.find("DataDictionary")
+      data_field = data_dictionary.find("DataField")
       data_type = clf.get_type(data_field)
 
       assert data_type.categories == ['setosa', 'versicolor', 'virginica']
@@ -198,8 +198,8 @@ class TestBase(TestCase):
       </PMML>"""
 
     clf = PMMLBaseEstimator(pmml=StringIO(template))
-    data_dictionary = clf.find(clf.root, "DataDictionary")
-    data_field = clf.find(data_dictionary, "DataField")
+    data_dictionary = clf.root.find("DataDictionary")
+    data_field = data_dictionary.find("DataField")
     data_type = clf.get_type(data_field)
 
     assert data_type.categories == ['loud', 'louder', 'loudest']

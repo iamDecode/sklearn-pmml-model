@@ -37,11 +37,11 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
   def __init__(self, pmml, n_jobs=None):
     PMMLBaseClassifier.__init__(self, pmml)
 
-    mining_model = self.find(self.root, 'MiningModel')
+    mining_model = self.root.find('MiningModel')
     if mining_model is None:
       raise Exception('PMML model does not contain MiningModel.')
 
-    segmentation = self.find(mining_model, 'Segmentation')
+    segmentation = mining_model.find('Segmentation')
     if segmentation is None:
       raise Exception('PMML model does not contain Segmentation.')
 
@@ -49,8 +49,8 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
       raise Exception('PMML model ensemble should use majority vote.')
 
     # Parse segments
-    segments = self.findall(segmentation, 'Segment')
-    valid_segments = [segment for segment in segments if self.find(segment, 'True') is not None]
+    segments = segmentation.findall('Segment')
+    valid_segments = [segment for segment in segments if segment.find('True') is not None]
 
     if len(valid_segments) < len(segments):
       warnings.warn("Warning: {} segment(s) ignored because of unsupported predicate.".format(len(segments) - len(valid_segments)))
