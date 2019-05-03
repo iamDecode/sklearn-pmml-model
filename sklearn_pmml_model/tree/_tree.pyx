@@ -733,6 +733,16 @@ cdef class Tree:
         d["values"] = self._get_value_ndarray()
         return d
 
+    def set_n_categories(self, n_categories):
+        if (n_categories.ndim != 1 or
+                n_categories.dtype != np.int32 or
+                not n_categories.flags.c_contiguous or
+                n_categories.shape[0] != self.n_features):
+            raise ValueError('Did not recognise loaded array layout')
+
+        memcpy(self.n_categories, (<np.ndarray> n_categories).data,
+               n_categories.shape[0] * sizeof(INT32_t))
+
     def __setstate__(self, d):
         """Setstate re-implementation, for unpickling."""
         self.max_depth = d["max_depth"]

@@ -40,14 +40,9 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     if tree_model.get('splitCharacteristic') != 'binarySplit':
       raise Exception('Sklearn only supports binary tree models.')
 
-    n_categories = np.asarray([
-      len(t.categories) if hasattr(t, 'categories') else -1
-      for _, t in self.field_mapping.values()
-    ], dtype=np.int32)
-
     # Parse tree
     self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]),
-                      self.n_outputs_, n_categories)
+                      self.n_outputs_, np.array([], dtype=np.int32))
 
     first_node = tree_model.find('Node')
     nodes, values = construct_tree(first_node, self.classes_, self.field_mapping)
@@ -63,6 +58,19 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
       'values': value_ndarray
     }
     self.tree_.__setstate__(state)
+
+    # Required after constructing trees, because categories may be inferred in
+    # the parsing process
+    target = self.target_field.get('name')
+    fields = [field for name, field in self.fields.items() if name != target]
+    n_categories = np.asarray([
+      len(self.field_mapping[field.get('name')][1].categories)
+      if field.get('optype') == 'categorical' else -1
+      for field in fields
+      if field.tag == 'DataField'
+    ], dtype=np.int32, order='C')
+
+    self.tree_.set_n_categories(n_categories)
 
 
 def construct_tree(node, classes, field_mapping, i=0):
@@ -154,7 +162,7 @@ def construct_tree(node, classes, field_mapping, i=0):
           warn('Categorical values are missing in the PMML document, '
                + 'attempting to infer from decision tree splits.')
 
-        mask |= 1 << (field_type.categories.index(category))
+        mask |= 1 << field_type.categories.index(category)
 
       value = struct.pack('Q', mask)  # Q = unsigned long long = uint64
 

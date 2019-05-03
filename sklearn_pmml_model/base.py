@@ -132,6 +132,27 @@ class PMMLBaseEstimator(BaseEstimator):
     """
     raise Exception('Not supported.')
 
+  def _prepare_data(self, X):
+    X = np.asarray(X)
+
+    for column, (index, field_type) in self.field_mapping.items():
+      if type(field_type) is Category and index is not None and type(X[0,index]) is str:
+        categories = [str(v) for v in field_type.categories]
+        categories += [c for c in np.unique(X[:,index]) if c not in categories]
+        X[:,index] = [categories.index(x) for x in X[:,index]]
+
+    return X
+
+  def predict(self, X, *args, **kwargs):
+    X = self._prepare_data(X)
+    return super().predict(X, *args, **kwargs)
+
+  def predict_proba(self, X, *args, **kwargs):
+    X = self._prepare_data(X)
+    return super().predict_proba(X, *args, **kwargs)
+
+
+
 
 def get_type(data_field, derives=None):
   """

@@ -67,13 +67,23 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     clf.n_features_ = self.n_features_
     clf.n_outputs_ = self.n_outputs_
     clf.n_classes_ = self.n_classes_
-    clf.n_categories = np.asarray([
-      len(t.categories) if hasattr(t, 'categories') else -1
-      for _, t in self.field_mapping.values()
-    ], dtype=np.int32)
     self.template_estimator = clf
 
     self.estimators_ = [self.get_tree(s) for s in valid_segments]
+
+    # Required after constructing trees, because categories may be inferred in
+    # the parsing process
+    target = self.target_field.get('name')
+    fields = [field for name, field in self.fields.items() if name != target]
+    for clf in self.estimators_:
+      n_categories = np.asarray([
+        len(self.field_mapping[field.get('name')][1].categories)
+        if field.get('optype') == 'categorical' else -1
+        for field in fields
+        if field.tag == 'DataField'
+      ], dtype=np.int32, order='C')
+      clf.n_categories = n_categories
+      clf.tree_.set_n_categories(n_categories)
 
   def get_tree(self, segment):
     """
@@ -139,7 +149,6 @@ def clone(est, safe=True):
   new_object.n_features_ = est.n_features_
   new_object.n_outputs_ = est.n_outputs_
   new_object.n_classes_ = est.n_classes_
-  new_object.n_categories = est.n_categories
   new_object.tree_ = Tree(est.n_features_, np.asarray([est.n_classes_]),
-                          est.n_outputs_, est.n_categories)
+                          est.n_outputs_, np.array([], dtype=np.int32))
   return new_object
