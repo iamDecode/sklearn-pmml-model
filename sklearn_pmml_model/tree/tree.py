@@ -156,13 +156,16 @@ def construct_tree(node, classes, field_mapping, i=0):
       ]
 
       mask = 0
+
       for category in categories:
-        if category not in field_type.categories:
-          field_type.categories.append(category)
+        try:
+          index = field_type.categories.index(category)
+          mask |= 1 << index
+        except ValueError:
           warn('Categorical values are missing in the PMML document, '
                + 'attempting to infer from decision tree splits.')
-
-        mask |= 1 << field_type.categories.index(category)
+          field_type.categories.append(category)
+          mask |= 1 << len(field_type.categories) - 1
 
       value = struct.pack('Q', mask)  # Q = unsigned long long = uint64
 
