@@ -16,13 +16,7 @@
   <DataField name="skin" optype="continuous" dataType="double"/>
   <DataField name="bmi" optype="continuous" dataType="double"/>
   <DataField name="ped" optype="continuous" dataType="double"/>
-  <DataField name="age" optype="categorical" dataType="string">
-   <Value value="(20,30]"/>
-   <Value value="(30,40]"/>
-   <Value value="(40,50]"/>
-   <Value value="(50,60]"/>
-   <Value value="(60,70]"/>
-  </DataField>
+  <DataField name="age" optype="categorical" dataType="string"/>
  </DataDictionary>
  <MiningModel modelName="randomForest_Model" algorithmName="randomForest" functionName="classification">
   <MiningSchema>

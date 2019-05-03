@@ -320,7 +320,6 @@ class TestCategoricalPimaForestIntegration(TestCase):
     df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
     cats = np.unique(df['age'])
     df['age'] = pd.Categorical(df['age'], categories=cats)
-    df['age'] = df['age'].cat.codes
     Xte = df.iloc[:, 1:]
     yte = df.iloc[:, 0]
     self.test = (Xte, yte)
