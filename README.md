@@ -20,6 +20,7 @@ $ pip install sklearn-pmml-model
 This library is very alpha, and currently only supports a limited number of models. The library currently supports the following models:
 - [Decision Trees](sklearn_pmml_model/tree) (`sklearn_pmml_model.tree.PMMLTreeClassifier`)
 - [Random Forests](sklearn_pmml_model/ensemble) (`sklearn_pmml_model.ensemble.PMMLForestClassifier`)
+- [Linear Regression](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLLinearRegression`)
 
 A small part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html) is covered:
 - DataDictionary
@@ -32,6 +33,10 @@ A small part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.ht
   - SimplePredicate
   - SimpleSetPredicate
 - Segmentation ('majorityVote' only, for Random Forests)
+- Regression
+  - RegressionTable
+    - NumericPredictor
+    - CategoricalPredictor
   
 ## Example
 A minimal working example is shown below:
