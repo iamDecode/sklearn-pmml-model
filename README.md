@@ -69,7 +69,8 @@ clf.predict(Xte)
 clf.score(Xte, yte)
 ```
 
-More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble).
+More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble) and [linear_model](sklearn_pmml_model/linear_model).
+
 ## Development
 
 ### Prerequisites
