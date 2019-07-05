@@ -383,7 +383,7 @@ class TestCategoricalPimaForestIntegration(TestCase):
       [0.5600000000000001, 0.4400000000000000],
       [0.2800000000000000, 0.7200000000000000]
     ])
-    assert np.array_equal(ref, self.clf.predict_proba(Xte))
+    assert np.allclose(ref, self.clf.predict_proba(Xte))
 
   def test_score(self):
     Xte, yte = self.test

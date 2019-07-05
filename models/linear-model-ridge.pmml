@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<PMML version="4.3" xmlns="http://www.dmg.org/PMML-4_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_3 http://www.dmg.org/pmml/v4-3/pmml-4-3.xsd">
+ <Header copyright="Copyright (c) 2019 dennis" description="Generalized Linear Regression Model">
+  <Extension name="user" value="dennis" extender="SoftwareAG PMML Generator"/>
+  <Application name="SoftwareAG PMML Generator" version="1.4"/>
+  <Timestamp>2019-07-05 14:48:04</Timestamp>
+ </Header>
+ <DataDictionary numberOfFields="11">
+  <DataField name="predictedScore" optype="continuous" dataType="double"/>
+  <DataField name="npreg" optype="continuous" dataType="double"/>
+  <DataField name="glu" optype="continuous" dataType="double"/>
+  <DataField name="bp" optype="continuous" dataType="double"/>
+  <DataField name="skin" optype="continuous" dataType="double"/>
+  <DataField name="bmi" optype="continuous" dataType="double"/>
+  <DataField name="ped" optype="continuous" dataType="double"/>
+  <DataField name="age(30,40]" optype="continuous" dataType="double"/>
+  <DataField name="age(40,50]" optype="continuous" dataType="double"/>
+  <DataField name="age(50,60]" optype="continuous" dataType="double"/>
+  <DataField name="age(60,70]" optype="continuous" dataType="double"/>
+ </DataDictionary>
+ <GeneralRegressionModel modelName="Elasticnet_Model" modelType="generalLinear" algorithmName="glmnet" functionName="regression">
+  <Extension name="lambda" value="0.571744930745718"/>
+  <MiningSchema>
+   <MiningField name="predictedScore" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="npreg" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="glu" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="bp" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="skin" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="bmi" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="ped" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="age(30,40]" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="age(40,50]" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="age(50,60]" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="age(60,70]" usageType="active" invalidValueTreatment="returnInvalid"/>
+  </MiningSchema>
+  <Output>
+   <OutputField name="predictedValue" feature="predictedValue" dataType="double" optype="continuous"/>
+  </Output>
+  <ParameterList>
+   <Parameter name="p0" label="Intercept"/>
+   <Parameter name="p1" label="npreg"/>
+   <Parameter name="p2" label="glu"/>
+   <Parameter name="p3" label="bp"/>
+   <Parameter name="p4" label="skin"/>
+   <Parameter name="p5" label="bmi"/>
+   <Parameter name="p6" label="ped"/>
+   <Parameter name="p7" label="age(30,40]"/>
+   <Parameter name="p8" label="age(40,50]"/>
+   <Parameter name="p9" label="age(50,60]"/>
+   <Parameter name="p10" label="age(60,70]"/>
+  </ParameterList>
+  <CovariateList>
+   <Predictor name="npreg"/>
+   <Predictor name="glu"/>
+   <Predictor name="bp"/>
+   <Predictor name="skin"/>
+   <Predictor name="bmi"/>
+   <Predictor name="ped"/>
+   <Predictor name="age(30,40]"/>
+   <Predictor name="age(40,50]"/>
+   <Predictor name="age(50,60]"/>
+   <Predictor name="age(60,70]"/>
+  </CovariateList>
+  <PPMatrix>
+   <PPCell value="1" predictorName="npreg" parameterName="p1"/>
+   <PPCell value="1" predictorName="glu" parameterName="p2"/>
+   <PPCell value="1" predictorName="skin" parameterName="p4"/>
+   <PPCell value="1" predictorName="bmi" parameterName="p5"/>
+   <PPCell value="1" predictorName="ped" parameterName="p6"/>
+   <PPCell value="1" predictorName="age(30,40]" parameterName="p7"/>
+   <PPCell value="1" predictorName="age(40,50]" parameterName="p8"/>
+   <PPCell value="1" predictorName="age(50,60]" parameterName="p9"/>
+   <PPCell value="1" predictorName="age(60,70]" parameterName="p10"/>
+  </PPMatrix>
+  <ParamMatrix>
+   <PCell parameterName="p0" df="1" beta="-0.319460976201184"/>
+   <PCell parameterName="p1" df="1" beta="0.0129328075069777"/>
+   <PCell parameterName="p2" df="1" beta="0.00295834056265095"/>
+   <PCell parameterName="p3" df="1" beta="0.0"/>
+   <PCell parameterName="p4" df="1" beta="0.00113327704693355"/>
+   <PCell parameterName="p5" df="1" beta="0.00680542868088701"/>
+   <PCell parameterName="p6" df="1" beta="0.0668511302874908"/>
+   <PCell parameterName="p7" df="1" beta="0.0635682055588492"/>
+   <PCell parameterName="p8" df="1" beta="0.0753023562973137"/>
+   <PCell parameterName="p9" df="1" beta="0.15176667940367"/>
+   <PCell parameterName="p10" df="1" beta="-0.230105470284087"/>
+  </ParamMatrix>
+ </GeneralRegressionModel>
+</PMML>

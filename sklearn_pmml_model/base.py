@@ -1,4 +1,4 @@
-from sklearn.base import BaseEstimator
+from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
 from sklearn_pmml_model.datatypes import *
@@ -152,8 +152,6 @@ class PMMLBaseEstimator(BaseEstimator):
     return super().predict_proba(X, *args, **kwargs)
 
 
-
-
 def get_type(data_field, derives=None):
   """
   Parse type defined in <DataField> object and returns it.
@@ -213,7 +211,7 @@ def get_type(data_field, derives=None):
     return Category(type_mapping[data_type], categories=categories, ordered=op_type == 'ordinal')
 
 
-class PMMLBaseClassifier(PMMLBaseEstimator):
+class PMMLBaseClassifier(PMMLBaseEstimator, ClassifierMixin):
   """
   Base class for classifiers, preparing classes, target fields
 
@@ -230,6 +228,20 @@ class PMMLBaseClassifier(PMMLBaseEstimator):
     self.classes_ = np.array(target_type.categories)
     self.n_classes_ = len(self.classes_)
     self.n_outputs_ = 1
+
+
+class PMMLBaseRegressor(PMMLBaseEstimator, RegressorMixin):
+  """
+  Base class for regressors.
+
+  Parameters
+  ----------
+  pmml : str, object
+      Filename or file object containing PMML data.
+
+  """
+  def __init__(self, pmml):
+    super().__init__(pmml)
 
 
 # Helper methods
