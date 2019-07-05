@@ -4,14 +4,57 @@ from sklearn_pmml_model.linear_model import PMMLLinearRegression
 import pandas as pd
 import numpy as np
 from os import path
+from io import StringIO
 
 
 BASE_DIR = path.dirname(sklearn_pmml_model.__file__)
 
 
 class TestLinearRegression(TestCase):
-    def test_invalid(self):
-        pass
+    def test_invalid_model(self):
+        with self.assertRaises(Exception) as cm:
+            PMMLLinearRegression(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                </DataDictionary>
+                <MiningSchema>
+                  <MiningField name="Class" usageType="target"/>
+                </MiningSchema>
+              </PMML>
+              """))
+
+        assert str(cm.exception) == 'PMML model does not contain RegressionModel.'
+
+    def test_nonlinear_model(self):
+        with self.assertRaises(Exception) as cm:
+            PMMLLinearRegression(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                  <DataField name="a" optype="continuous" dataType="double"/>
+                </DataDictionary>
+                <RegressionModel>
+                  <MiningSchema>
+                    <MiningField name="Class" usageType="target"/>
+                  </MiningSchema>
+                  <RegressionTable>
+                    <NumericPredictor name="a" exponent="1" coefficient="1"/>
+                    <NumericPredictor name="a" exponent="1" coefficient="1"/>
+                  </RegressionTable>
+                </RegressionModel>
+              </PMML>
+              """))
+
+        assert str(cm.exception) == 'PMML model is not linear.'
 
 
 class TestLinearRegressionIntegration(TestCase):
