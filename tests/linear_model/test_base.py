@@ -79,8 +79,79 @@ class TestLinearRegressionIntegration(TestCase):
 
 
 class TestGeneralRegression(TestCase):
-    def test_invalid(self):
-        pass # TODO: invalidity tests required for 100% coverage
+    def test_invalid_model(self):
+        with self.assertRaises(Exception) as cm:
+            PMMLRidge(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                </DataDictionary>
+                <MiningSchema>
+                  <MiningField name="Class" usageType="target"/>
+                </MiningSchema>
+              </PMML>
+              """))
+
+        assert str(cm.exception) == 'PMML model does not contain GeneralRegressionModel.'
+
+    def test_nonlinear_model(self):
+        with self.assertRaises(Exception) as cm:
+            PMMLRidge(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                  <DataField name="a" optype="continuous" dataType="double"/>
+                </DataDictionary>
+                <GeneralRegressionModel>
+                  <MiningSchema>
+                    <MiningField name="Class" usageType="target"/>
+                  </MiningSchema>
+                  <PPMatrix>
+                    <PPCell value="1" predictorName="a" parameterName="p1"/>
+                    <PPCell value="1" predictorName="a" parameterName="p1"/>
+                  </PPMatrix>
+                </GeneralRegressionModel>
+              </PMML>
+              """))
+
+        assert str(cm.exception) == 'PMML model is not linear.'
+
+    def test_multioutput_model(self):
+        with self.assertRaises(Exception) as cm:
+            PMMLRidge(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                  <DataField name="a" optype="continuous" dataType="double"/>
+                </DataDictionary>
+                <GeneralRegressionModel>
+                  <MiningSchema>
+                    <MiningField name="Class" usageType="target"/>
+                  </MiningSchema>
+                  <PPMatrix>
+                    <PPCell value="1" predictorName="a" parameterName="p1"/>
+                  </PPMatrix>
+                  <ParamMatrix>
+                    <PCell parameterName="p1" df="1" beta="1"/>
+                    <PCell parameterName="p1" targetCategory="second" df="1" beta="1"/>
+                  </ParamMatrix>
+                </GeneralRegressionModel>
+              </PMML>
+              """))
+
+        assert str(cm.exception) == 'This model does not support multiple outputs.'
 
 class TestGeneralRegressionIntegration(TestCase):
     def setUp(self):
@@ -117,12 +188,12 @@ class TestRidgeIntegration(TestCase):
 
     def test_predict(self):
         Xte, _ = self.test
-        ref = np.array([0.65461611, 0.51045524, 0.80656755, 0.72890736, 0.85654177, 0.68880767, 0.52505019, 0.64790302, 0.48064435, 0.77280713, 0.87094528, 0.63574819, 0.69125413, 0.60797211, 0.58479396, 0.59170134, 0.35634862, 0.78929521, 0.65120424, 0.68458249, 0.74326189, 0.70389976, 0.51829532, 0.60081591, 0.52560795, 0.50740001, 0.64598948, 0.30023775, 0.25051830, 0.41489928, 0.49786944, 0.13820963, 0.41862045, 0.33885938, 0.30708614, 0.46567856, 0.42420278, 0.43491241, 0.53283311, 0.50451583, 0.26805405, 0.36681474, 0.34921490, 0.45266706, 0.51454434, 0.56370536, 0.37818708, 0.38000895, 0.58950988, 0.26678905, 0.45968793, 0.49001880])
+        ref = np.array([0.56707253, 0.44086932, 0.70106631, 0.63462966, 0.75552995, 0.60126409, 0.4352619 , 0.55362532, 0.40207959, 0.68526355, 0.77666758, 0.53249166, 0.61717879, 0.51593912, 0.49949509, 0.49068951, 0.26094857, 0.71970929, 0.57488419, 0.61499657, 0.6551319 , 0.59615382, 0.42850703, 0.52000645, 0.44016652, 0.42641415, 0.56069061, 0.21493887, 0.17195355, 0.33184511, 0.4237941 , 0.08433666, 0.34454511, 0.26253933, 0.23076609, 0.39833734, 0.35012744, 0.36532649, 0.42733187, 0.42595108, 0.18051046, 0.28151586, 0.25718191, 0.38083643, 0.43149017, 0.46942765, 0.29962233, 0.31491245, 0.49074276, 0.19720312, 0.36989965, 0.41818817])
         assert np.allclose(ref, self.clf.predict(Xte))
 
     def test_score(self):
         Xte, yte = self.test
-        ref = 0.3477256646867015
+        ref = 0.3286660932879891
         assert ref == self.clf.score(Xte, yte == 'Yes')
 
 
