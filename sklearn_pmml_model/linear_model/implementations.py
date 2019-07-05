@@ -1,5 +1,5 @@
-from sklearn.linear_model import LinearRegression
-from sklearn_pmml_model.linear_model.base import PMMLLinearModel
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
+from sklearn_pmml_model.linear_model.base import PMMLLinearModel, PMMLGeneralRegression
 from itertools import chain
 import numpy as np
 
@@ -77,3 +77,21 @@ class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
             for name, field in self.fields.items()
             if table.find(f"*[@name='{name}']") is not None
         ]))
+
+
+'''
+NOTE: Many of these variants only differ in the training part, not the 
+classification part. Hence they are equavalent in terms of parsing.
+'''
+
+
+class PMMLRidge(PMMLGeneralRegression, Ridge):
+    pass
+
+
+class PMMLLasso(PMMLGeneralRegression, Lasso):
+    pass
+
+
+class PMMLElasticNet(PMMLGeneralRegression, ElasticNet):
+    pass
