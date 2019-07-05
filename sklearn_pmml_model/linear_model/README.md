@@ -1,6 +1,6 @@
 # sklearn-pmml-model.linear_model
 
-This package contains the `PMMLLinearRegression`.
+This package contains the `PMMLLinearRegression` (`lm` in R) as well as `PMMLRidge`, `PMMLLasso` and `PMMLElasticNet` (`glm` and `glmnet` in R).
 
 ## Example
 A minimal working example is shown below:
