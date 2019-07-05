@@ -24,9 +24,9 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
   pmml : str, object
       Filename or file object containing PMML data.
 
-  See more
-  --------
-  http://dmg.org/pmml/v4-3/TreeModel.html
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/TreeModel.html
 
   """
   def __init__(self, pmml):

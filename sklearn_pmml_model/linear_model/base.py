@@ -60,9 +60,9 @@ class PMMLGeneralRegression(PMMLLinearModel):
     pmml : str, object
       Filename or file object containing PMML data.
 
-    See more
-    --------
-    http://dmg.org/pmml/v4-3/GeneralRegression.html
+    Notes
+    -----
+    Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
 
     """
     def __init__(self, pmml):
@@ -90,6 +90,8 @@ class PMMLGeneralRegression(PMMLLinearModel):
 
         Returns
         -------
+        coefficients: numpy.ndarray
+            Coefficient value for every field. Zero if not present.
 
         """
         pp = model.find('PPMatrix')

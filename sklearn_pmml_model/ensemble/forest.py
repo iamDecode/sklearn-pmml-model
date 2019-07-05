@@ -29,9 +29,9 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
       ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
       ``-1`` means using all processors.
 
-  See more
-  --------
-  http://dmg.org/pmml/v4-3/MultipleModels.html
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/MultipleModels.html
 
   """
   def __init__(self, pmml, n_jobs=None):

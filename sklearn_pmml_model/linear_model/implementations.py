@@ -18,9 +18,9 @@ class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
     pmml : str, object
       Filename or file object containing PMML data.
 
-    See more
-    --------
-    http://dmg.org/pmml/v4-3/Regression.html
+    Notes
+    -----
+    Specification: http://dmg.org/pmml/v4-3/Regression.html
 
     """
     def __init__(self, pmml):
