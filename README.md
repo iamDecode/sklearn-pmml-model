@@ -80,17 +80,25 @@ Tests can be run using Py.test. Grab a local copy of the source:
 
 ```
 $ git clone http://github.com/iamDecode/sklearn-pmml-model
+$ cd sklearn-pmml-model
 ```
 
-create a virtual environment:
+create a virtual environment and activating it:
 ```
 $ python3 -m venv venv
+$ source venv/bin/activate
 ```
 
-And install the dependencies:
+and install the dependencies:
 
 ```
 $ pip install -r requirements.txt
+```
+
+The final step is to build the Cython extensions:
+
+```
+$ python setup.py build_ext --inplace
 ```
 
 ### Testing
