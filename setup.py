@@ -7,17 +7,6 @@ build_type="optimized" # "debug"
 with open("README.md", "r") as fh:
   long_description = fh.read()
 
-# Directories (relative to the top-level directory where setup.py resides) in which to look for data files.
-datadirs = ("tests", "sklearn_pmml_model", "sklearn_pmml_model/tree")
-
-# File extensions to be considered as data files. (Literal, no wildcards.)
-dataexts = (".py",  ".pyx", ".pxd",  ".c",)
-
-# Standard documentation to detect (and package if it exists).
-standard_docs     = ["README", "LICENSE", "TODO", "CHANGELOG", "AUTHORS"]  # just the basename without file extension
-standard_doc_exts = [".md", ".rst", ".txt", ""]  # commonly .md for GitHub projects, but other projects may use .rst or .txt (or even blank).
-
-
 #########################################################
 # Init
 #########################################################
@@ -146,25 +135,6 @@ def declare_cython_extension(extName, use_math=False, use_openmp=False, include_
   )
 
 
-# Gather user-defined data files
-# http://stackoverflow.com/questions/13628979/setuptools-how-to-make-package-contain-extra-data-folder-and-all-folders-inside
-datafiles = []
-getext = lambda filename: os.path.splitext(filename)[1]
-for datadir in datadirs:
-  datafiles.extend( [(root, [os.path.join(root, f) for f in files if getext(f) in dataexts])
-                     for root, dirs, files in os.walk(datadir)] )
-
-
-# Add standard documentation (README et al.), if any, to data files
-detected_docs = []
-for docname in standard_docs:
-  for ext in standard_doc_exts:
-    filename = "".join( (docname, ext) )  # relative to the directory in which setup.py resides
-    if os.path.isfile(filename):
-      detected_docs.append(filename)
-datafiles.append( ('.', detected_docs) )
-
-
 #########################################################
 # Set up modules
 #########################################################
@@ -222,7 +192,6 @@ setup(
   tests_require = [
     'pytest',
   ],
-  provides = ["sklearn_pmml_model"],
   ext_modules = my_ext_modules,
   packages=find_packages(),
 
@@ -230,14 +199,10 @@ setup(
   #
   # Fileglobs relative to each package, **does not** automatically recurse into subpackages.
   # FIXME: force sdist, but sdist only, to keep the .pyx files (this puts them also in the bdist)
-  package_data={'sklearn_pmml_model': ['*.pxd', '*.pyx'],
-                'sklearn_pmml_model.tree': ['*.pxd', '*.pyx']},
+  package_data={'sklearn_pmml_model.tree': ['*.pxd', '*.pyx']},
 
   # Disable zip_safe, because:
   #   - Cython won't find .pxd files inside installed .egg, hard to compile libs depending on this one
   #   - dynamic loader may need to have the library unzipped to a temporary directory anyway (at import time)
-  zip_safe = False,
-
-  # Custom data files not inside a Python package
-  data_files = datafiles
+  zip_safe = False
 )
