@@ -163,7 +163,7 @@ my_ext_modules = cythonize(cython_ext_modules, include_path=my_include_dirs, gdb
 
 setup(
   name="sklearn-pmml-model",
-  version="0.0.8",
+  version="0.0.9",
   author="Dennis Collaris",
   author_email="d.collaris@me.com",
   description = "A library to parse PMML models into Scikit-learn estimators.",
