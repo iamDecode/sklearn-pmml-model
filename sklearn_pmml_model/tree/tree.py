@@ -72,6 +72,9 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
 
     self.tree_.set_n_categories(n_categories)
 
+  def fit(self, x, y):
+    return PMMLBaseClassifier.fit(self, x, y)
+
 
 def construct_tree(node, classes, field_mapping, i=0):
   """

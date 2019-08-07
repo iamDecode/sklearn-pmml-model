@@ -78,6 +78,8 @@ class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
       if table.find(f"*[@name='{name}']") is not None
     ]))
 
+  def fit(self, x, y):
+    return PMMLLinearModel.fit(self, x, y)
 
 '''
 NOTE: Many of these variants only differ in the training part, not the 
@@ -86,12 +88,23 @@ classification part. Hence they are equavalent in terms of parsing.
 
 
 class PMMLRidge(PMMLGeneralRegression, Ridge):
-  pass
+  def fit(self, x, y):
+    return PMMLGeneralRegression.fit(self, x, y)
 
 
 class PMMLLasso(PMMLGeneralRegression, Lasso):
-  pass
+  def __init__(self, pmml):
+    super().__init__(pmml)
+    self.n_iter_ = 0
+
+  def fit(self, x, y):
+    return PMMLGeneralRegression.fit(self, x, y)
 
 
 class PMMLElasticNet(PMMLGeneralRegression, ElasticNet):
-  pass
+  def __init__(self, pmml):
+    super().__init__(pmml)
+    self.n_iter_ = 0
+
+  def fit(self, x, y):
+    return PMMLGeneralRegression.fit(self, x, y)

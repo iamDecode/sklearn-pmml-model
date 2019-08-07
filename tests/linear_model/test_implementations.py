@@ -1,6 +1,6 @@
 from unittest import TestCase
 import sklearn_pmml_model
-from sklearn_pmml_model.linear_model import PMMLLinearRegression, PMMLRidge
+from sklearn_pmml_model.linear_model import PMMLLinearRegression, PMMLRidge, PMMLLasso, PMMLElasticNet
 import pandas as pd
 import numpy as np
 from os import path
@@ -76,6 +76,12 @@ class TestLinearRegressionIntegration(TestCase):
     Xte, yte = self.test
     ref = 0.409378064635437
     assert ref == self.clf.score(Xte, yte == 'Yes')
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      self.clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
 
 
 class TestGeneralRegression(TestCase):
@@ -196,6 +202,12 @@ class TestRidgeIntegration(TestCase):
     ref = 0.3286660932879891
     assert ref == self.clf.score(Xte, yte == 'Yes')
 
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      self.clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
+
 
 class TestLassoIntegration(TestCase):
   def setUp(self):
@@ -207,7 +219,7 @@ class TestLassoIntegration(TestCase):
     self.test = (Xte, yte)
 
     pmml = path.join(BASE_DIR, '../models/linear-model-lasso.pmml')
-    self.clf = PMMLRidge(pmml)
+    self.clf = PMMLLasso(pmml)
 
   def test_predict(self):
     Xte, _ = self.test
@@ -219,3 +231,37 @@ class TestLassoIntegration(TestCase):
     ref = 0.2878302689160125
     assert ref == self.clf.score(Xte, yte == 'Yes')
 
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      self.clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
+
+
+class TestElasticNetIntegration(TestCase):
+  def setUp(self):
+    df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
+    Xte = df.iloc[:, 1:]
+    Xte = pd.get_dummies(Xte, prefix_sep='')
+    del Xte['age(20,30]']
+    yte = df.iloc[:, 0]
+    self.test = (Xte, yte)
+
+    pmml = path.join(BASE_DIR, '../models/linear-model-lasso.pmml')
+    self.clf = PMMLElasticNet(pmml)
+
+  def test_predict(self):
+    Xte, _ = self.test
+    ref = np.array([0.54760797, 0.38252085, 0.64405119, 0.69267769, 0.75267467, 0.64973490, 0.55853793, 0.68095342, 0.43982239, 0.63910989, 0.66383460, 0.52450774, 0.83004930, 0.73954792, 0.62750939, 0.62808670, 0.35907729, 0.79067870, 0.56363984, 0.66214774, 0.76835019, 0.53462166, 0.50177534, 0.56021176, 0.58576734, 0.54497646, 0.71855174, 0.33393039, 0.30558116, 0.41401622, 0.58820140, 0.17572293, 0.47128396, 0.32379699, 0.31160441, 0.48678035, 0.45300624, 0.36171583, 0.55043818, 0.49585081, 0.50409265, 0.40823653, 0.21645944, 0.45602514, 0.34953902, 0.49245104, 0.37850364, 0.40465109, 0.42816803, 0.29311945, 0.48653454, 0.54348106])
+    assert np.allclose(ref, self.clf.predict(Xte))
+
+  def test_score(self):
+    Xte, yte = self.test
+    ref = 0.2878302689160125
+    assert ref == self.clf.score(Xte, yte == 'Yes')
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      self.clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'

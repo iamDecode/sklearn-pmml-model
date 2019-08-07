@@ -128,6 +128,9 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
 
     return tree
 
+  def fit(self, x, y):
+    return PMMLBaseClassifier.fit(self, x, y)
+
 
 def clone(est, safe=True):
   """
