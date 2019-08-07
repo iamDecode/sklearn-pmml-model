@@ -1,7 +1,7 @@
 from sklearn.base import BaseEstimator, ClassifierMixin, RegressorMixin
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
-from sklearn_pmml_model.datatypes import *
+from sklearn_pmml_model.datatypes import Category
 from collections import OrderedDict
 import datetime
 import numpy as np
