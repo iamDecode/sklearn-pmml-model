@@ -650,7 +650,7 @@ cdef class Tree:
 
     property threshold:
         def __get__(self):
-            return self._get_node_ndarray()['threshold'][:self.node_count]
+            return self._get_node_ndarray()['split_value'][:self.node_count]
 
     property impurity:
         def __get__(self):
