@@ -120,6 +120,10 @@ class TestTree(TestCase):
       assert str(cm.exception) == 'Unsupported tree format: unknown predicate' \
                                   ' structure in Node 2'
 
+  def test_tree_threshold_value(self):
+    clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/categorical.pmml'))
+    assert clf.tree_.threshold == [[0, 4], 25.18735, -2, 125.5, -2, -2, 20.02033, -2, -2]
+
 
 class TestIrisTreeIntegration(TestCase):
   def setUp(self):

@@ -650,7 +650,28 @@ cdef class Tree:
 
     property threshold:
         def __get__(self):
-            return self._get_node_ndarray()['threshold'][:self.node_count]
+            n_categories = int32_ptr_to_ndarray(self.n_categories, self.n_features)
+
+            def split_value_representation(node):
+                if node.get('feature') == TREE_UNDEFINED:
+                    return TREE_UNDEFINED
+
+                # Return double threshold for numerical variables
+                if n_categories[node.get('feature')] == -1:
+                    return np.double(node.get('split_value').get('threshold'))
+
+                # Return array with category indexes for categorical variables
+                cat_split = node.get('split_value').get('cat_split')
+                return [
+                    i for i in range(31)
+                    if (np.int32(cat_split) & 1<<i) == 1<<i
+                ]
+
+            return [
+                split_value_representation(self.nodes[i])
+                for i in range(self.node_count)
+
+            ]
 
     property impurity:
         def __get__(self):
