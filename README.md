@@ -25,8 +25,9 @@ This library is very alpha, and currently only supports a limited number of mode
 - [Ridge](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLRidge`)
 - [Lasso](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLLasso`)
 - [ElasticNet](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLElasticNet`)
+- [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) (`sklearn_pmml_model.naive_bayes.PMMLGaussianNB`)
 
-A small part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html) is covered:
+The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html) is covered:
 - DataDictionary
   - DataField (continuous, categorical, ordinal)
     - Value
@@ -46,6 +47,15 @@ A small part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.ht
     - PPCell
   - ParamMatrix
     - PCell
+- NaiveBayesModel
+  - BayesInputs
+    - BayesInput
+      - TargetValueStats
+        - TargetValueStat
+          - GaussianDistribution
+      - PairCounts
+        - TargetValueCounts
+          - TargetValueCount
   
 ## Example
 A minimal working example is shown below:
@@ -70,7 +80,7 @@ clf.predict(Xte)
 clf.score(Xte, yte)
 ```
 
-More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble) and [linear_model](sklearn_pmml_model/linear_model).
+More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble), [linear_model](sklearn_pmml_model/linear_model) and [naive_bayes](sklearn_pmml_model/naive_bayes).
 
 ## Development
 
