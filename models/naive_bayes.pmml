@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<PMML version="4.3" xmlns="http://www.dmg.org/PMML-4_3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_3 http://www.dmg.org/pmml/v4-3/pmml-4-3.xsd">
+    <Header copyright="Copyright (c) 2020 dennis" description="NaiveBayes Model">
+        <Extension name="user" value="dennis" extender="SoftwareAG PMML Generator"/>
+        <Application name="SoftwareAG PMML Generator" version="1.4"/>
+        <Timestamp>2020-01-28 17:45:24</Timestamp>
+    </Header>
+    <DataDictionary numberOfFields="8">
+        <DataField name="type" optype="categorical" dataType="string">
+            <Value value="No"/>
+            <Value value="Yes"/>
+        </DataField>
+        <DataField name="npreg" optype="continuous" dataType="double"/>
+        <DataField name="glu" optype="continuous" dataType="double"/>
+        <DataField name="bp" optype="continuous" dataType="double"/>
+        <DataField name="skin" optype="continuous" dataType="double"/>
+        <DataField name="bmi" optype="continuous" dataType="double"/>
+        <DataField name="ped" optype="continuous" dataType="double"/>
+        <DataField name="age" optype="categorical" dataType="string">
+            <Value value="(20,30]"/>
+            <Value value="(30,40]"/>
+            <Value value="(40,50]"/>
+            <Value value="(50,60]"/>
+            <Value value="(60,70]"/>
+        </DataField>
+    </DataDictionary>
+    <NaiveBayesModel modelName="naiveBayes_Model" functionName="classification" threshold="0.001">
+        <MiningSchema>
+            <MiningField name="type" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="npreg" usageType="active" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="glu" usageType="active" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="bp" usageType="active" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="skin" usageType="active" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="bmi" usageType="active" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="ped" usageType="active" invalidValueTreatment="returnInvalid"/>
+            <MiningField name="age" usageType="active" invalidValueTreatment="returnInvalid"/>
+        </MiningSchema>
+        <Output>
+            <OutputField name="Predicted_type" optype="categorical" dataType="string" feature="predictedValue"/>
+            <OutputField name="Probability_No" optype="continuous" dataType="double" feature="probability" value="No"/>
+            <OutputField name="Probability_Yes" optype="continuous" dataType="double" feature="probability" value="Yes"/>
+        </Output>
+        <BayesInputs>
+            <BayesInput fieldName="npreg">
+                <TargetValueStats>
+                    <TargetValueStat value="No">
+                        <GaussianDistribution mean="2.80188679245283" variance="7.26513926325247"/>
+                    </TargetValueStat>
+                    <TargetValueStat value="Yes">
+                        <GaussianDistribution mean="4.79245283018868" variance="13.7279424977538"/>
+                    </TargetValueStat>
+                </TargetValueStats>
+            </BayesInput>
+            <BayesInput fieldName="glu">
+                <TargetValueStats>
+                    <TargetValueStat value="No">
+                        <GaussianDistribution mean="111.990566037736" variance="723.533243486074"/>
+                    </TargetValueStat>
+                    <TargetValueStat value="Yes">
+                        <GaussianDistribution mean="143.367924528302" variance="824.291913746631"/>
+                    </TargetValueStat>
+                </TargetValueStats>
+            </BayesInput>
+            <BayesInput fieldName="bp">
+                <TargetValueStats>
+                    <TargetValueStat value="No">
+                        <GaussianDistribution mean="69.7452830188679" variance="121.829739442947"/>
+                    </TargetValueStat>
+                    <TargetValueStat value="Yes">
+                        <GaussianDistribution mean="75.2551020408163" variance="139.22291184515"/>
+                    </TargetValueStat>
+                </TargetValueStats>
+            </BayesInput>
+            <BayesInput fieldName="skin">
+                <TargetValueStats>
+                    <TargetValueStat value="No">
+                        <GaussianDistribution mean="26.6792452830189" variance="121.61042228212"/>
+                    </TargetValueStat>
+                    <TargetValueStat value="Yes">
+                        <GaussianDistribution mean="33.1176470588235" variance="151.329236172081"/>
+                    </TargetValueStat>
+                </TargetValueStats>
+            </BayesInput>
+            <BayesInput fieldName="bmi">
+                <TargetValueStats>
+                    <TargetValueStat value="No">
+                        <GaussianDistribution mean="30.8235849056604" variance="44.6014384546271"/>
+                    </TargetValueStat>
+                    <TargetValueStat value="Yes">
+                        <GaussianDistribution mean="34.58" variance="31.2998846153846"/>
+                    </TargetValueStat>
+                </TargetValueStats>
+            </BayesInput>
+            <BayesInput fieldName="ped">
+                <TargetValueStats>
+                    <TargetValueStat value="No">
+                        <GaussianDistribution mean="0.419103773584906" variance="0.0765463034141959"/>
+                    </TargetValueStat>
+                    <TargetValueStat value="Yes">
+                        <GaussianDistribution mean="0.505424528301887" variance="0.11190700853549"/>
+                    </TargetValueStat>
+                </TargetValueStats>
+            </BayesInput>
+            <BayesInput fieldName="age">
+                <PairCounts value="(20,30]">
+                    <TargetValueCounts>
+                        <TargetValueCount value="No" count="77"/>
+                        <TargetValueCount value="Yes" count="35"/>
+                    </TargetValueCounts>
+                </PairCounts>
+                <PairCounts value="(30,40]">
+                    <TargetValueCounts>
+                        <TargetValueCount value="No" count="15"/>
+                        <TargetValueCount value="Yes" count="32"/>
+                    </TargetValueCounts>
+                </PairCounts>
+                <PairCounts value="(40,50]">
+                    <TargetValueCounts>
+                        <TargetValueCount value="No" count="8"/>
+                        <TargetValueCount value="Yes" count="23"/>
+                    </TargetValueCounts>
+                </PairCounts>
+                <PairCounts value="(50,60]">
+                    <TargetValueCounts>
+                        <TargetValueCount value="No" count="4"/>
+                        <TargetValueCount value="Yes" count="14"/>
+                    </TargetValueCounts>
+                </PairCounts>
+                <PairCounts value="(60,70]">
+                    <TargetValueCounts>
+                        <TargetValueCount value="No" count="2"/>
+                        <TargetValueCount value="Yes" count="2"/>
+                    </TargetValueCounts>
+                </PairCounts>
+            </BayesInput>
+        </BayesInputs>
+        <BayesOutput fieldName="type">
+            <TargetValueCounts>
+                <TargetValueCount value="No" count="106"/>
+                <TargetValueCount value="Yes" count="106"/>
+            </TargetValueCounts>
+        </BayesOutput>
+    </NaiveBayesModel>
+</PMML>

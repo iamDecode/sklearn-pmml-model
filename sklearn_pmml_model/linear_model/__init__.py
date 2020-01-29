@@ -1,5 +1,5 @@
 """
-The :mod:`sklearn.linear_model` module implements generalized linear models.
+The :mod:`sklearn_pmml_model.linear_model` module implements generalized linear models.
 """
 
 from .implementations import PMMLLinearRegression, PMMLRidge, PMMLLasso, PMMLElasticNet
