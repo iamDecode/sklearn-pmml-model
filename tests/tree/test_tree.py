@@ -56,7 +56,7 @@ class TestTree(TestCase):
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
-      pmml = path.join(BASE_DIR, '../models/sklearn2pmml.pmml')
+      pmml = path.join(BASE_DIR, '../models/decisionTree.pmml')
       clf = PMMLTreeClassifier(pmml=pmml)
       clf.fit(np.array([[]]), np.array([]))
 
@@ -137,7 +137,7 @@ class TestIrisTreeIntegration(TestCase):
     X, Xte, y, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
 
-    pmml = path.join(BASE_DIR, '../models/sklearn2pmml.pmml')
+    pmml = path.join(BASE_DIR, '../models/decisionTree.pmml')
     self.clf = PMMLTreeClassifier(pmml=pmml)
     self.ref = DecisionTreeClassifier(random_state=1).fit(X, y)
 

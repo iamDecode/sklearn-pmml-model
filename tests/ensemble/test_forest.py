@@ -150,7 +150,7 @@ class TestIrisForestIntegration(TestCase):
     y.name = "Class"
     self.test = X, y
 
-    self.clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/iris.pmml'))
+    self.clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/randomForest.pmml'))
 
   def test_predict_proba(self):
     Xte, _ = self.test
