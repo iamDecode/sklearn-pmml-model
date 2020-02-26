@@ -33,8 +33,15 @@ class PMMLLinearModel(PMMLBaseRegressor):
         if field.tag == 'DataField'
       ]
     )
+
+    X = np.array([[0 for field in fields if field.tag == "DataField"]])
+    transformer._validate_transformers()
+    transformer._validate_column_callables(X)
+    transformer._validate_remainder(X)
     transformer.transformers_ = transformer.transformers
     transformer.sparse_output_ = False
+    transformer._feature_names_in = None
+
     self.transformer = transformer
 
   def _prepare_data(self, X):
