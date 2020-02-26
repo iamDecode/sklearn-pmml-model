@@ -10,7 +10,7 @@ class PMMLGaussianNB(PMMLBaseClassifier, GaussianNB):
 
   """
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLBaseClassifier.__init__(self, pmml)
 
     model = self.root.find('NaiveBayesModel')
 

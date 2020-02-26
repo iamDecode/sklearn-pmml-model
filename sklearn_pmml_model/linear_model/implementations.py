@@ -24,7 +24,7 @@ class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
 
   """
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLLinearModel.__init__(self, pmml)
 
     # Import coefficients and intercepts
     model = self.root.find('RegressionModel')
@@ -94,7 +94,7 @@ class PMMLRidge(PMMLGeneralRegression, Ridge):
 
 class PMMLLasso(PMMLGeneralRegression, Lasso):
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLGeneralRegression.__init__(self, pmml)
     self.n_iter_ = 0
 
   def fit(self, x, y):
@@ -103,7 +103,7 @@ class PMMLLasso(PMMLGeneralRegression, Lasso):
 
 class PMMLElasticNet(PMMLGeneralRegression, ElasticNet):
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLGeneralRegression.__init__(self, pmml)
     self.n_iter_ = 0
 
   def fit(self, x, y):

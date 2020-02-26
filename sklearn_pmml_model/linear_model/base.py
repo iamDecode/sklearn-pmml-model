@@ -11,7 +11,7 @@ class PMMLLinearModel(PMMLBaseRegressor):
 
   """
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLBaseRegressor.__init__(self, pmml)
 
     # Setup a column transformer to deal with categorical variables
     target = self.target_field.get('name')
@@ -66,7 +66,7 @@ class PMMLGeneralRegression(PMMLLinearModel):
 
   """
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLLinearModel.__init__(self, pmml)
 
     # Import coefficients and intercepts
     model = self.root.find('GeneralRegressionModel')

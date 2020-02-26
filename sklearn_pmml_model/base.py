@@ -222,7 +222,7 @@ class PMMLBaseClassifier(PMMLBaseEstimator, ClassifierMixin):
 
   """
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLBaseEstimator.__init__(self, pmml)
 
     target_type: Category = get_type(self.target_field)
     self.classes_ = np.array(target_type.categories)
@@ -241,7 +241,7 @@ class PMMLBaseRegressor(PMMLBaseEstimator, RegressorMixin):
 
   """
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLBaseEstimator.__init__(self, pmml)
 
 
 # Helper methods

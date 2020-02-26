@@ -30,7 +30,7 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
 
   """
   def __init__(self, pmml):
-    super().__init__(pmml)
+    PMMLBaseClassifier.__init__(self, pmml)
 
     tree_model = self.root.find('TreeModel')
 
