@@ -211,7 +211,7 @@ def get_type(data_field, derives=None):
     return Category(type_mapping[data_type], categories=categories, ordered=op_type == 'ordinal')
 
 
-class PMMLBaseClassifier(PMMLBaseEstimator, ClassifierMixin):
+class PMMLBaseClassifier(PMMLBaseEstimator):
   """
   Base class for classifiers, preparing classes, target fields
 
@@ -230,7 +230,7 @@ class PMMLBaseClassifier(PMMLBaseEstimator, ClassifierMixin):
     self.n_outputs_ = 1
 
 
-class PMMLBaseRegressor(PMMLBaseEstimator, RegressorMixin):
+class PMMLBaseRegressor(PMMLBaseEstimator):
   """
   Base class for regressors.
 
