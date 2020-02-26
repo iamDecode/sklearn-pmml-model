@@ -145,8 +145,7 @@ class TestIrisForestIntegration(TestCase):
     X = pd.DataFrame(iris.data)
     X.columns = np.array(['sepal_length', 'sepal_width', 'petal_length',
                           'petal_width'])
-    y = pd.Series(np.array(np.array(['Iris-setosa', 'Iris-versicolor',
-                                     'Iris-virginica']))[iris.target])
+    y = pd.Series(np.array(np.array(['setosa', 'versicolor', 'virginica']))[iris.target])
     y.name = "Class"
     self.test = X, y
 
