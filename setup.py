@@ -181,9 +181,9 @@ setup(
     "Topic :: Scientific/Engineering"
   ],
 
-  setup_requires = ["cython", "numpy", "pytest-runner"],
+  setup_requires = ["cython", "numpy>=1.16.0", "pytest-runner"],
   install_requires = [
-    'numpy',
+    'numpy>=1.16.0',
     'pandas',
     'scipy',
     'scikit-learn',
