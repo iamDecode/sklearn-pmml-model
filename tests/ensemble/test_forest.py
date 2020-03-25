@@ -102,33 +102,6 @@ class TestForest(TestCase):
       """))
     assert len(w) == 1
 
-  def test_non_binary_tree(self):
-    with self.assertRaises(Exception) as cm:
-      PMMLForestClassifier(pmml=StringIO("""
-      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
-        <DataDictionary>
-          <DataField name="Class" optype="categorical" dataType="string">
-            <Value value="setosa"/>
-            <Value value="versicolor"/>
-            <Value value="virginica"/>
-          </DataField>
-        </DataDictionary>
-        <MiningModel>
-          <MiningSchema>
-            <MiningField name="Class" usageType="target"/>
-          </MiningSchema>
-          <Segmentation multipleModelMethod="majorityVote">
-            <Segment>
-              <True/>
-              <TreeModel splitCharacteristic="multiSplit" />
-            </Segment>
-          </Segmentation>
-        </MiningModel>
-      </PMML>
-      """))
-
-    assert str(cm.exception) == 'Sklearn only supports binary tree models.'
-
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
       pmml = path.join(BASE_DIR, '../models/categorical-rf.pmml')

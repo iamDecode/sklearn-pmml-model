@@ -3,7 +3,7 @@ import warnings
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn_pmml_model.base import PMMLBaseClassifier
-from sklearn_pmml_model.tree import construct_tree
+from sklearn_pmml_model.tree import construct_tree, unflatten
 from sklearn.base import clone as _clone
 
 
@@ -108,10 +108,12 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     if tree_model is None:
       raise Exception('PMML segment does not contain TreeModel.')
 
-    if tree_model.get('splitCharacteristic') != 'binarySplit':
-      raise Exception('Sklearn only supports binary tree models.')
+    split = tree_model.get('splitCharacteristic')
+    if split == 'binarySplit':
+      first_node = tree_model.find('Node')
+    else:
+      first_node = unflatten(tree_model.find('Node'))
 
-    first_node = tree_model.find('Node')
     nodes, values = construct_tree(first_node, tree.classes_, self.field_mapping)
 
     node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)

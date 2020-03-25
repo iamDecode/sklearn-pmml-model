@@ -5,6 +5,7 @@ from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDE
 from sklearn.tree import DecisionTreeClassifier
 from operator import add
 from warnings import warn
+from xml.etree import cElementTree as eTree
 
 
 SPLIT_UNDEFINED = struct.pack('d', TREE_UNDEFINED)
@@ -37,14 +38,16 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     if tree_model is None:
       raise Exception('PMML model does not contain TreeModel.')
 
-    if tree_model.get('splitCharacteristic') != 'binarySplit':
-      raise Exception('Sklearn only supports binary tree models.')
-
     # Parse tree
     self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]),
                       self.n_outputs_, np.array([], dtype=np.int32))
 
-    first_node = tree_model.find('Node')
+    split = tree_model.get('splitCharacteristic')
+    if split == 'binarySplit':
+      first_node = tree_model.find('Node')
+    else:
+      first_node = unflatten(tree_model.find('Node'))
+
     nodes, values = construct_tree(first_node, self.classes_, self.field_mapping)
 
     node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
@@ -74,6 +77,42 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
 
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
+
+
+def unflatten(node):
+  """
+  This method converts a `mutliSplit` decision tree into a `binarySplit`
+  decision tree which is expressively equivalent.
+
+  Parameters
+  ----------
+  node : eTree.Element
+      XML Node element representing the current node.
+
+  Returns
+  -------
+  node : eTree.Element
+    Modified XML Node element representing the flattened decision tree.
+
+  """
+  child_nodes = node.findall('Node')
+
+  parent = node
+  for child in child_nodes:
+    new_node = eTree.Element("Node")
+    new_node.append(eTree.Element("True"))
+    predicate = [e for e in parent if e.tag != 'Node']
+    left_child = unflatten(child)
+
+    if left_child.find('True') is not None and left_child.find('Node') is None:  # leaf node
+      parent[:] = left_child[:]
+      parent.attrib = left_child.attrib
+    else:
+      parent[:] = [*predicate, left_child, new_node]
+
+    parent = new_node
+
+  return node
 
 
 def construct_tree(node, classes, field_mapping, i=0):

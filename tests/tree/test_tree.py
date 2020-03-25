@@ -1,13 +1,15 @@
 from unittest import TestCase
 import sklearn_pmml_model
 from sklearn_pmml_model.tree import PMMLTreeClassifier
+from sklearn2pmml.pipeline import PMMLPipeline
+from sklearn2pmml import sklearn2pmml
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from io import StringIO
 import pandas as pd
 import numpy as np
-from os import path
+from os import path, remove
 from sklearn.datasets import load_digits
 
 
@@ -33,26 +35,6 @@ class TestTree(TestCase):
       """))
 
     assert str(cm.exception) == 'PMML model does not contain TreeModel.'
-
-  def test_non_binary_tree(self):
-    with self.assertRaises(Exception) as cm:
-      PMMLTreeClassifier(pmml=StringIO("""
-      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
-        <DataDictionary>
-          <DataField name="Class" optype="categorical" dataType="string">
-            <Value value="setosa"/>
-            <Value value="versicolor"/>
-            <Value value="virginica"/>
-          </DataField>
-        </DataDictionary>
-        <MiningSchema>
-          <MiningField name="Class" usageType="target"/>
-        </MiningSchema>
-        <TreeModel splitCharacteristic="multiSplit" />
-      </PMML>
-      """))
-
-    assert str(cm.exception) == 'Sklearn only supports binary tree models.'
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
@@ -136,6 +118,7 @@ class TestIrisTreeIntegration(TestCase):
     y.name = "Class"
     X, Xte, y, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
+    self.train = (X, y)
 
     pmml = path.join(BASE_DIR, '../models/decisionTree.pmml')
     self.clf = PMMLTreeClassifier(pmml=pmml)
@@ -155,6 +138,29 @@ class TestIrisTreeIntegration(TestCase):
   def test_score(self):
     Xte, yte = self.test
     assert self.ref.score(Xte, yte) == self.clf.score(Xte, yte)
+
+  def test_sklearn2pmml(self):
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", self.ref)
+    ])
+    pipeline.fit(self.train[0], self.train[1])
+    sklearn2pmml(pipeline, "tree_sklearn2pmml.pmml", with_repr = True)
+
+    try:
+      # Import PMML
+      model = PMMLTreeClassifier(pmml='tree_sklearn2pmml.pmml')
+
+      # Verify classification
+      Xte, _ = self.test
+      assert np.array_equal(
+        self.ref.predict_proba(Xte),
+        model.predict_proba(Xte)
+      )
+
+    finally:
+      remove("tree_sklearn2pmml.pmml")
+
 
 
 class TestDigitsTreeIntegration(TestCase):
