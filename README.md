@@ -32,7 +32,7 @@ The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStruct
   - DataField (continuous, categorical, ordinal)
     - Value
     - Interval
-- TransformationDictionary
+- TransformationDictionary / LocalTransformations
   - DerivedField
 - TreeModel
   - SimplePredicate
