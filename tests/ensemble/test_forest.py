@@ -1,9 +1,12 @@
 from unittest import TestCase
 import sklearn_pmml_model
 from sklearn_pmml_model.ensemble import PMMLForestClassifier
+from sklearn2pmml.pipeline import PMMLPipeline
+from sklearn2pmml import sklearn2pmml
+from sklearn.ensemble import RandomForestClassifier
 from io import StringIO
 import numpy as np
-from os import path
+from os import path, remove
 import pandas as pd
 from warnings import catch_warnings
 
@@ -72,7 +75,7 @@ class TestForest(TestCase):
       </PMML>
       """))
 
-    assert str(cm.exception) == 'PMML model ensemble should use majority vote.'
+    assert str(cm.exception) == 'PMML model ensemble should use majority vote or average.'
 
   def test_non_true_segment(self):
     with self.assertRaises(Exception), catch_warnings(record=True) as w:
@@ -123,6 +126,7 @@ class TestIrisForestIntegration(TestCase):
     self.test = X, y
 
     self.clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/randomForest.pmml'))
+    self.ref = RandomForestClassifier(random_state=1).fit(X, y)
 
   def test_predict_proba(self):
     Xte, _ = self.test
@@ -285,6 +289,29 @@ class TestIrisForestIntegration(TestCase):
     Xte, yte = self.test
     ref = 0.9866666666666667
     assert ref == self.clf.score(Xte, yte)
+
+  def test_sklearn2pmml(self):
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", self.ref)
+    ])
+    pipeline.fit(self.test[0], self.test[1])
+
+    sklearn2pmml(pipeline, "forest_sklearn2pmml.pmml", with_repr = True)
+
+    try:
+      # Import PMML
+      model = PMMLForestClassifier(pmml='forest_sklearn2pmml.pmml')
+
+      # Verify classification
+      Xte, _ = self.test
+      assert np.array_equal(
+        self.ref.predict_proba(Xte),
+        model.predict_proba(Xte)
+      )
+
+    finally:
+      remove("forest_sklearn2pmml.pmml")
 
 
 class TestCategoricalPimaForestIntegration(TestCase):

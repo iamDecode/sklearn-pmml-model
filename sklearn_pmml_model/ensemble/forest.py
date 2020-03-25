@@ -45,8 +45,8 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     if segmentation is None:
       raise Exception('PMML model does not contain Segmentation.')
 
-    if segmentation.get('multipleModelMethod') != 'majorityVote':
-      raise Exception('PMML model ensemble should use majority vote.')
+    if segmentation.get('multipleModelMethod') not in ['majorityVote', 'average']:
+      raise Exception('PMML model ensemble should use majority vote or average.')
 
     # Parse segments
     segments = segmentation.findall('Segment')
