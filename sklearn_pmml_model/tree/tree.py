@@ -39,7 +39,7 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
       raise Exception('PMML model does not contain TreeModel.')
 
     # Parse tree
-    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_]),
+    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_], dtype=np.intp),
                       self.n_outputs_, np.array([], dtype=np.int32))
 
     split = tree_model.get('splitCharacteristic')

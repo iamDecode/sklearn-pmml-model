@@ -154,6 +154,6 @@ def clone(est, safe=True):
   new_object.n_features_ = est.n_features_
   new_object.n_outputs_ = est.n_outputs_
   new_object.n_classes_ = est.n_classes_
-  new_object.tree_ = Tree(est.n_features_, np.asarray([est.n_classes_]),
+  new_object.tree_ = Tree(est.n_features_, np.asarray([est.n_classes_], dtype=np.intp),
                           est.n_outputs_, np.array([], dtype=np.int32))
   return new_object
