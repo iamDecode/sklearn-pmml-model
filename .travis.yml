@@ -1,7 +1,5 @@
 language: python
 
-sudo: false
-
 jobs:
   include:
     # perform a linux build
@@ -24,12 +22,12 @@ env:
     # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
 
 install:
-  - python -m pip install twine cibuildwheel==1.1.0
+  - python3 -m pip install twine cibuildwheel==1.3.0
 
 script:
   # build the wheels, put them into './wheelhouse'
-  - if [[ $TRAVIS_TAG ]]; then python -m cibuildwheel --output-dir wheelhouse; fi
+  - if [[ $TRAVIS_TAG ]]; then python3 -m cibuildwheel --output-dir wheelhouse; fi
 
 after_success:
   # if the release was tagged, upload them to PyPI
-  - if [[ $TRAVIS_TAG ]]; then python -m twine upload wheelhouse/*.whl; fi
+  - if [[ $TRAVIS_TAG ]]; then python3 -m twine upload wheelhouse/*.whl; fi
