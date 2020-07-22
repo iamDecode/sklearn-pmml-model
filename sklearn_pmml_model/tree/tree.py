@@ -157,7 +157,16 @@ def construct_tree(node, classes, field_mapping, i=0):
     if record_count is not None:
       node_count_weighted = float(record_count)
       node_count = int(node_count_weighted)
-      votes = [[[float(e.get('recordCount')) for e in node.findall('ScoreDistribution')]]]
+
+      def votesFor(target):
+        # Deal with case where targetfield a double, but ScoreDistribution value
+        # is an integer.
+        if isinstance(target, float) and target.is_integer():
+          return node.find(f"ScoreDistribution[@value='{target}']") or node.find(f"ScoreDistribution[@value='{int(target)}']")
+
+        return node.find(f"ScoreDistribution[@value='{target}']")
+
+      votes = [[[float(votesFor(c).get('recordCount')) if votesFor(c) is not None else 0.0 for c in classes]]]
     else:
       score = node.get('score')
 
