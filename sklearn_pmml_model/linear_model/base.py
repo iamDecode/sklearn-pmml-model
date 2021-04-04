@@ -23,6 +23,7 @@ class PMMLLinearModel(PMMLBaseRegressor):
 
       encoder = OneHotEncoder()
       encoder.categories_ = np.array([self.field_mapping[field.get('name')][1].categories])
+      encoder.drop_idx_ = np.array([None for x in encoder.categories_])
       encoder._legacy_mode = False
       return encoder
 

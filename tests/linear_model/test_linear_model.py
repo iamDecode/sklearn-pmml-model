@@ -75,7 +75,7 @@ class TestLinearRegressionIntegration(TestCase):
   def test_score(self):
     Xte, yte = self.test
     ref = 0.409378064635437
-    assert ref == self.clf.score(Xte, yte == 'Yes')
+    assert np.allclose(ref, self.clf.score(Xte, yte == 'Yes'))
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
@@ -177,7 +177,7 @@ class TestGeneralRegressionIntegration(TestCase):
   def test_score(self):
     Xte, yte = self.test
     ref = 0.4791710734180739
-    assert ref == self.clf.score(Xte, yte == 'Yes')
+    assert np.allclose(ref, self.clf.score(Xte, yte == 'Yes'))
 
 
 class TestRidgeIntegration(TestCase):
@@ -229,7 +229,7 @@ class TestLassoIntegration(TestCase):
   def test_score(self):
     Xte, yte = self.test
     ref = 0.2878302689160125
-    assert ref == self.clf.score(Xte, yte == 'Yes')
+    assert np.allclose(ref, self.clf.score(Xte, yte == 'Yes'))
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
@@ -258,7 +258,7 @@ class TestElasticNetIntegration(TestCase):
   def test_score(self):
     Xte, yte = self.test
     ref = 0.2878302689160125
-    assert ref == self.clf.score(Xte, yte == 'Yes')
+    assert np.allclose(ref, self.clf.score(Xte, yte == 'Yes'))
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
