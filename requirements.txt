@@ -1,6 +1,6 @@
 numpy==1.20.2
 scipy==1.6.2
-scikit-learn==0.22.2.post1
+scikit-learn==0.24.2
 cached-property==1.5.2
 pytest==6.2.3
 pandas==1.2.3
@@ -9,4 +9,4 @@ Cython==0.29.22
 sphinx==3.5.3
 numpydoc==1.1.0
 sphinx-autoapi==1.7.0
-sklearn2pmml==0.69.0
+sklearn2pmml==0.71.1
