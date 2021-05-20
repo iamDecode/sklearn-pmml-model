@@ -1,10 +1,12 @@
 import numpy as np
 import warnings
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, _gb_losses
 from sklearn_pmml_model.base import PMMLBaseClassifier
 from sklearn_pmml_model.tree import get_tree
 from scipy.special import expit
+from ._gradient_boosting import predict_stages
+
 
 class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassifier):
   """
@@ -48,15 +50,8 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
     segments = segmentation.findall('Segment')
     valid_segments = [None] * self.n_classes_
 
-    indices = range(self.n_classes_)
-    if self.n_classes_ == 2:
-      indices = [0]
-
-    if len(indices) == len(segments) - 1:
-      for i in indices:
-        valid_segments[i] = [segment for segment in segments[i].find('MiningModel').find('Segmentation').findall('Segment') if segment.find('True') is not None and segment.find('TreeModel') is not None]
-    else:
-      valid_segments = [[segment for segment in segments if segment.find('True') is not None and segment.find('TreeModel') is not None]]
+    for i in range(self.n_classes_):
+      valid_segments[i] = [segment for segment in segments[i].find('MiningModel').find('Segmentation').findall('Segment') if segment.find('True') is not None and segment.find('TreeModel') is not None]
 
     n_estimators = len(valid_segments[0])
     GradientBoostingClassifier.__init__(self, n_estimators=n_estimators)
@@ -68,14 +63,21 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
 
     self._check_params()
 
+    if self.n_classes_ == 2 and len(segments) == 3 and segments[-1].find('TreeModel') is None:
+      # For binary classification where both sides are specified, we need to force multinomial deviance
+      self.loss_ = _gb_losses.MultinomialDeviance(self.n_classes_ + 1)
+      self.loss_.K = 2
+
     try:
       self.init = None
       self._init_state()
 
-      self.init_.class_prior_ = [expit(-float(segments[i].find('MiningModel').find('Targets').find('Target').get('rescaleConstant'))) for i in indices]
-
-      if self.n_classes_ == 2:
-        self.init_.class_prior_ = [self.init_.class_prior_[0], 1 - self.init_.class_prior_[0]]
+      self.init_.class_prior_ = [
+        expit(-float(segments[i].find('MiningModel').find('Targets').find('Target').get('rescaleConstant')))
+        for i in range(self.n_classes_)
+      ]
+      # if self.n_classes_ == 2:
+      #   self.init_.class_prior_ = [self.init_.class_prior_[0], 1 - self.init_.class_prior_[0]]
 
       self.init_.classes_ = [i for i,_ in enumerate(self.classes_)]
       self.init_.n_classes_ = self.n_classes_
@@ -96,15 +98,25 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
     # the parsing process
     target = self.target_field.get('name')
     fields = [field for name, field in self.fields.items() if name != target]
-    # for clf in self.estimators_[0]: # FIXME: should work for mutli class too
-    #   n_categories = np.asarray([
-    #     len(self.field_mapping[field.get('name')][1].categories)
-    #     if field.get('optype') == 'categorical' else -1
-    #     for field in fields
-    #     if field.tag == 'DataField'
-    #   ], dtype=np.int32, order='C')
-    #   clf.n_categories = n_categories
-    #   clf.tree_.set_n_categories(n_categories)
+    for x,y in np.ndindex(self.estimators_.shape): # FIXME: should work for mutli class too
+      clf = self.estimators_[x, y]
+      n_categories = np.asarray([
+        len(self.field_mapping[field.get('name')][1].categories)
+        if field.get('optype') == 'categorical' else -1
+        for field in fields
+        if field.tag == 'DataField'
+      ], dtype=np.int32, order='C')
+      clf.n_categories = n_categories
+      clf.tree_.set_n_categories(n_categories)
+
+    self.categorical = [x != -1 for x in self.estimators_[0,0].n_categories]
 
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
+
+  def _raw_predict(self, X):
+    """Override to support categorical features"""
+    raw_predictions = self._raw_predict_init(X)
+    predict_stages(self.estimators_, X, self.learning_rate,
+                   raw_predictions)
+    return raw_predictions
