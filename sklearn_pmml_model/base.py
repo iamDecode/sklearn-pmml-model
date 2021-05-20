@@ -59,7 +59,7 @@ class PMMLBaseEstimator(BaseEstimator):
         get_type(e, derives=fields[e.find('FieldRef').get('field')])
       )
       for name, e in fields.items()
-      if e.tag == 'DerivedField'
+      if e.tag == 'DerivedField' and e.find('FieldRef') is not None
     })
 
     field_mapping.update({
