@@ -50,7 +50,13 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
     segments = segmentation.findall('Segment')
     valid_segments = [None] * self.n_classes_
 
-    for i in range(self.n_classes_):
+    indices = range(self.n_classes_)
+    # For binary classification, only the predictions of the first class need to be described, the other can be inferred
+    # Not all PMML models do this, but we assume the following conditions imply this approach.
+    if self.n_classes_ == 2 and len(segments) == 2 and segments[-1].find('TreeModel') is None:
+      indices = [0]
+
+    for i in indices:
       valid_segments[i] = [segment for segment in segments[i].find('MiningModel').find('Segmentation').findall('Segment') if segment.find('True') is not None and segment.find('TreeModel') is not None]
 
     n_estimators = len(valid_segments[0])
@@ -74,10 +80,11 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
 
       self.init_.class_prior_ = [
         expit(-float(segments[i].find('MiningModel').find('Targets').find('Target').get('rescaleConstant')))
-        for i in range(self.n_classes_)
+        for i in indices
       ]
-      # if self.n_classes_ == 2:
-      #   self.init_.class_prior_ = [self.init_.class_prior_[0], 1 - self.init_.class_prior_[0]]
+
+      if self.n_classes_ == 2:
+        self.init_.class_prior_ = [self.init_.class_prior_[0], 1 - self.init_.class_prior_[0]]
 
       self.init_.classes_ = [i for i,_ in enumerate(self.classes_)]
       self.init_.n_classes_ = self.n_classes_
