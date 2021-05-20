@@ -1,12 +1,13 @@
 import numpy as np
 import struct
+from sklearn.base import clone as _clone
 from sklearn_pmml_model.base import PMMLBaseClassifier
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
+from sklearn.tree._tree import Tree as Tree2, NODE_DTYPE as NODE_DTYPE2
 from sklearn.tree import DecisionTreeClassifier
 from operator import add
 from warnings import warn
 from xml.etree import cElementTree as eTree
-
 
 SPLIT_UNDEFINED = struct.pack('d', TREE_UNDEFINED)
 
@@ -30,6 +31,7 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
   Specification: http://dmg.org/pmml/v4-3/TreeModel.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
 
@@ -101,6 +103,7 @@ def unflatten(node):
   for child in child_nodes:
     new_node = eTree.Element("Node")
     new_node.append(eTree.Element("True"))
+    new_node.set('score', parent.get('score', 0))
     predicate = [e for e in parent if e.tag != 'Node']
     left_child = unflatten(child)
 
@@ -115,7 +118,7 @@ def unflatten(node):
   return node
 
 
-def construct_tree(node, classes, field_mapping, i=0):
+def construct_tree(node, classes, field_mapping, i=0, cat_support=True, rescale_factor=1):
   """
   Generator for nodes and values used for constructing cython Tree class.
 
@@ -124,8 +127,8 @@ def construct_tree(node, classes, field_mapping, i=0):
   node : eTree.Element
       XML Node element representing the current node.
 
-  classes : list
-      List of possible target classes.
+  classes : list, None
+      List of possible target classes. Is `None` for regression trees.
 
   field_mapping: { str: (int, callable) }
       Dictionary mapping column names to tuples with 1) index of the column and
@@ -169,34 +172,50 @@ def construct_tree(node, classes, field_mapping, i=0):
       votes = [[[float(votesFor(c).get('recordCount')) if votesFor(c) is not None else 0.0 for c in classes]]]
     else:
       score = node.get('score')
+      node_count, node_count_weighted = (0, 0.0)
 
-      if score is not None:
-        node_count, node_count_weighted = (0, 0.0)
-        votes = [[[1.0 if str(c) == score else 0.0 for c in classes]]]
+      if classes is None:
+        # FIXME: unsure about `10 x rescale_factor`, but seems required, at least for r2pmml generated models
+        votes = [[[float(score) * 10 * rescale_factor]]]
       else:
-        raise Exception('Node has insufficient information to determine output:'
-                        + ' recordCount or score attributes expected')
+        votes = [[[1.0 if str(c) == score else 0.0 for c in classes]]]
 
-    return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, SPLIT_UNDEFINED, impurity,
-             node_count, node_count_weighted)], votes
+    if cat_support:
+      return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, SPLIT_UNDEFINED, impurity,
+               node_count, node_count_weighted)], votes
+    else:
+      return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, TREE_UNDEFINED, impurity,
+               node_count, node_count_weighted)], votes
 
-  left_node, left_value = construct_tree(child_nodes[0], classes, field_mapping, i)
+  predicate = child_nodes[0].find('SimplePredicate')
+  set_predicate = child_nodes[0].find('SimpleSetPredicate')
+
+  if predicate is not None and predicate.get('operator') in ['greaterThan', 'greaterOrEqual']:
+    child_nodes.reverse()
+
+  left_node, left_value = construct_tree(child_nodes[0], classes, field_mapping, i, cat_support, rescale_factor)
   offset = len(left_node)
-  right_node, right_value = construct_tree(child_nodes[1], classes, field_mapping, i + offset)
+  right_node, right_value = construct_tree(child_nodes[1], classes, field_mapping, i + offset, cat_support,
+                                           rescale_factor)
 
   children = left_node + right_node
   distributions = left_value + right_value
 
-  predicate = child_nodes[0].find('SimplePredicate')
-
   if predicate is not None:
     column, _ = field_mapping[predicate.get('field')]
     # We do not use field_mapping type as the Cython tree only supports floats
-    value = predicate.get('value')
-    value = struct.pack('d', float(value))  # d = double = float64
-  else:
-    set_predicate = child_nodes[0].find('SimpleSetPredicate')
+    value = predicate.get('value', 0.0)
+    if cat_support:
+      value = struct.pack('d', float(value))  # d = double = float64
+    else:
+      value = float(value)
 
+      if predicate.get('operator') == 'greaterOrEqual':
+        value -= 0.0000001
+
+      if predicate.get('operator') == 'lessThan':
+        value += 0.0000001
+  else:
     if set_predicate is not None:
       column, field_type = field_mapping[set_predicate.get('field')]
 
@@ -226,9 +245,102 @@ def construct_tree(node, classes, field_mapping, i=0):
       raise Exception("Unsupported tree format: unknown predicate structure in Node {}"
                       .format(child_nodes[0].get('id')))
 
-  distribution = [list(map(add, distributions[0][0], distributions[offset][0]))]
-  sample_count_weighted = sum(distribution[0])
-  sample_count = int(sample_count_weighted)
+  if classes is None:
+    distribution = [[0]]
+    sample_count_weighted = 0
+    sample_count = 0
+  else:
+    distribution = [list(map(add, distributions[0][0], distributions[offset][0]))]
+    sample_count_weighted = sum(distribution[0])
+    sample_count = int(sample_count_weighted)
 
   return [(i, i + offset, column, value, impurity, sample_count, sample_count_weighted)] + children, \
          [distribution] + distributions
+
+
+def get_tree(est, segment, rescale_factor=1):
+  """
+  Method to train a single tree for a <Segment> PMML element.
+
+  Parameters
+  ----------
+  est:
+      The estimator to built the tree for. Should contain `template_estimator` and
+      `field_mapping` attributes.
+
+  segment : eTree.Element
+      <Segment> element containing the decision tree to be imported.
+      Only segments with a <True/> predicate are supported.
+
+  Returns
+  -------
+  tree : sklearn.tree.DecisionTreeClassifier
+      The sklearn decision tree instance imported from the provided segment.
+
+  """
+  tree = clone(est.template_estimator)
+
+  tree_model = segment.find("TreeModel")
+
+  if tree_model is None:
+    raise Exception('PMML segment does not contain TreeModel.')
+
+  split = tree_model.get('splitCharacteristic')
+  if split == 'binarySplit':
+    first_node = tree_model.find('Node')
+  else:
+    first_node = unflatten(tree_model.find('Node'))
+
+  if isinstance(tree, DecisionTreeClassifier):
+    nodes, values = construct_tree(first_node, tree.classes_, est.field_mapping, rescale_factor=rescale_factor)
+    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
+  else:
+    nodes, values = construct_tree(first_node, None, est.field_mapping, cat_support=False,
+                                   rescale_factor=rescale_factor)
+    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE2)
+
+  value_ndarray = np.ascontiguousarray(values)
+  max_depth = None
+
+  state = {
+    'max_depth': (2 ** 31) - 1 if max_depth is None else max_depth,
+    'node_count': node_ndarray.shape[0],
+    'nodes': node_ndarray,
+    'values': value_ndarray
+  }
+  tree.tree_.__setstate__(state)
+
+  return tree
+
+
+def clone(est, safe=True):
+  """
+  Helper method to clone a DecisionTree, including private properties
+  that are ignored in sklearn.base.clone.
+
+  Parameters
+  ----------
+  est : BaseEstimator
+      The estimator or group of estimators to be cloned.
+
+  safe : boolean, optional
+      If safe is false, clone will fall back to a deep copy on objects
+      that are not estimators.
+
+  """
+  new_object = _clone(est, safe=safe)
+  new_object.n_features_ = est.n_features_
+  new_object.n_outputs_ = est.n_outputs_
+
+  if isinstance(est, DecisionTreeClassifier):
+    new_object.classes_ = est.classes_
+    new_object.n_classes_ = est.n_classes_
+    n_classes = np.asarray([est.n_classes_], dtype=np.intp)
+
+    new_object.tree_ = Tree(est.n_features_, n_classes, est.n_outputs_,
+                            np.array([], dtype=np.int32))
+  else:
+    n_classes = np.array([1] * est.n_outputs_, dtype=np.intp)
+    new_object.tree_ = Tree2(est.n_features_, n_classes, est.n_outputs_)
+
+  return new_object

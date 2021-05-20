@@ -71,7 +71,7 @@ class TestGaussianNBIntegration(TestCase):
     yte = df.iloc[:, 0]
     self.test = (Xte, yte)
 
-    pmml = path.join(BASE_DIR, '../models/naive_bayes.pmml')
+    pmml = path.join(BASE_DIR, '../models/nb-cat-pima.pmml')
     self.clf = PMMLGaussianNB(pmml)
 
     ref = GaussianNB()

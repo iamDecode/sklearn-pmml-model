@@ -107,7 +107,7 @@ class TestForest(TestCase):
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
-      pmml = path.join(BASE_DIR, '../models/categorical-rf.pmml')
+      pmml = path.join(BASE_DIR, '../models/rf-cat-pima.pmml')
       clf = PMMLForestClassifier(pmml)
       clf.fit(np.array([[]]), np.array([]))
 
@@ -125,7 +125,7 @@ class TestIrisForestIntegration(TestCase):
     y.name = "Class"
     self.test = X, y
 
-    self.clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/randomForest.pmml'))
+    self.clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/rf-iris.pmml'))
     self.ref = RandomForestClassifier(random_state=1).fit(X, y)
 
   def test_predict_proba(self):
@@ -297,11 +297,11 @@ class TestIrisForestIntegration(TestCase):
     ])
     pipeline.fit(self.test[0], self.test[1])
 
-    sklearn2pmml(pipeline, "forest_sklearn2pmml.pmml", with_repr = True)
+    sklearn2pmml(pipeline, "rf-sklearn2pmml.pmml", with_repr = True)
 
     try:
       # Import PMML
-      model = PMMLForestClassifier(pmml='forest_sklearn2pmml.pmml')
+      model = PMMLForestClassifier(pmml='rf-sklearn2pmml.pmml')
 
       # Verify classification
       Xte, _ = self.test
@@ -311,7 +311,7 @@ class TestIrisForestIntegration(TestCase):
       )
 
     finally:
-      remove("forest_sklearn2pmml.pmml")
+      remove("rf-sklearn2pmml.pmml")
 
 
 class TestCategoricalPimaForestIntegration(TestCase):
@@ -323,7 +323,7 @@ class TestCategoricalPimaForestIntegration(TestCase):
     yte = df.iloc[:, 0]
     self.test = (Xte, yte)
 
-    pmml = path.join(BASE_DIR, '../models/categorical-rf.pmml')
+    pmml = path.join(BASE_DIR, '../models/rf-cat-pima.pmml')
     self.clf = PMMLForestClassifier(pmml)
 
   def test_predict_proba(self):

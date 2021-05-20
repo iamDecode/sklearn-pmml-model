@@ -1,10 +1,8 @@
 import numpy as np
 import warnings
-from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE
 from sklearn.ensemble import RandomForestClassifier
 from sklearn_pmml_model.base import PMMLBaseClassifier
-from sklearn_pmml_model.tree import construct_tree, unflatten
-from sklearn.base import clone as _clone
+from sklearn_pmml_model.tree import get_tree
 
 
 class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
@@ -69,7 +67,7 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     clf.n_classes_ = self.n_classes_
     self.template_estimator = clf
 
-    self.estimators_ = [self.get_tree(s) for s in valid_segments]
+    self.estimators_ = [get_tree(self, s) for s in valid_segments]
 
     # Required after constructing trees, because categories may be inferred in
     # the parsing process
@@ -85,75 +83,7 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
       clf.n_categories = n_categories
       clf.tree_.set_n_categories(n_categories)
 
-  def get_tree(self, segment):
-    """
-    Method to train a single tree for a <Segment> PMML element.
-
-    Parameters
-    ----------
-    segment : eTree.Element
-        <Segment> element containing the decision tree to be imported.
-        Only segments with a <True/> predicate are supported.
-
-    Returns
-    -------
-    tree : sklearn.tree.DecisionTreeClassifier
-        The sklearn decision tree instance imported from the provided segment.
-
-    """
-    tree = clone(self.template_estimator)
-
-    tree_model = segment.find("TreeModel")
-
-    if tree_model is None:
-      raise Exception('PMML segment does not contain TreeModel.')
-
-    split = tree_model.get('splitCharacteristic')
-    if split == 'binarySplit':
-      first_node = tree_model.find('Node')
-    else:
-      first_node = unflatten(tree_model.find('Node'))
-
-    nodes, values = construct_tree(first_node, tree.classes_, self.field_mapping)
-
-    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
-    value_ndarray = np.ascontiguousarray(values)
-    max_depth = None
-
-    state = {
-      'max_depth': (2 ** 31) - 1 if max_depth is None else max_depth,
-      'node_count': node_ndarray.shape[0],
-      'nodes': node_ndarray,
-      'values': value_ndarray
-    }
-    tree.tree_.__setstate__(state)
-
-    return tree
-
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
 
 
-def clone(est, safe=True):
-  """
-  Helper method to clone a DecisionTreeClassifier, including private properties
-  that are ignored in sklearn.base.clone.
-
-  Parameters
-  ----------
-  est : BaseEstimator
-      The estimator or group of estimators to be cloned.
-
-  safe : boolean, optional
-      If safe is false, clone will fall back to a deep copy on objects
-      that are not estimators.
-
-  """
-  new_object = _clone(est, safe=safe)
-  new_object.classes_ = est.classes_
-  new_object.n_features_ = est.n_features_
-  new_object.n_outputs_ = est.n_outputs_
-  new_object.n_classes_ = est.n_classes_
-  new_object.tree_ = Tree(est.n_features_, np.asarray([est.n_classes_], dtype=np.intp),
-                          est.n_outputs_, np.array([], dtype=np.int32))
-  return new_object
