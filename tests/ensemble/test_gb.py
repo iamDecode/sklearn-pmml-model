@@ -134,7 +134,8 @@ class TestIrisGradientBoostingIntegration(TestCase):
     pipeline = PMMLPipeline([
       ("classifier", self.ref)
     ])
-    pipeline.fit(self.test[0], self.test[1])
+    Xte, _, yte = self.test
+    pipeline.fit(Xte, yte)
 
     sklearn2pmml(pipeline, "gb-sklearn2pmml.pmml", with_repr = True)
 
@@ -143,8 +144,6 @@ class TestIrisGradientBoostingIntegration(TestCase):
       model = PMMLGradientBoostingClassifier(pmml='gb-sklearn2pmml.pmml')
 
       # Verify classification
-      Xte, _, yte = self.test
-
       assert np.array_equal(
         self.ref.score(Xte, yte),
         model.score(Xte, yte)
