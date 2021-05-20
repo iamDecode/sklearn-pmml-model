@@ -3,8 +3,8 @@ import struct
 from sklearn.base import clone as _clone
 from sklearn_pmml_model.base import PMMLBaseClassifier
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
-from sklearn.tree._tree import Tree as Tree2, NODE_DTYPE as NODE_DTYPE2
 from sklearn.tree import DecisionTreeClassifier
+from sklearn_pmml_model.datatypes import Category
 from operator import add
 from warnings import warn
 from xml.etree import cElementTree as eTree
@@ -98,6 +98,7 @@ def unflatten(node):
 
   """
   child_nodes = node.findall('Node')
+  child_nodes = [node for node in child_nodes if getattr(node.find('SimplePredicate'),'attrib', {}).get('operator') != 'isMissing']
 
   parent = node
   for child in child_nodes:
@@ -118,7 +119,7 @@ def unflatten(node):
   return node
 
 
-def construct_tree(node, classes, field_mapping, i=0, cat_support=True, rescale_factor=1):
+def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
   """
   Generator for nodes and values used for constructing cython Tree class.
 
@@ -180,22 +181,30 @@ def construct_tree(node, classes, field_mapping, i=0, cat_support=True, rescale_
       else:
         votes = [[[1.0 if str(c) == score else 0.0 for c in classes]]]
 
-    if cat_support:
-      return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, SPLIT_UNDEFINED, impurity,
-               node_count, node_count_weighted)], votes
-    else:
-      return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, TREE_UNDEFINED, impurity,
-               node_count, node_count_weighted)], votes
+    return [(TREE_LEAF, TREE_LEAF, TREE_UNDEFINED, SPLIT_UNDEFINED, impurity,
+             node_count, node_count_weighted)], votes
 
   predicate = child_nodes[0].find('SimplePredicate')
   set_predicate = child_nodes[0].find('SimpleSetPredicate')
 
+  # Convert SimplePredicate with equals operator on category to set predicate
+  if predicate is not None and predicate.get('operator') == 'equal' and isinstance(field_mapping[predicate.get('field')][1], Category):
+    set_predicate = eTree.fromstring(f'''<SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isIn">
+     <Array type="string">{predicate.get('value')}</Array>
+    </SimpleSetPredicate>''')
+    predicate = None
+  elif predicate is not None and predicate.get('operator') == 'notEqual' and isinstance(field_mapping[predicate.get('field')][1], Category):
+    set_predicate = eTree.fromstring(f'''<SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isNotIn">
+     <Array type="string">{predicate.get('value')}</Array>
+    </SimpleSetPredicate>''')
+    predicate = None
+
   if predicate is not None and predicate.get('operator') in ['greaterThan', 'greaterOrEqual']:
     child_nodes.reverse()
 
-  left_node, left_value = construct_tree(child_nodes[0], classes, field_mapping, i, cat_support, rescale_factor)
+  left_node, left_value = construct_tree(child_nodes[0], classes, field_mapping, i, rescale_factor)
   offset = len(left_node)
-  right_node, right_value = construct_tree(child_nodes[1], classes, field_mapping, i + offset, cat_support,
+  right_node, right_value = construct_tree(child_nodes[1], classes, field_mapping, i + offset,
                                            rescale_factor)
 
   children = left_node + right_node
@@ -203,18 +212,17 @@ def construct_tree(node, classes, field_mapping, i=0, cat_support=True, rescale_
 
   if predicate is not None:
     column, _ = field_mapping[predicate.get('field')]
+
     # We do not use field_mapping type as the Cython tree only supports floats
-    value = predicate.get('value', 0.0)
-    if cat_support:
-      value = struct.pack('d', float(value))  # d = double = float64
-    else:
-      value = float(value)
+    value = np.around(float(predicate.get('value')), decimals=15)
 
-      if predicate.get('operator') == 'greaterOrEqual':
-        value -= 0.0000001
+    # Account for `>=` != `>` and `<` != `<=`. scikit-learn only uses `<=`.
+    if predicate.get('operator') == 'greaterOrEqual':
+      value -= 0.00000000001
+    if predicate.get('operator') == 'lessThan':
+      value -= 0.00000000001
 
-      if predicate.get('operator') == 'lessThan':
-        value += 0.0000001
+    value = struct.pack('d', value)  # d = double = float64
   else:
     if set_predicate is not None:
       column, field_type = field_mapping[set_predicate.get('field')]
@@ -237,7 +245,7 @@ def construct_tree(node, classes, field_mapping, i=0, cat_support=True, rescale_
           field_type.categories.append(category)
           mask |= 1 << len(field_type.categories) - 1
 
-      value = struct.pack('Q', mask)  # Q = unsigned long long = uint64
+      value = struct.pack('Q', np.uint64(mask))  # Q = unsigned long long = uint64
 
       if set_predicate.get('booleanOperator') == 'isNotIn':
         value = struct.pack('Q', ~np.uint64(mask))
@@ -295,9 +303,8 @@ def get_tree(est, segment, rescale_factor=1):
     nodes, values = construct_tree(first_node, tree.classes_, est.field_mapping, rescale_factor=rescale_factor)
     node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
   else:
-    nodes, values = construct_tree(first_node, None, est.field_mapping, cat_support=False,
-                                   rescale_factor=rescale_factor)
-    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE2)
+    nodes, values = construct_tree(first_node, None, est.field_mapping, rescale_factor=rescale_factor)
+    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
 
   value_ndarray = np.ascontiguousarray(values)
   max_depth = None
@@ -341,6 +348,7 @@ def clone(est, safe=True):
                             np.array([], dtype=np.int32))
   else:
     n_classes = np.array([1] * est.n_outputs_, dtype=np.intp)
-    new_object.tree_ = Tree2(est.n_features_, n_classes, est.n_outputs_)
+    new_object.tree_ = Tree(est.n_features_, n_classes, est.n_outputs_,
+                            np.array([], dtype=np.int32))
 
   return new_object

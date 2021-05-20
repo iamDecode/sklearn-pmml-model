@@ -83,6 +83,8 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
       clf.n_categories = n_categories
       clf.tree_.set_n_categories(n_categories)
 
+    self.categorical = [x != -1 for x in self.estimators_[0].n_categories]
+
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
 

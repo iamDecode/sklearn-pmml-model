@@ -66,7 +66,7 @@ Pima.tr2
 
 
 library(gbm)
-library(pmml)
+library(r2pmml)
 test = read.csv('/Users/decode/Developer/sklearn-pmml-model/models/categorical-test.csv', header=TRUE, sep=",")
 test$age = as.factor(test$age)
 test$type = as.factor(test$type)
@@ -78,11 +78,9 @@ clf = gbm::gbm(type ~., data=test, distribution="multinomial")
 #saveXML(pmml_clf, "/Users/decode/Downloads/gbm.pmml")
 
 options(digits=16)
-predict(clf, test)
+predict.gbm(clf, test, type = "response")
 
 r2pmml(clf, "pima_gbm.pmml", fmap = as.fmap(as.matrix(test)), response_name = "type", response_levels = c("Yes", "No"), missing = NULL, compact = TRUE)
-
-
 
 
 
@@ -160,6 +158,7 @@ library("xgboost")
 library("r2pmml")
 
 data(iris)
+colnames(iris) <- c('sepal_length', 'sepal_width', 'petal_length', 'petal_width', 'Class')
 
 iris_X = iris[, 1:4]
 iris_y = as.integer(iris[, 5]) - 1
@@ -200,11 +199,11 @@ r2pmml(iris.xgb, "iris_xgb.pmml", fmap = iris.fmap, response_name = "Species", r
 
 
 
-iris.gbm = gbm::gbm(Species ~., data=iris)
+iris.gbm = gbm::gbm(Class ~., data=iris)
 predict(iris.gbm, iris_X)
 
 
-r2pmml(iris.gbm, "iris_gbm.pmml", fmap = iris.fmap, response_name = "Species", response_levels = c("setosa", "versicolor", "virginica"), missing = NULL, compact = TRUE)
+r2pmml(iris.gbm, "iris_gbm.pmml", fmap = iris.fmap, response_name = "Class", response_levels = c("setosa", "versicolor", "virginica"), missing = NULL, compact = TRUE)
 
 #clf = xgboost(data=x, label=y, max.depth = 2, eta = 1, nthread = 2, nrounds = 2, objective = "binary:logistic")
 pmml_clf = pmml(iris.gbm, predicted_field = "Species")

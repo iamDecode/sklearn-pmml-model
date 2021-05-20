@@ -144,8 +144,9 @@ ext_module_quad_tree = declare_cython_extension("sklearn_pmml_model.tree.quad_tr
 ext_module_criterion = declare_cython_extension("sklearn_pmml_model.tree._criterion", use_math=True, use_openmp=False, include_dirs=my_include_dirs)
 ext_module_splitter  = declare_cython_extension("sklearn_pmml_model.tree._splitter", use_math=True, use_openmp=False, include_dirs=my_include_dirs)
 ext_module_utils     = declare_cython_extension("sklearn_pmml_model.tree._utils", use_math=True, use_openmp=False, include_dirs=my_include_dirs)
+ext_module_gb        = declare_cython_extension("sklearn_pmml_model.ensemble._gradient_boosting", use_math=True, use_openmp=False, include_dirs=my_include_dirs)
 
-cython_ext_modules = [ext_module_tree, ext_module_quad_tree, ext_module_criterion, ext_module_splitter, ext_module_utils]
+cython_ext_modules = [ext_module_tree, ext_module_quad_tree, ext_module_criterion, ext_module_splitter, ext_module_utils, ext_module_gb]
 
 # Call cythonize() explicitly, as recommended in the Cython documentation. See
 #     http://cython.readthedocs.io/en/latest/src/reference/compilation.html#compiling-with-distutils
@@ -199,7 +200,7 @@ setup(
   #
   # Fileglobs relative to each package, **does not** automatically recurse into subpackages.
   # FIXME: force sdist, but sdist only, to keep the .pyx files (this puts them also in the bdist)
-  package_data={'sklearn_pmml_model.tree': ['*.pxd', '*.pyx']},
+  package_data={'sklearn_pmml_model.tree': ['*.pxd', '*.pyx'], 'sklearn_pmml_model.ensemble': ['*.pxd', '*.pyx']},
 
   # Disable zip_safe, because:
   #   - Cython won't find .pxd files inside installed .egg, hard to compile libs depending on this one
