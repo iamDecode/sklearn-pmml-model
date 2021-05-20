@@ -1,0 +1,4146 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+	<Header>
+		<Application name="JPMML-R" version="1.4.4"/>
+		<Timestamp>2021-05-17T17:50:46Z</Timestamp>
+	</Header>
+	<DataDictionary>
+		<DataField name="type" optype="categorical" dataType="string">
+			<Value value="No"/>
+			<Value value="Yes"/>
+		</DataField>
+		<DataField name="npreg" optype="continuous" dataType="double"/>
+		<DataField name="glu" optype="continuous" dataType="double"/>
+		<DataField name="bp" optype="continuous" dataType="double"/>
+		<DataField name="skin" optype="continuous" dataType="double"/>
+		<DataField name="bmi" optype="continuous" dataType="double"/>
+		<DataField name="ped" optype="continuous" dataType="double"/>
+		<DataField name="age" optype="categorical" dataType="string">
+			<Value value="(20,30]"/>
+			<Value value="(30,40]"/>
+			<Value value="(40,50]"/>
+			<Value value="(50,60]"/>
+			<Value value="(60,70]"/>
+		</DataField>
+	</DataDictionary>
+	<MiningModel functionName="classification">
+		<MiningSchema>
+			<MiningField name="type" usageType="target"/>
+			<MiningField name="npreg"/>
+			<MiningField name="glu"/>
+			<MiningField name="bp"/>
+			<MiningField name="skin"/>
+			<MiningField name="bmi"/>
+			<MiningField name="ped"/>
+			<MiningField name="age"/>
+		</MiningSchema>
+		<Segmentation multipleModelMethod="modelChain" missingPredictionTreatment="returnMissing">
+			<Segment id="1">
+				<True/>
+				<MiningModel functionName="regression">
+					<MiningSchema>
+						<MiningField name="npreg"/>
+						<MiningField name="glu"/>
+						<MiningField name="bp"/>
+						<MiningField name="skin"/>
+						<MiningField name="bmi"/>
+						<MiningField name="ped"/>
+						<MiningField name="age"/>
+					</MiningSchema>
+					<Output>
+						<OutputField name="gbmValue(No)" optype="continuous" dataType="double" isFinalResult="false"/>
+					</Output>
+					<Segmentation multipleModelMethod="sum">
+						<Segment id="1">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.015384615384615385">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.16923076923076924">
+										<SimplePredicate field="ped" operator="lessThan" value="0.34199999999999997"/>
+									</Node>
+									<Node id="3" score="-0.13846153846153847">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.34199999999999997"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="2">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03686833599479694">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.10751167470233475">
+										<SimplePredicate field="glu" operator="lessThan" value="123.0"/>
+									</Node>
+									<Node id="3" score="-0.12710584268050426">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="123.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="3">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01680312729135935">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.14824178296114238">
+										<SimplePredicate field="glu" operator="lessThan" value="124.5"/>
+									</Node>
+									<Node id="3" score="-0.09585857756845467">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="124.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="4">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.012922146393610093">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.12979500074803915">
+										<SimplePredicate field="glu" operator="lessThan" value="126.5"/>
+									</Node>
+									<Node id="3" score="-0.07278461346630455">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="126.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="5">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04186007013169197">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09724191619926359">
+										<SimplePredicate field="glu" operator="lessThan" value="123.0"/>
+									</Node>
+									<Node id="3" score="-0.1287988115885392">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="123.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="6">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.017554605938136996">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.14442331222790072">
+										<SimplePredicate field="ped" operator="lessThan" value="0.33299999999999996"/>
+									</Node>
+									<Node id="3" score="-0.09118999945308907">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.33299999999999996"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="7">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0339810182586553">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.12820630730274718">
+										<SimplePredicate field="bmi" operator="lessThan" value="33.45"/>
+									</Node>
+									<Node id="3" score="-0.07594848562611858">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="33.45"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="8">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.0069132341993774805">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.08338859298864676">
+										<SimplePredicate field="glu" operator="lessThan" value="124.5"/>
+									</Node>
+									<Node id="3" score="-0.08431480036054112">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="124.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="9">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.022955313803150773">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09237128249512849">
+										<SimplePredicate field="ped" operator="lessThan" value="0.47"/>
+									</Node>
+									<Node id="3" score="-0.07170282532227339">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.47"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="10">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.003936240733917069">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.13613584441378687">
+										<SimplePredicate field="glu" operator="lessThan" value="116.0"/>
+									</Node>
+									<Node id="3" score="-0.07868851156600157">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="116.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="11">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05617861162726098">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1475692731300695">
+										<SimplePredicate field="skin" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="0.05044382679268233">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="12">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04202046580393976">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1585835082067492">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.03083143569781613">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="13">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.010723855005451168">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09987985634992688">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="-0.10552703616720378">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="14">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.051872732210568796">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.12283697836085468">
+										<SimplePredicate field="glu" operator="lessThan" value="138.0"/>
+									</Node>
+									<Node id="3" score="-0.06167006162988861">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="138.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="15">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.05336693783355807">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.16592205750105163">
+										<SimplePredicate field="bp" operator="lessThan" value="76.0635073697358"/>
+									</Node>
+									<Node id="3" score="-0.1001173162584786">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="76.0635073697358"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="16">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.012883584500211383">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.054114519401893685">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="-0.12008055074357948">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="17">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.015760378957377984">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.11369315884814356">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.84341634584875"/>
+									</Node>
+									<Node id="3" score="0.11778432089366597">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.84341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="18">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.018792740164802483">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.16099422162510046">
+										<SimplePredicate field="npreg" operator="lessThan" value="4.5"/>
+									</Node>
+									<Node id="3" score="-0.14710898820554516">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="4.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="19">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.005903736834173579">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.14484061089106878">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.11318501235745088">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="20">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.042244887098002434">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.1541180824511281">
+										<SimplePredicate field="glu" operator="lessThan" value="140.0"/>
+									</Node>
+									<Node id="3" score="-0.08827384081397749">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="140.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="21">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05297052668107691">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06241470933895759">
+										<SimplePredicate field="ped" operator="lessThan" value="0.48450000000000004"/>
+									</Node>
+									<Node id="3" score="-0.18758663537111714">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.48450000000000004"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="22">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.002118216454151778">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.05880939191147431">
+										<SimplePredicate field="skin" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="0.09960238983915352">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="23">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.013906639456104253">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06591360435242108">
+										<SimplePredicate field="bp" operator="lessThan" value="76.0635073697358"/>
+									</Node>
+									<Node id="3" score="-0.12275242646772971">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="76.0635073697358"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="24">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0031181468149927565">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.06875090666693358">
+										<SimplePredicate field="bp" operator="lessThan" value="73.0785866601082"/>
+									</Node>
+									<Node id="3" score="0.10112140156307413">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="73.0785866601082"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="25">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.08417999287622487">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.16106516578893923">
+										<SimplePredicate field="ped" operator="lessThan" value="0.536"/>
+									</Node>
+									<Node id="3" score="0.020663424732021984">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.536"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="26">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="3.0649865790442787E-4">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0932546807525877">
+										<SimplePredicate field="skin" operator="lessThan" value="32.5"/>
+									</Node>
+									<Node id="3" score="0.12788992512675731">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="32.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="27">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.006100972016968749">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.10727437144404886">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="-0.10327983784069812">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="28">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03812109375387271">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.13324697450687537">
+										<SimplePredicate field="ped" operator="lessThan" value="0.33299999999999996"/>
+									</Node>
+									<Node id="3" score="-0.05700478699912995">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.33299999999999996"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="29">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03763067675307027">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.0735999595181334">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="-0.18930881712289346">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="30">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.008480147546074854">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.057076319113041056">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="-0.08496269198171008">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="31">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.054082141885710144">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.14436692489891875">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="-0.0512501049630332">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="32">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.026592397745101554">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.03198456352714689">
+										<SimplePredicate field="bp" operator="lessThan" value="69.0"/>
+									</Node>
+									<Node id="3" score="-0.07680122169274309">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="69.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="33">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01653693465724594">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.08118827319495507">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="-0.07162398153053923">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="34">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.004110601502542633">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07128235976482439">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="-0.06306115675973913">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="35">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-1.0259271508830447E-4">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09987368954661067">
+										<SimplePredicate field="skin" operator="lessThan" value="31.40404980926645"/>
+									</Node>
+									<Node id="3" score="0.06225434280461317">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="31.40404980926645"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="36">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.022066786461648877">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07273412298763458">
+										<SimplePredicate field="skin" operator="lessThan" value="29.5"/>
+									</Node>
+									<Node id="3" score="-0.09158745339112342">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="29.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="37">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01828430281136224">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07238110001406727">
+										<SimplePredicate field="npreg" operator="lessThan" value="3.5"/>
+									</Node>
+									<Node id="3" score="-0.055484057010508236">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="3.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="38">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.008763273974020689">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0766635193828612">
+										<SimplePredicate field="bmi" operator="lessThan" value="37.5"/>
+									</Node>
+									<Node id="3" score="0.09987711868012414">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="37.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="39">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.0392932337118304">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.05250220151903088">
+										<SimplePredicate field="glu" operator="lessThan" value="126.0"/>
+									</Node>
+									<Node id="3" score="-0.13108866894269167">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="126.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="40">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.031928247357939116">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.0400290811221157">
+										<SimplePredicate field="glu" operator="lessThan" value="137.0"/>
+									</Node>
+									<Node id="3" score="-0.1300518771034684">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="137.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="41">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03959225900012914">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07011845258192285">
+										<SimplePredicate field="ped" operator="lessThan" value="0.271"/>
+									</Node>
+									<Node id="3" score="-0.13363001178474512">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.271"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="42">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.007292260332397063">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.08095253705261976">
+										<SimplePredicate field="npreg" operator="lessThan" value="4.5"/>
+									</Node>
+									<Node id="3" score="-0.11056418241995924">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="4.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="43">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.05144529189178973">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.13127200302276307">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="-0.016977603363330287">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="44">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.002002542430280827">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09571752910976863">
+										<SimplePredicate field="glu" operator="lessThan" value="118.5"/>
+									</Node>
+									<Node id="3" score="0.07832458900928015">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="118.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="45">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.023311586137320595">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07913192913872208">
+										<SimplePredicate field="skin" operator="lessThan" value="32.337159760518446"/>
+									</Node>
+									<Node id="3" score="-0.04181214736431446">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="32.337159760518446"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="46">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.050626259748713834">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-6.795603828532193E-4">
+										<SimplePredicate field="skin" operator="lessThan" value="32.837159760518446"/>
+									</Node>
+									<Node id="3" score="0.12058874174630525">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="32.837159760518446"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="47">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.014593123531871567">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.08045355801166965">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="-0.08429402333046845">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="48">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04247975392314666">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.10714120473603653">
+										<SimplePredicate field="skin" operator="lessThan" value="35.7932346740183"/>
+									</Node>
+									<Node id="3" score="0.06097856737747712">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="35.7932346740183"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="49">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.011197220642293585">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.0916065881612309">
+										<SimplePredicate field="ped" operator="lessThan" value="0.425"/>
+									</Node>
+									<Node id="3" score="-0.09845191688353003">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.425"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="50">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.026358416090640952">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.03529201045500859">
+										<SimplePredicate field="skin" operator="lessThan" value="33.5"/>
+									</Node>
+									<Node id="3" score="0.11042717956198123">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="33.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="51">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.015614458770387191">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0868604035613737">
+										<SimplePredicate field="skin" operator="lessThan" value="38.5"/>
+									</Node>
+									<Node id="3" score="0.09837905289519124">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="38.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="52">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.02910802797617952">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08440788312085103">
+										<SimplePredicate field="bmi" operator="lessThan" value="37.5"/>
+									</Node>
+									<Node id="3" score="0.059371740255294896">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="37.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="53">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03629077123747851">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1378732629464141">
+										<SimplePredicate field="glu" operator="lessThan" value="119.5"/>
+									</Node>
+									<Node id="3" score="0.027198286080606246">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="119.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="54">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.009865287892436864">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.05356815680440319">
+										<SimplePredicate field="ped" operator="lessThan" value="0.484"/>
+									</Node>
+									<Node id="3" score="0.060059302366709255">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.484"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="55">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.04367701481895349">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.10828508660408465">
+										<SimplePredicate field="bmi" operator="lessThan" value="32.65"/>
+									</Node>
+									<Node id="3" score="-0.011701332425444641">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="32.65"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="56">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0075553769882911945">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.10279635985191576">
+										<SimplePredicate field="glu" operator="lessThan" value="140.0"/>
+									</Node>
+									<Node id="3" score="-0.1448301955935081">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="140.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="57">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03576602961370814">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.11571715920066841">
+										<SimplePredicate field="ped" operator="lessThan" value="0.427"/>
+									</Node>
+									<Node id="3" score="-0.07325823800487406">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.427"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="58">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.01554243702829923">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09088757622941897">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+									<Node id="3" score="0.08720093460959132">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="59">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.005951824829149855">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09013374185801792">
+										<SimplePredicate field="bp" operator="lessThan" value="77.0"/>
+									</Node>
+									<Node id="3" score="-0.11805165263084559">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="77.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="60">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.044754760433812185">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.11768488223546597">
+										<SimplePredicate field="glu" operator="lessThan" value="139.0"/>
+									</Node>
+									<Node id="3" score="-0.040330381668117206">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="139.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="61">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0020798842459290937">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1149099233203525">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.0878724097945356">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="62">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.09511498752075535">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.06378620172051816">
+										<SimplePredicate field="bmi" operator="lessThan" value="36.9"/>
+									</Node>
+									<Node id="3" score="-0.14524104480113484">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="36.9"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="63">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.004726933149014611">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09009404915703251">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="-0.05787561859019851">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="64">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.010608113142770393">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.03953818272370069">
+										<SimplePredicate field="bp" operator="lessThan" value="77.0"/>
+									</Node>
+									<Node id="3" score="-0.06911212498698664">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="77.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="65">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.040288892556830276">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.11629887347693331">
+										<SimplePredicate field="ped" operator="lessThan" value="0.47"/>
+									</Node>
+									<Node id="3" score="-0.06336108142512842">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.47"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="66">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.06241681079811297">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.01497699563844021">
+										<SimplePredicate field="bmi" operator="lessThan" value="32.65"/>
+									</Node>
+									<Node id="3" score="-0.09206669527290844">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="32.65"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="67">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.04440263553976597">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.018812125553128823">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.08391186122282521">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="68">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0632559070298329">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.0025938308816478655">
+										<SimplePredicate field="ped" operator="lessThan" value="0.383"/>
+									</Node>
+									<Node id="3" score="0.160315228866929">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.383"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="69">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.015453064631398323">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.04353469328884474">
+										<SimplePredicate field="ped" operator="lessThan" value="0.378"/>
+									</Node>
+									<Node id="3" score="0.10983347730378722">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.378"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="70">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.06371418994308248">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0033309897352843385">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="-0.11547121869262376">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="71">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01576625297333824">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.1035876068312107">
+										<SimplePredicate field="ped" operator="lessThan" value="0.33299999999999996"/>
+									</Node>
+									<Node id="3" score="-0.0720551008845342">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.33299999999999996"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="72">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.005057582419211147">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.13939336581972847">
+										<SimplePredicate field="bmi" operator="lessThan" value="33.6"/>
+									</Node>
+									<Node id="3" score="-0.07890228220611217">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="33.6"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="73">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.026868671521991263">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.014886761786320805">
+										<SimplePredicate field="ped" operator="lessThan" value="0.314"/>
+									</Node>
+									<Node id="3" score="-0.09367736481529056">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.314"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="74">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.002301736502179503">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.12394663998338157">
+										<SimplePredicate field="glu" operator="lessThan" value="126.5"/>
+									</Node>
+									<Node id="3" score="-0.10196532362456512">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="126.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="75">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04204800248970217">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.22767945316140634">
+										<SimplePredicate field="skin" operator="lessThan" value="31.40404980926645"/>
+									</Node>
+									<Node id="3" score="0.11706466951461568">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="31.40404980926645"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="76">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.030050203206652488">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09642046354886291">
+										<SimplePredicate field="skin" operator="lessThan" value="33.917448867104895"/>
+									</Node>
+									<Node id="3" score="0.04738176719259301">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="33.917448867104895"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="77">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.04447180712105311">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.13283982566563407">
+										<SimplePredicate field="bmi" operator="lessThan" value="33.05"/>
+									</Node>
+									<Node id="3" score="-0.01075820446931">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="33.05"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="78">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.013350730293722671">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.11491031765837956">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="-0.10513545496504371">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="79">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.047855424185489964">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.010101301185414937">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="-0.08560954718556499">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="80">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01779353239062983">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06071024698362498">
+										<SimplePredicate field="glu" operator="lessThan" value="138.0"/>
+									</Node>
+									<Node id="3" score="-0.05087321095816242">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="138.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="81">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.058454173946131976">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.15518487558805918">
+										<SimplePredicate field="skin" operator="lessThan" value="29.0"/>
+									</Node>
+									<Node id="3" score="-0.038276527695795245">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="29.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="82">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.049883551850269464">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09170152707563554">
+										<SimplePredicate field="glu" operator="lessThan" value="142.0"/>
+									</Node>
+									<Node id="3" score="0.01702520851031627">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="142.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="83">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04400298026163745">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09662135780491797">
+										<SimplePredicate field="glu" operator="lessThan" value="136.0"/>
+									</Node>
+									<Node id="3" score="0.017385126872189818">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="136.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="84">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03170900103671069">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.14843049612717704">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.06833799475511762">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="85">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.029041066490091978">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.14542464725933518">
+										<SimplePredicate field="glu" operator="lessThan" value="139.0"/>
+									</Node>
+									<Node id="3" score="-0.12966381637705784">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="139.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="86">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.05752170996562044">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.1426265367342047">
+										<SimplePredicate field="npreg" operator="lessThan" value="5.5"/>
+									</Node>
+									<Node id="3" score="-0.07864601286411435">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="5.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="87">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0072993638331979045">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.10632897661122676">
+										<SimplePredicate field="ped" operator="lessThan" value="0.2865"/>
+									</Node>
+									<Node id="3" score="-0.06532235220402326">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.2865"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="88">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.02173267248804797">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.10346678865522685">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="-0.048325141369533926">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="89">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.011404949805261048">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07458876105445315">
+										<SimplePredicate field="glu" operator="lessThan" value="140.0"/>
+									</Node>
+									<Node id="3" score="-0.06230949665212974">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="140.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="90">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03666660195002152">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.011001482046462419">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (40,50]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.11293553634439585">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="91">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.0370268519164853">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06484605937034554">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="-0.20002350997541463">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="92">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.02007480373635013">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06246756630626717">
+										<SimplePredicate field="bp" operator="lessThan" value="76.0635073697358"/>
+									</Node>
+									<Node id="3" score="-0.1326325810671919">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="76.0635073697358"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="93">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.019570667171030287">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.12152071697215744">
+										<SimplePredicate field="skin" operator="lessThan" value="31.40404980926645"/>
+									</Node>
+									<Node id="3" score="0.044148113954674176">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="31.40404980926645"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="94">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.05281402133874094">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.13350916041367297">
+										<SimplePredicate field="glu" operator="lessThan" value="124.5"/>
+									</Node>
+									<Node id="3" score="-0.04133030758201311">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="124.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="95">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03290512453865897">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09115379500925468">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+									<Node id="3" score="0.06029274821429414">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="96">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.007371437323399548">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1326818478176975">
+										<SimplePredicate field="glu" operator="lessThan" value="118.5"/>
+									</Node>
+									<Node id="3" score="0.09490474053658521">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="118.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="97">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.032252886801136714">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.06708257431448543">
+										<SimplePredicate field="bp" operator="lessThan" value="73.0785866601082"/>
+									</Node>
+									<Node id="3" score="0.11739756775738426">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="73.0785866601082"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="98">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.023501904807180497">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09996063944686225">
+										<SimplePredicate field="glu" operator="lessThan" value="118.5"/>
+									</Node>
+									<Node id="3" score="0.04203415345540387">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="118.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="99">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01939338835889274">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07112206704102896">
+										<SimplePredicate field="npreg" operator="lessThan" value="4.5"/>
+									</Node>
+									<Node id="3" score="-0.0633724975325252">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="4.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="100">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.003820526822985455">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.0973674978636979">
+										<SimplePredicate field="bmi" operator="lessThan" value="32.7"/>
+									</Node>
+									<Node id="3" score="-0.07802507825988658">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="32.7"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+					</Segmentation>
+				</MiningModel>
+			</Segment>
+			<Segment id="2">
+				<True/>
+				<MiningModel functionName="regression">
+					<MiningSchema>
+						<MiningField name="npreg"/>
+						<MiningField name="glu"/>
+						<MiningField name="bp"/>
+						<MiningField name="skin"/>
+						<MiningField name="bmi"/>
+						<MiningField name="ped"/>
+						<MiningField name="age"/>
+					</MiningSchema>
+					<Output>
+						<OutputField name="gbmValue(Yes)" optype="continuous" dataType="double" isFinalResult="false"/>
+					</Output>
+					<Segmentation multipleModelMethod="sum">
+						<Segment id="1">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.015384615384615385">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.16923076923076924">
+										<SimplePredicate field="ped" operator="lessThan" value="0.34199999999999997"/>
+									</Node>
+									<Node id="3" score="0.13846153846153847">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.34199999999999997"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="2">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03686833599479694">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.10751167470233475">
+										<SimplePredicate field="glu" operator="lessThan" value="123.0"/>
+									</Node>
+									<Node id="3" score="0.12710584268050426">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="123.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="3">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.016803127291359344">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.14824178296114238">
+										<SimplePredicate field="glu" operator="lessThan" value="124.5"/>
+									</Node>
+									<Node id="3" score="0.09585857756845467">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="124.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="4">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.012922146393610093">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.12979500074803915">
+										<SimplePredicate field="glu" operator="lessThan" value="126.5"/>
+									</Node>
+									<Node id="3" score="0.07278461346630455">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="126.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="5">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.04186007013169197">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09724191619926359">
+										<SimplePredicate field="glu" operator="lessThan" value="123.0"/>
+									</Node>
+									<Node id="3" score="0.1287988115885392">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="123.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="6">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.01755460593813701">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.14442331222790075">
+										<SimplePredicate field="ped" operator="lessThan" value="0.33299999999999996"/>
+									</Node>
+									<Node id="3" score="0.09118999945308907">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.33299999999999996"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="7">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.033981018258655356">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.12820630730274726">
+										<SimplePredicate field="bmi" operator="lessThan" value="33.45"/>
+									</Node>
+									<Node id="3" score="0.07594848562611851">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="33.45"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="8">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.006913234199377474">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08338859298864676">
+										<SimplePredicate field="glu" operator="lessThan" value="124.5"/>
+									</Node>
+									<Node id="3" score="0.08431480036054109">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="124.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="9">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.022955313803150763">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09237128249512847">
+										<SimplePredicate field="ped" operator="lessThan" value="0.47"/>
+									</Node>
+									<Node id="3" score="0.07170282532227339">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.47"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="10">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.003936240733917055">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.13613584441378687">
+										<SimplePredicate field="glu" operator="lessThan" value="116.0"/>
+									</Node>
+									<Node id="3" score="0.07868851156600158">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="116.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="11">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.056178611627260955">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.14756927313006948">
+										<SimplePredicate field="skin" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="-0.050443826792682334">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="12">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.04202046580393978">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.030831435697816125">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+									<Node id="3" score="0.15858350820674924">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="13">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.010723855005451175">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0998798563499269">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="0.10552703616720381">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="14">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05187273221056881">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1228369783608547">
+										<SimplePredicate field="glu" operator="lessThan" value="138.0"/>
+									</Node>
+									<Node id="3" score="0.06167006162988862">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="138.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="15">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05336693783355805">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1659220575010516">
+										<SimplePredicate field="bp" operator="lessThan" value="76.0635073697358"/>
+									</Node>
+									<Node id="3" score="0.10011731625847863">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="76.0635073697358"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="16">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01288358450021139">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.05411451940189367">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="0.12008055074357948">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="17">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01576037895737795">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.11369315884814352">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.84341634584875"/>
+									</Node>
+									<Node id="3" score="-0.117784320893666">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.84341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="18">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.018792740164802483">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.16099422162510046">
+										<SimplePredicate field="npreg" operator="lessThan" value="4.5"/>
+									</Node>
+									<Node id="3" score="0.14710898820554516">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="4.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="19">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0059037368341736">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.11318501235745082">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+									<Node id="3" score="0.14484061089106876">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="20">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04224488709800242">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.15411808245112807">
+										<SimplePredicate field="glu" operator="lessThan" value="140.0"/>
+									</Node>
+									<Node id="3" score="0.08827384081397749">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="140.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="21">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.05297052668107691">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.06241470933895757">
+										<SimplePredicate field="ped" operator="lessThan" value="0.48450000000000004"/>
+									</Node>
+									<Node id="3" score="0.1875866353711171">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.48450000000000004"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="22">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.0021182164541517644">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.05880939191147436">
+										<SimplePredicate field="skin" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="-0.09960238983915355">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="23">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.013906639456104234">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.06591360435242109">
+										<SimplePredicate field="bp" operator="lessThan" value="76.0635073697358"/>
+									</Node>
+									<Node id="3" score="0.12275242646772969">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="76.0635073697358"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="24">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.0031181468149927703">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06875090666693356">
+										<SimplePredicate field="bp" operator="lessThan" value="73.0785866601082"/>
+									</Node>
+									<Node id="3" score="-0.10112140156307414">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="73.0785866601082"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="25">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0841799928762248">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.16106516578893912">
+										<SimplePredicate field="ped" operator="lessThan" value="0.536"/>
+									</Node>
+									<Node id="3" score="-0.020663424732022005">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.536"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="26">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-3.0649865790442104E-4">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.0932546807525877">
+										<SimplePredicate field="skin" operator="lessThan" value="32.5"/>
+									</Node>
+									<Node id="3" score="-0.12788992512675731">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="32.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="27">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.006100972016968755">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.10727437144404886">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="0.10327983784069815">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="28">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03812109375387271">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.13324697450687537">
+										<SimplePredicate field="ped" operator="lessThan" value="0.33299999999999996"/>
+									</Node>
+									<Node id="3" score="0.05700478699912995">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.33299999999999996"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="29">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03763067675307024">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07359995951813342">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="0.1893088171228934">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="30">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.008480147546074847">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.05707631911304106">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="0.08496269198171008">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="31">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05408214188571017">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.14436692489891875">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="0.0512501049630332">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="32">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.026592397745101568">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.03198456352714688">
+										<SimplePredicate field="bp" operator="lessThan" value="69.0"/>
+									</Node>
+									<Node id="3" score="0.0768012216927431">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="69.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="33">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.016536934657245938">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08118827319495506">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="0.07162398153053921">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="34">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.004110601502542626">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07128235976482437">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="0.06306115675973913">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="35">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="1.0259271508830447E-4">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09987368954661065">
+										<SimplePredicate field="skin" operator="lessThan" value="31.40404980926645"/>
+									</Node>
+									<Node id="3" score="-0.062254342804613165">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="31.40404980926645"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="36">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.022066786461648863">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07273412298763461">
+										<SimplePredicate field="skin" operator="lessThan" value="29.5"/>
+									</Node>
+									<Node id="3" score="0.09158745339112341">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="29.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="37">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.01828430281136225">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07238110001406724">
+										<SimplePredicate field="npreg" operator="lessThan" value="3.5"/>
+									</Node>
+									<Node id="3" score="0.05548405701050818">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="3.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="38">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.008763273974020696">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.07666351938286123">
+										<SimplePredicate field="bmi" operator="lessThan" value="37.5"/>
+									</Node>
+									<Node id="3" score="-0.09987711868012417">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="37.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="39">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03929323371183041">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.05250220151903087">
+										<SimplePredicate field="glu" operator="lessThan" value="126.0"/>
+									</Node>
+									<Node id="3" score="0.1310886689426917">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="126.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="40">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03192824735793912">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.040029081122115694">
+										<SimplePredicate field="glu" operator="lessThan" value="137.0"/>
+									</Node>
+									<Node id="3" score="0.1300518771034684">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="137.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="41">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0395922590001291">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07011845258192285">
+										<SimplePredicate field="ped" operator="lessThan" value="0.271"/>
+									</Node>
+									<Node id="3" score="0.13363001178474507">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.271"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="42">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.007292260332397084">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08095253705261979">
+										<SimplePredicate field="npreg" operator="lessThan" value="4.5"/>
+									</Node>
+									<Node id="3" score="0.11056418241995923">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="4.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="43">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05144529189178975">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1312720030227631">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="0.01697760336333028">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="44">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0020025424302807997">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09571752910976859">
+										<SimplePredicate field="glu" operator="lessThan" value="118.5"/>
+									</Node>
+									<Node id="3" score="-0.07832458900928016">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="118.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="45">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.023311586137320588">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07913192913872208">
+										<SimplePredicate field="skin" operator="lessThan" value="32.337159760518446"/>
+									</Node>
+									<Node id="3" score="0.04181214736431448">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="32.337159760518446"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="46">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.050626259748713855">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="6.79560382853187E-4">
+										<SimplePredicate field="skin" operator="lessThan" value="32.837159760518446"/>
+									</Node>
+									<Node id="3" score="-0.12058874174630528">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="32.837159760518446"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="47">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.014593123531871595">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08045355801166965">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.5"/>
+									</Node>
+									<Node id="3" score="0.08429402333046851">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="48">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.04247975392314667">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.10714120473603653">
+										<SimplePredicate field="skin" operator="lessThan" value="35.7932346740183"/>
+									</Node>
+									<Node id="3" score="-0.0609785673774771">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="35.7932346740183"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="49">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.011197220642293592">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0916065881612309">
+										<SimplePredicate field="ped" operator="lessThan" value="0.425"/>
+									</Node>
+									<Node id="3" score="0.09845191688353004">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.425"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="50">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.026358416090640924">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.03529201045500862">
+										<SimplePredicate field="skin" operator="lessThan" value="33.5"/>
+									</Node>
+									<Node id="3" score="-0.11042717956198121">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="33.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="51">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.015614458770387182">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.08686040356137369">
+										<SimplePredicate field="skin" operator="lessThan" value="38.5"/>
+									</Node>
+									<Node id="3" score="-0.09837905289519122">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="38.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="52">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.029108027976179493">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.084407883120851">
+										<SimplePredicate field="bmi" operator="lessThan" value="37.5"/>
+									</Node>
+									<Node id="3" score="-0.059371740255294916">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="37.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="53">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03629077123747851">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.1378732629464141">
+										<SimplePredicate field="glu" operator="lessThan" value="119.5"/>
+									</Node>
+									<Node id="3" score="-0.027198286080606246">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="119.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="54">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.009865287892436883">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.05356815680440322">
+										<SimplePredicate field="ped" operator="lessThan" value="0.484"/>
+									</Node>
+									<Node id="3" score="-0.060059302366709255">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.484"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="55">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04367701481895345">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1082850866040846">
+										<SimplePredicate field="bmi" operator="lessThan" value="32.65"/>
+									</Node>
+									<Node id="3" score="0.01170133242544469">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="32.65"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="56">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.007555376988291182">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.10279635985191576">
+										<SimplePredicate field="glu" operator="lessThan" value="140.0"/>
+									</Node>
+									<Node id="3" score="0.14483019559350815">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="140.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="57">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03576602961370809">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.11571715920066837">
+										<SimplePredicate field="ped" operator="lessThan" value="0.427"/>
+									</Node>
+									<Node id="3" score="0.0732582380048741">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.427"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="58">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.015542437028299225">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08720093460959133">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.09088757622941895">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="59">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.005951824829149855">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09013374185801792">
+										<SimplePredicate field="bp" operator="lessThan" value="77.0"/>
+									</Node>
+									<Node id="3" score="0.1180516526308456">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="77.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="60">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.044754760433812164">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.11768488223546597">
+										<SimplePredicate field="glu" operator="lessThan" value="139.0"/>
+									</Node>
+									<Node id="3" score="0.040330381668117254">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="139.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="61">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.002079884245929107">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08787240979453563">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+									<Node id="3" score="0.1149099233203525">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="62">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.09511498752075535">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06378620172051817">
+										<SimplePredicate field="bmi" operator="lessThan" value="36.9"/>
+									</Node>
+									<Node id="3" score="0.14524104480113484">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="36.9"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="63">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.004726933149014618">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.09009404915703248">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="0.05787561859019849">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="64">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.010608113142770373">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.039538182723700716">
+										<SimplePredicate field="bp" operator="lessThan" value="77.0"/>
+									</Node>
+									<Node id="3" score="0.06911212498698664">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="77.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="65">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.040288892556830276">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.11629887347693331">
+										<SimplePredicate field="ped" operator="lessThan" value="0.47"/>
+									</Node>
+									<Node id="3" score="0.0633610814251284">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.47"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="66">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.062416810798112926">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.014976995638440183">
+										<SimplePredicate field="bmi" operator="lessThan" value="32.65"/>
+									</Node>
+									<Node id="3" score="0.0920666952729084">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="32.65"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="67">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.04440263553976597">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.08391186122282521">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+									<Node id="3" score="0.018812125553128823">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="68">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.06325590702983289">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0025938308816478442">
+										<SimplePredicate field="ped" operator="lessThan" value="0.383"/>
+									</Node>
+									<Node id="3" score="-0.16031522886692895">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.383"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="69">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.015453064631398304">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.04353469328884477">
+										<SimplePredicate field="ped" operator="lessThan" value="0.378"/>
+									</Node>
+									<Node id="3" score="-0.10983347730378722">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.378"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="70">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.06371418994308246">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.0033309897352842887">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="0.11547121869262372">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="71">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.015766252973338227">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.10358760683121067">
+										<SimplePredicate field="ped" operator="lessThan" value="0.33299999999999996"/>
+									</Node>
+									<Node id="3" score="0.0720551008845342">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.33299999999999996"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="72">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.005057582419211188">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.13939336581972847">
+										<SimplePredicate field="bmi" operator="lessThan" value="33.6"/>
+									</Node>
+									<Node id="3" score="0.07890228220611212">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="33.6"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="73">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.02686867152199129">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.014886761786320766">
+										<SimplePredicate field="ped" operator="lessThan" value="0.314"/>
+									</Node>
+									<Node id="3" score="0.09367736481529057">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.314"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="74">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.002301736502179496">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.12394663998338158">
+										<SimplePredicate field="glu" operator="lessThan" value="126.5"/>
+									</Node>
+									<Node id="3" score="0.10196532362456515">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="126.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="75">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.042048002489702224">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.22767945316140648">
+										<SimplePredicate field="skin" operator="lessThan" value="31.40404980926645"/>
+									</Node>
+									<Node id="3" score="-0.1170646695146157">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="31.40404980926645"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="76">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.030050203206652505">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09642046354886295">
+										<SimplePredicate field="skin" operator="lessThan" value="33.917448867104895"/>
+									</Node>
+									<Node id="3" score="-0.04738176719259301">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="33.917448867104895"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="77">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.044471807121053114">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.1328398256656341">
+										<SimplePredicate field="bmi" operator="lessThan" value="33.05"/>
+									</Node>
+									<Node id="3" score="0.010758204469309994">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="33.05"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="78">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.013350730293722671">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.11491031765837958">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="0.10513545496504371">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="79">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.047855424185489964">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.01010130118541492">
+										<SimplePredicate field="bp" operator="lessThan" value="71.0"/>
+									</Node>
+									<Node id="3" score="0.085609547185565">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="71.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="80">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.01779353239062984">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.060710246983624996">
+										<SimplePredicate field="glu" operator="lessThan" value="138.0"/>
+									</Node>
+									<Node id="3" score="0.05087321095816242">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="138.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="81">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.058454173946131976">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.15518487558805916">
+										<SimplePredicate field="skin" operator="lessThan" value="29.0"/>
+									</Node>
+									<Node id="3" score="0.03827652769579523">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="29.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="82">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.049883551850269485">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09170152707563557">
+										<SimplePredicate field="glu" operator="lessThan" value="142.0"/>
+									</Node>
+									<Node id="3" score="-0.01702520851031625">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="142.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="83">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.044002980261637493">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09662135780491804">
+										<SimplePredicate field="glu" operator="lessThan" value="136.0"/>
+									</Node>
+									<Node id="3" score="-0.017385126872189804">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="136.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="84">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03170900103671067">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.06833799475511762">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+									<Node id="3" score="0.14843049612717704">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="85">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.029041066490092006">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.14542464725933518">
+										<SimplePredicate field="glu" operator="lessThan" value="139.0"/>
+									</Node>
+									<Node id="3" score="0.1296638163770578">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="139.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="86">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05752170996562042">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.14262653673420467">
+										<SimplePredicate field="npreg" operator="lessThan" value="5.5"/>
+									</Node>
+									<Node id="3" score="0.07864601286411438">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="5.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="87">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="ped"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.007299363833197911">
+										<SimplePredicate field="ped" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.10632897661122671">
+										<SimplePredicate field="ped" operator="lessThan" value="0.2865"/>
+									</Node>
+									<Node id="3" score="0.06532235220402322">
+										<SimplePredicate field="ped" operator="greaterOrEqual" value="0.2865"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="88">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.02173267248804794">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.10346678865522684">
+										<SimplePredicate field="npreg" operator="lessThan" value="2.5"/>
+									</Node>
+									<Node id="3" score="0.04832514136953397">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="2.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="89">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.011404949805261088">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07458876105445317">
+										<SimplePredicate field="glu" operator="lessThan" value="140.0"/>
+									</Node>
+									<Node id="3" score="0.062309496652129676">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="140.0"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="90">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.03666660195002154">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.11293553634439586">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.01100148204646242">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(20,30] (40,50]</Array>
+										</SimpleSetPredicate>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="91">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.03702685191648528">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0648460593703456">
+										<SimplePredicate field="bmi" operator="lessThan" value="34.59341634584875"/>
+									</Node>
+									<Node id="3" score="0.20002350997541474">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="34.59341634584875"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="92">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.0200748037363501">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.06246756630626718">
+										<SimplePredicate field="bp" operator="lessThan" value="76.0635073697358"/>
+									</Node>
+									<Node id="3" score="0.13263258106719186">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="76.0635073697358"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="93">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="skin"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.01957066717103025">
+										<SimplePredicate field="skin" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.12152071697215738">
+										<SimplePredicate field="skin" operator="lessThan" value="31.40404980926645"/>
+									</Node>
+									<Node id="3" score="-0.04414811395467422">
+										<SimplePredicate field="skin" operator="greaterOrEqual" value="31.40404980926645"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="94">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.05281402133874091">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.13350916041367294">
+										<SimplePredicate field="glu" operator="lessThan" value="124.5"/>
+									</Node>
+									<Node id="3" score="0.041330307582013136">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="124.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="95">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="age"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.032905124538659014">
+										<SimplePredicate field="age" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.060292748214294103">
+										<SimpleSetPredicate field="age" booleanOperator="isIn">
+											<Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+										</SimpleSetPredicate>
+									</Node>
+									<Node id="3" score="0.0911537950092547">
+										<SimplePredicate field="age" operator="equal" value="(20,30]"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="96">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.007371437323399576">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.13268184781769743">
+										<SimplePredicate field="glu" operator="lessThan" value="118.5"/>
+									</Node>
+									<Node id="3" score="-0.09490474053658521">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="118.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="97">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bp"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.032252886801136776">
+										<SimplePredicate field="bp" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.06708257431448537">
+										<SimplePredicate field="bp" operator="lessThan" value="73.0785866601082"/>
+									</Node>
+									<Node id="3" score="-0.11739756775738433">
+										<SimplePredicate field="bp" operator="greaterOrEqual" value="73.0785866601082"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="98">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="glu"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.023501904807180493">
+										<SimplePredicate field="glu" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="0.09996063944686226">
+										<SimplePredicate field="glu" operator="lessThan" value="118.5"/>
+									</Node>
+									<Node id="3" score="-0.04203415345540387">
+										<SimplePredicate field="glu" operator="greaterOrEqual" value="118.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="99">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="npreg"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="-0.019393388358892732">
+										<SimplePredicate field="npreg" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.07112206704102897">
+										<SimplePredicate field="npreg" operator="lessThan" value="4.5"/>
+									</Node>
+									<Node id="3" score="0.06337249753252525">
+										<SimplePredicate field="npreg" operator="greaterOrEqual" value="4.5"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+						<Segment id="100">
+							<True/>
+							<TreeModel functionName="regression">
+								<MiningSchema>
+									<MiningField name="bmi"/>
+								</MiningSchema>
+								<Node id="1">
+									<True/>
+									<Node id="4" score="0.003820526822985455">
+										<SimplePredicate field="bmi" operator="isMissing"/>
+									</Node>
+									<Node id="2" score="-0.0973674978636979">
+										<SimplePredicate field="bmi" operator="lessThan" value="32.7"/>
+									</Node>
+									<Node id="3" score="0.07802507825988658">
+										<SimplePredicate field="bmi" operator="greaterOrEqual" value="32.7"/>
+									</Node>
+								</Node>
+							</TreeModel>
+						</Segment>
+					</Segmentation>
+				</MiningModel>
+			</Segment>
+			<Segment id="3">
+				<True/>
+				<RegressionModel functionName="classification" normalizationMethod="softmax">
+					<MiningSchema>
+						<MiningField name="type" usageType="target"/>
+						<MiningField name="gbmValue(No)"/>
+						<MiningField name="gbmValue(Yes)"/>
+					</MiningSchema>
+					<Output>
+						<OutputField name="probability(No)" optype="continuous" dataType="double" feature="probability" value="No"/>
+						<OutputField name="probability(Yes)" optype="continuous" dataType="double" feature="probability" value="Yes"/>
+					</Output>
+					<RegressionTable intercept="0.0" targetCategory="No">
+						<NumericPredictor name="gbmValue(No)" coefficient="1.0"/>
+					</RegressionTable>
+					<RegressionTable intercept="0.0" targetCategory="Yes">
+						<NumericPredictor name="gbmValue(Yes)" coefficient="1.0"/>
+					</RegressionTable>
+				</RegressionModel>
+			</Segment>
+		</Segmentation>
+	</MiningModel>
+</PMML>

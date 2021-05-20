@@ -38,38 +38,11 @@ class TestTree(TestCase):
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
-      pmml = path.join(BASE_DIR, '../models/decisionTree.pmml')
+      pmml = path.join(BASE_DIR, '../models/tree-iris.pmml')
       clf = PMMLTreeClassifier(pmml=pmml)
       clf.fit(np.array([[]]), np.array([]))
 
     assert str(cm.exception) == 'Not supported.'
-
-  def test_incomplete_node(self):
-    with self.assertRaises(Exception) as cm:
-      PMMLTreeClassifier(pmml=StringIO("""
-          <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
-            <DataDictionary>
-              <DataField name="Class" optype="categorical" dataType="string">
-                <Value value="setosa"/>
-                <Value value="versicolor"/>
-                <Value value="virginica"/>
-              </DataField>
-            </DataDictionary>
-            <MiningSchema>
-              <MiningField name="Class" usageType="target"/>
-            </MiningSchema>
-            <TreeModel splitCharacteristic="binarySplit">
-              <Node id="1">
-                <True/>
-                <Node id="2"/>
-              </Node>
-            </TreeModel>
-          </PMML>
-          """))
-
-    assert str(cm.exception) == 'Node has insufficient information to ' \
-                                'determine output: recordCount or score ' \
-                                'attributes expected'
 
   def test_unsupported_predicate(self):
       with self.assertRaises(Exception) as cm:
@@ -103,7 +76,7 @@ class TestTree(TestCase):
                                   ' structure in Node 2'
 
   def test_tree_threshold_value(self):
-    clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/categorical.pmml'))
+    clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/tree-cat-pima.pmml'))
     assert clf.tree_.threshold == [[0, 4], 25.18735, -2, 125.5, -2, -2, 20.02033, -2, -2]
 
 
@@ -120,7 +93,7 @@ class TestIrisTreeIntegration(TestCase):
     self.test = (Xte, yte)
     self.train = (X, y)
 
-    pmml = path.join(BASE_DIR, '../models/decisionTree.pmml')
+    pmml = path.join(BASE_DIR, '../models/tree-iris.pmml')
     self.clf = PMMLTreeClassifier(pmml=pmml)
     self.ref = DecisionTreeClassifier(random_state=1).fit(X, y)
 
@@ -145,11 +118,11 @@ class TestIrisTreeIntegration(TestCase):
       ("classifier", self.ref)
     ])
     pipeline.fit(self.train[0], self.train[1])
-    sklearn2pmml(pipeline, "tree_sklearn2pmml.pmml", with_repr = True)
+    sklearn2pmml(pipeline, "tree-sklearn2pmml.pmml", with_repr = True)
 
     try:
       # Import PMML
-      model = PMMLTreeClassifier(pmml='tree_sklearn2pmml.pmml')
+      model = PMMLTreeClassifier(pmml='tree-sklearn2pmml.pmml')
 
       # Verify classification
       Xte, _ = self.test
@@ -159,7 +132,7 @@ class TestIrisTreeIntegration(TestCase):
       )
 
     finally:
-      remove("tree_sklearn2pmml.pmml")
+      remove("tree-sklearn2pmml.pmml")
 
 
 
@@ -176,7 +149,7 @@ class TestDigitsTreeIntegration(TestCase):
     X, Xte, y, yte = train_test_split(X, y, test_size=0.33, random_state=123)
     self.test = (Xte, yte)
 
-    self.clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/digits.pmml'))
+    self.clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/tree-digits.pmml'))
     self.ref = DecisionTreeClassifier(random_state=1).fit(X, y)
 
   def test_predict(self):
@@ -200,7 +173,7 @@ class TestDigitsTreeIntegration(TestCase):
 
 class TestCategoricalTreeIntegration(TestCase):
   def setUp(self):
-    self.clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/cat.pmml'))
+    self.clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/tree-cat.pmml'))
 
   def test_predict(self):
     Xte = np.array([[0], [1], [2]])
@@ -220,7 +193,7 @@ class TestCategoricalPimaTreeIntegration(TestCase):
     yte = df.iloc[:, 0]
     self.test = (Xte, yte)
 
-    pmml = path.join(BASE_DIR, '../models/categorical.pmml')
+    pmml = path.join(BASE_DIR, '../models/tree-cat-pima.pmml')
     self.clf = PMMLTreeClassifier(pmml)
 
   def test_predict_proba(self):
