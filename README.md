@@ -18,14 +18,23 @@ $ pip install sklearn-pmml-model
 ```
 
 ## Status
-This library is very alpha, and currently only supports a limited number of models. The library currently supports the following models:
-- [Decision Trees](sklearn_pmml_model/tree) (`sklearn_pmml_model.tree.PMMLTreeClassifier`)
-- [Random Forests](sklearn_pmml_model/ensemble) (`sklearn_pmml_model.ensemble.PMMLForestClassifier`)
-- [Linear Regression](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLLinearRegression`)
-- [Ridge](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLRidge`)
-- [Lasso](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLLasso`)
-- [ElasticNet](sklearn_pmml_model/linear_model) (`sklearn_pmml_model.linear_model.PMMLElasticNet`)
-- [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) (`sklearn_pmml_model.naive_bayes.PMMLGaussianNB`)
+This library is in beta, and currently not all models are supported. The library currently does support the following models:
+
+| Model                  | Classification | Regression | Categorical features |
+|------------------------|----------------|------------|----------------------|
+| [Decision Trees](sklearn_pmml_model/tree) | ✅              |            | ✅<sup>1</sup>        |
+| [Random Forests](sklearn_pmml_model/ensemble) | ✅              |            | ✅<sup>1</sup>        |
+| [Gradient Boosting](sklearn_pmml_model/ensemble) | ✅              |            | ✅<sup>1</sup>        |
+| [Linear Regression](sklearn_pmml_model/linear_model) |                | ✅          |                      |
+| [Ridge](sklearn_pmml_model/linear_model) |                | ✅          |                      |
+| [Lasso](sklearn_pmml_model/linear_model) |                | ✅          |                      |
+| [ElasticNet](sklearn_pmml_model/linear_model) |                | ✅          |                      |
+| [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅              |            |                      |
+
+<sup>1</sup> Categorical feature support using slightly modified internals, based on [scikit-learn#12866](https://github.com/scikit-learn/scikit-learn/pull/12866).
+
+
+---
 
 The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html) is covered:
 - DataDictionary
@@ -37,12 +46,12 @@ The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStruct
 - TreeModel
   - SimplePredicate
   - SimpleSetPredicate
-- Segmentation ('majorityVote' only, for Random Forests)
+- Segmentation *('majorityVote' for Random Forests, 'modelChain' and 'sum' for Gradient Boosting)*
 - Regression
   - RegressionTable
     - NumericPredictor
     - CategoricalPredictor
-- GeneralRegressionModel (only linear models)
+- GeneralRegressionModel *(only linear models)*
   - PPMatrix
     - PPCell
   - ParamMatrix
