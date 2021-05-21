@@ -87,5 +87,3 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
 
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
-
-

@@ -83,7 +83,7 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
 
 def unflatten(node):
   """
-  This method converts a `mutliSplit` decision tree into a `binarySplit`
+  This method converts a `multiSplit` decision tree into a `binarySplit`
   decision tree which is expressively equivalent.
 
   Parameters
@@ -98,7 +98,10 @@ def unflatten(node):
 
   """
   child_nodes = node.findall('Node')
-  child_nodes = [node for node in child_nodes if getattr(node.find('SimplePredicate'),'attrib', {}).get('operator') != 'isMissing']
+  child_nodes = [
+    node for node in child_nodes
+    if getattr(node.find('SimplePredicate'), 'attrib', {}).get('operator') != 'isMissing'  # filter isMissing nodes
+  ]
 
   parent = node
   for child in child_nodes:
@@ -138,6 +141,10 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
   i : int
       Index of the node in the result list.
 
+  rescale_factor : float
+      Factor to scale the output of every node with. Required for gradient
+      boosting trees. Optional, and 1 by default.
+
   Returns
   -------
   (nodes, values) : tuple
@@ -155,22 +162,20 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
   impurity = 0  # TODO: impurity doesnt affect predictions, but is nice to have
   i += 1
 
+  def votes_for(field):
+    # Deal with case where target field is a double, but ScoreDistribution value is an integer.
+    if isinstance(field, float) and field.is_integer():
+      return node.find(f"ScoreDistribution[@value='{field}']") or node.find(f"ScoreDistribution[@value='{int(field)}']")
+
+    return node.find(f"ScoreDistribution[@value='{field}']")
+
   if not child_nodes:
     record_count = node.get('recordCount')
 
     if record_count is not None:
       node_count_weighted = float(record_count)
       node_count = int(node_count_weighted)
-
-      def votesFor(target):
-        # Deal with case where targetfield a double, but ScoreDistribution value
-        # is an integer.
-        if isinstance(target, float) and target.is_integer():
-          return node.find(f"ScoreDistribution[@value='{target}']") or node.find(f"ScoreDistribution[@value='{int(target)}']")
-
-        return node.find(f"ScoreDistribution[@value='{target}']")
-
-      votes = [[[float(votesFor(c).get('recordCount')) if votesFor(c) is not None else 0.0 for c in classes]]]
+      votes = [[[float(votes_for(c).get('recordCount')) if votes_for(c) is not None else 0.0 for c in classes]]]
     else:
       score = node.get('score')
       node_count, node_count_weighted = (0, 0.0)
@@ -188,16 +193,23 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
   set_predicate = child_nodes[0].find('SimpleSetPredicate')
 
   # Convert SimplePredicate with equals operator on category to set predicate
-  if predicate is not None and predicate.get('operator') == 'equal' and isinstance(field_mapping[predicate.get('field')][1], Category):
-    set_predicate = eTree.fromstring(f'''<SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isIn">
-     <Array type="string">{predicate.get('value')}</Array>
-    </SimpleSetPredicate>''')
-    predicate = None
-  elif predicate is not None and predicate.get('operator') == 'notEqual' and isinstance(field_mapping[predicate.get('field')][1], Category):
-    set_predicate = eTree.fromstring(f'''<SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isNotIn">
-     <Array type="string">{predicate.get('value')}</Array>
-    </SimpleSetPredicate>''')
-    predicate = None
+  if predicate is not None:
+    is_categorical = isinstance(field_mapping[predicate.get('field')][1], Category)
+
+    if predicate.get('operator') == 'equal' and is_categorical:
+      set_predicate = eTree.fromstring(f'''
+      <SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isIn">
+       <Array type="string">{predicate.get('value')}</Array>
+      </SimpleSetPredicate>
+      ''')
+      predicate = None
+    elif predicate.get('operator') == 'notEqual' and is_categorical:
+      set_predicate = eTree.fromstring(f'''
+      <SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isNotIn">
+       <Array type="string">{predicate.get('value')}</Array>
+      </SimpleSetPredicate>
+      ''')
+      predicate = None
 
   if predicate is not None and predicate.get('operator') in ['greaterThan', 'greaterOrEqual']:
     child_nodes.reverse()
@@ -266,7 +278,7 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
          [distribution] + distributions
 
 
-def get_tree(est, segment, rescale_factor=1):
+def get_tree(est, segment, rescale_factor=1) -> object:
   """
   Method to train a single tree for a <Segment> PMML element.
 
@@ -280,10 +292,15 @@ def get_tree(est, segment, rescale_factor=1):
       <Segment> element containing the decision tree to be imported.
       Only segments with a <True/> predicate are supported.
 
+  rescale_factor : float
+      Factor to scale the output of every node with. Required for gradient
+      boosting trees. Optional, and 1 by default.
+
   Returns
   -------
-  tree : sklearn.tree.DecisionTreeClassifier
-      The sklearn decision tree instance imported from the provided segment.
+  tree : sklearn.tree.DecisionTreeClassifier, sklearn.tree.DecisionTreeRegressor
+      The sklearn decision tree instance imported from the provided segment,
+      matching the type specified in est.template_estimator.
 
   """
   tree = clone(est.template_estimator)

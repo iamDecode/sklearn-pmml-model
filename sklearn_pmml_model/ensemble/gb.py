@@ -1,5 +1,6 @@
+from abc import ABC
+
 import numpy as np
-import warnings
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import GradientBoostingClassifier, _gb_losses
 from sklearn_pmml_model.base import PMMLBaseClassifier
@@ -8,7 +9,7 @@ from scipy.special import expit
 from ._gradient_boosting import predict_stages
 
 
-class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassifier):
+class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassifier, ABC):
   """
   Gradient Boosting for classification.
 
@@ -57,7 +58,10 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
       indices = [0]
 
     for i in indices:
-      valid_segments[i] = [segment for segment in segments[i].find('MiningModel').find('Segmentation').findall('Segment') if segment.find('True') is not None and segment.find('TreeModel') is not None]
+      valid_segments[i] = [
+        segment for segment in segments[i].find('MiningModel').find('Segmentation').findall('Segment')
+        if segment.find('True') is not None and segment.find('TreeModel') is not None
+      ]
 
     n_estimators = len(valid_segments[0])
     GradientBoostingClassifier.__init__(self, n_estimators=n_estimators)
@@ -86,26 +90,26 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
       if self.n_classes_ == 2:
         self.init_.class_prior_ = [self.init_.class_prior_[0], 1 - self.init_.class_prior_[0]]
 
-      self.init_.classes_ = [i for i,_ in enumerate(self.classes_)]
+      self.init_.classes_ = [i for i, _ in enumerate(self.classes_)]
       self.init_.n_classes_ = self.n_classes_
       self.init_.n_outputs_ = 1
       self.init_._strategy = self.init_.strategy
-    except:
+    except AttributeError:
       self.init = 'zero'
       self._init_state()
 
-    for x,y in np.ndindex(self.estimators_.shape):
+    for x, y in np.ndindex(self.estimators_.shape):
       try:
         factor = float(segments[y].find('MiningModel').find('Targets').find('Target').get('rescaleFactor', 1))
-        self.estimators_[x,y] = get_tree(self, valid_segments[y][x], rescale_factor=factor)
-      except:
-        self.estimators_[x,y] = get_tree(self, valid_segments[y][x])
+        self.estimators_[x, y] = get_tree(self, valid_segments[y][x], rescale_factor=factor)
+      except AttributeError:
+        self.estimators_[x, y] = get_tree(self, valid_segments[y][x])
 
     # Required after constructing trees, because categories may be inferred in
     # the parsing process
     target = self.target_field.get('name')
     fields = [field for name, field in self.fields.items() if name != target]
-    for x,y in np.ndindex(self.estimators_.shape): # FIXME: should work for mutli class too
+    for x, y in np.ndindex(self.estimators_.shape):
       clf = self.estimators_[x, y]
       n_categories = np.asarray([
         len(self.field_mapping[field.get('name')][1].categories)
@@ -116,14 +120,13 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
       clf.n_categories = n_categories
       clf.tree_.set_n_categories(n_categories)
 
-    self.categorical = [x != -1 for x in self.estimators_[0,0].n_categories]
+    self.categorical = [x != -1 for x in self.estimators_[0, 0].n_categories]
 
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
 
-  def _raw_predict(self, X):
+  def _raw_predict(self, x):
     """Override to support categorical features"""
-    raw_predictions = self._raw_predict_init(X)
-    predict_stages(self.estimators_, X, self.learning_rate,
-                   raw_predictions)
+    raw_predictions = self._raw_predict_init(x)
+    predict_stages(self.estimators_, x, self.learning_rate, raw_predictions)
     return raw_predictions
