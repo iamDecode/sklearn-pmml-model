@@ -13,17 +13,17 @@
             splitter='best'))])</Extension>
     </MiningBuildTask>
     <DataDictionary>
-        <DataField name="Class" optype="categorical" dataType="integer">
-            <Value value="0"/>
-            <Value value="1"/>
-            <Value value="2"/>
-            <Value value="3"/>
-            <Value value="4"/>
-            <Value value="5"/>
-            <Value value="6"/>
-            <Value value="7"/>
-            <Value value="8"/>
-            <Value value="9"/>
+        <DataField name="Class" optype="categorical" dataType="float">
+            <Value value="0.0"/>
+            <Value value="1.0"/>
+            <Value value="2.0"/>
+            <Value value="3.0"/>
+            <Value value="4.0"/>
+            <Value value="5.0"/>
+            <Value value="6.0"/>
+            <Value value="7.0"/>
+            <Value value="8.0"/>
+            <Value value="9.0"/>
         </DataField>
         <DataField name="2" optype="continuous" dataType="float"/>
         <DataField name="3" optype="continuous" dataType="float"/>
