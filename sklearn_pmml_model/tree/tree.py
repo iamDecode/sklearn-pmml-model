@@ -80,6 +80,9 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
 
+  def _more_tags(self):
+    return DecisionTreeClassifier._more_tags(self)
+
 
 def unflatten(node):
   """

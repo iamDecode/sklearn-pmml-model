@@ -71,3 +71,9 @@ class PMMLGaussianNB(PMMLBaseClassifier, GaussianNB):
       for name, field in self.fields.items()
       if field is not self.target_field
     ]))
+
+  def fit(self, x, y):
+    return PMMLBaseClassifier.fit(self, x, y)
+
+  def _more_tags(self):
+    return GaussianNB._more_tags(self)

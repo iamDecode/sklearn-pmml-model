@@ -85,6 +85,10 @@ class TestGradientBoosting(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  def test_more_tags(self):
+    clf = PMMLGradientBoostingClassifier(path.join(BASE_DIR, '../models/gb-xgboost-iris.pmml'))
+    assert clf._more_tags() == GradientBoostingClassifier()._more_tags()
+
 
 class TestIrisGradientBoostingIntegration(TestCase):
   def setUp(self):

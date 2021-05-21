@@ -81,6 +81,10 @@ class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
   def fit(self, x, y):
     return PMMLLinearModel.fit(self, x, y)
 
+  def _more_tags(self):
+    return LinearRegression._more_tags(self)
+
+
 '''
 NOTE: Many of these variants only differ in the training part, not the 
 classification part. Hence they are equavalent in terms of parsing.
@@ -91,6 +95,9 @@ class PMMLRidge(PMMLGeneralRegression, Ridge):
   def fit(self, x, y):
     return PMMLGeneralRegression.fit(self, x, y)
 
+  def _more_tags(self):
+    return Ridge._more_tags(self)
+
 
 class PMMLLasso(PMMLGeneralRegression, Lasso):
   def __init__(self, pmml):
@@ -100,6 +107,9 @@ class PMMLLasso(PMMLGeneralRegression, Lasso):
   def fit(self, x, y):
     return PMMLGeneralRegression.fit(self, x, y)
 
+  def _more_tags(self):
+    return Lasso._more_tags(self)
+
 
 class PMMLElasticNet(PMMLGeneralRegression, ElasticNet):
   def __init__(self, pmml):
@@ -108,3 +118,6 @@ class PMMLElasticNet(PMMLGeneralRegression, ElasticNet):
 
   def fit(self, x, y):
     return PMMLGeneralRegression.fit(self, x, y)
+
+  def _more_tags(self):
+    return ElasticNet._more_tags(self)

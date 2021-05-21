@@ -1,5 +1,6 @@
 from unittest import TestCase
 import sklearn_pmml_model
+from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
 from sklearn_pmml_model.linear_model import PMMLLinearRegression, PMMLRidge, PMMLLasso, PMMLElasticNet
 import pandas as pd
 import numpy as np
@@ -83,6 +84,9 @@ class TestLinearRegressionIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  def test_more_tags(self):
+    assert self.clf._more_tags() == LinearRegression()._more_tags()
+
 
 class TestGeneralRegression(TestCase):
   def test_invalid_model(self):
@@ -159,6 +163,7 @@ class TestGeneralRegression(TestCase):
 
     assert str(cm.exception) == 'This model does not support multiple outputs.'
 
+
 class TestGeneralRegressionIntegration(TestCase):
   def setUp(self):
     df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
@@ -208,6 +213,9 @@ class TestRidgeIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  def test_more_tags(self):
+    assert self.clf._more_tags() == Ridge()._more_tags()
+
 
 class TestLassoIntegration(TestCase):
   def setUp(self):
@@ -237,6 +245,9 @@ class TestLassoIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  def test_more_tags(self):
+    assert self.clf._more_tags() == Lasso()._more_tags()
+
 
 class TestElasticNetIntegration(TestCase):
   def setUp(self):
@@ -265,3 +276,6 @@ class TestElasticNetIntegration(TestCase):
       self.clf.fit(np.array([[]]), np.array([]))
 
     assert str(cm.exception) == 'Not supported.'
+
+  def test_more_tags(self):
+    assert self.clf._more_tags() == ElasticNet()._more_tags()
