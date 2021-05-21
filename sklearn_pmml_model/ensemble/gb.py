@@ -130,3 +130,6 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
     raw_predictions = self._raw_predict_init(x)
     predict_stages(self.estimators_, x, self.learning_rate, raw_predictions)
     return raw_predictions
+
+  def _more_tags(self):
+    return GradientBoostingClassifier._more_tags(self)

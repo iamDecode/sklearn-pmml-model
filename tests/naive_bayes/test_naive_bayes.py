@@ -62,6 +62,10 @@ class TestNaiveBayes(TestCase):
 
     assert str(cm.exception) == 'Distribution "PoissonDistribution" not implemented, or not supported by scikit-learn'
 
+  def test_more_tags(self):
+    clf = PMMLGaussianNB(path.join(BASE_DIR, '../models/nb-cat-pima.pmml'))
+    assert clf._more_tags() == GaussianNB()._more_tags()
+
 
 class TestGaussianNBIntegration(TestCase):
   def setUp(self):

@@ -113,6 +113,10 @@ class TestForest(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  def test_more_tags(self):
+      clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/rf-cat-pima.pmml'))
+      assert clf._more_tags() == RandomForestClassifier()._more_tags()
+
 
 class TestIrisForestIntegration(TestCase):
   def setUp(self):

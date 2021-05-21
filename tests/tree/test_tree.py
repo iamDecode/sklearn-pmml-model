@@ -80,6 +80,10 @@ class TestTree(TestCase):
     assert clf.tree_.threshold[0] == [0, 4]
     assert np.allclose(clf.tree_.threshold[1:], [25.18735, -2, 125.5, -2, -2, 20.02033, -2, -2])
 
+  def test_more_tags(self):
+    clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/tree-cat-pima.pmml'))
+    assert clf._more_tags() == DecisionTreeClassifier()._more_tags()
+
 
 class TestIrisTreeIntegration(TestCase):
   def setUp(self):
