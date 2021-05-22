@@ -64,6 +64,34 @@ Pima.tr2
 
 
 
+library(glmnet)
+library(r2pmml)
+test = read.csv('/Users/decode/Developer/sklearn-pmml-model/models/categorical-test.csv', header=TRUE, sep=",")
+test$age = as.factor(test$age)
+test$type = as.factor(test$type)
+
+x = model.matrix(type ~ ., test)[,-1]
+y = ifelse(test$type == "Yes", 1, 0)
+
+clf = glmnet(x, test$type, family = "multinomial")
+lambda = cv.glmnet(x, y)$lambda.1se
+clf = decorate(clf, lambda.s = lambda)
+
+predict(clf, x)
+
+#fmap = as.fmap(as.matrix(test)), 
+r2pmml(clf, "pima_lmc.pmml", lambda.s = lambda)
+
+
+
+
+
+preds <- predict(clf, newdata = test)
+conf_matrix <- table(preds, test$type)
+conf_matrix
+
+
+
 
 library(gbm)
 library(r2pmml)

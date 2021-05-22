@@ -1,4 +1,5 @@
 from sklearn.base import BaseEstimator
+from sklearn.preprocessing import LabelBinarizer
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
 from sklearn_pmml_model.datatypes import Category
@@ -228,7 +229,11 @@ class PMMLBaseClassifier(PMMLBaseEstimator):
     PMMLBaseEstimator.__init__(self, pmml)
 
     target_type: Category = get_type(self.target_field)
-    self.classes_ = np.array(target_type.categories)
+    try:
+      self.classes_ = np.array(target_type.categories)
+    except AttributeError:
+      self._label_binarizer = LabelBinarizer(pos_label=1, neg_label=-1)
+      self._label_binarizer.classes_ = np.array(target_type.categories)
     self.n_classes_ = len(self.classes_)
     self.n_outputs_ = 1
 
