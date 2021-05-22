@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+    <Header>
+        <Application name="JPMML-R" version="1.4.4"/>
+        <Timestamp>2021-05-26T11:59:49Z</Timestamp>
+    </Header>
+    <DataDictionary>
+        <DataField name="_target" optype="categorical" dataType="string">
+            <Value value="No"/>
+            <Value value="Yes"/>
+        </DataField>
+        <DataField name="npreg" optype="continuous" dataType="double"/>
+        <DataField name="glu" optype="continuous" dataType="double"/>
+        <DataField name="bp" optype="continuous" dataType="double"/>
+        <DataField name="skin" optype="continuous" dataType="double"/>
+        <DataField name="bmi" optype="continuous" dataType="double"/>
+        <DataField name="ped" optype="continuous" dataType="double"/>
+        <DataField name="age(30,40]" optype="continuous" dataType="double"/>
+        <DataField name="age(40,50]" optype="continuous" dataType="double"/>
+        <DataField name="age(50,60]" optype="continuous" dataType="double"/>
+        <DataField name="age(60,70]" optype="continuous" dataType="double"/>
+    </DataDictionary>
+    <RegressionModel functionName="classification" normalizationMethod="logit">
+        <MiningSchema>
+            <MiningField name="_target" usageType="target"/>
+            <MiningField name="npreg"/>
+            <MiningField name="glu"/>
+            <MiningField name="bp"/>
+            <MiningField name="skin"/>
+            <MiningField name="bmi"/>
+            <MiningField name="ped"/>
+            <MiningField name="age(30,40]"/>
+            <MiningField name="age(40,50]"/>
+            <MiningField name="age(50,60]"/>
+            <MiningField name="age(60,70]"/>
+        </MiningSchema>
+        <Output>
+            <OutputField name="probability(No)" optype="continuous" dataType="double" feature="probability" value="No"/>
+            <OutputField name="probability(Yes)" optype="continuous" dataType="double" feature="probability" value="Yes"/>
+        </Output>
+        <RegressionTable intercept="-5.813433672443972" targetCategory="Yes">
+            <NumericPredictor name="npreg" coefficient="0.08650789309856853"/>
+            <NumericPredictor name="glu" coefficient="0.029845161208353056"/>
+            <NumericPredictor name="bp" coefficient="0.01771566658062681"/>
+            <NumericPredictor name="skin" coefficient="0"/>
+            <NumericPredictor name="bmi" coefficient="0"/>
+            <NumericPredictor name="ped" coefficient="0.7454561651044069"/>
+            <NumericPredictor name="age(30,40]" coefficient="0"/>
+            <NumericPredictor name="age(40,50]" coefficient="0.010730099297261153"/>
+            <NumericPredictor name="age(50,60]" coefficient="0"/>
+            <NumericPredictor name="age(60,70]" coefficient="-0.12650546294905132"/>
+        </RegressionTable>
+        <RegressionTable intercept="0.0" targetCategory="No"/>
+    </RegressionModel>
+</PMML>

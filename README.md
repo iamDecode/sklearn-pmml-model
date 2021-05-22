@@ -20,19 +20,22 @@ $ pip install sklearn-pmml-model
 ## Status
 This library is in beta, and currently not all models are supported. The library currently does support the following models:
 
-| Model                  | Classification | Regression | Categorical features |
-|------------------------|----------------|------------|----------------------|
-| [Decision Trees](sklearn_pmml_model/tree) | ✅              |            | ✅<sup>1</sup>        |
-| [Random Forests](sklearn_pmml_model/ensemble) | ✅              |            | ✅<sup>1</sup>        |
-| [Gradient Boosting](sklearn_pmml_model/ensemble) | ✅              |            | ✅<sup>1</sup>        |
-| [Linear Regression](sklearn_pmml_model/linear_model) |                | ✅          |                      |
-| [Ridge](sklearn_pmml_model/linear_model) |                | ✅          |                      |
-| [Lasso](sklearn_pmml_model/linear_model) |                | ✅          |                      |
-| [ElasticNet](sklearn_pmml_model/linear_model) |                | ✅          |                      |
-| [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅              |            |                      |
+| Model                                                  | Classification | Regression | Categorical features |
+|--------------------------------------------------------|----------------|------------|----------------------|
+| [Decision Trees](sklearn_pmml_model/tree)              | ✅             |            | ✅<sup>1</sup>        |
+| [Random Forests](sklearn_pmml_model/ensemble)          | ✅             |            | ✅<sup>1</sup>        |
+| [Gradient Boosting](sklearn_pmml_model/ensemble)       | ✅             |            | ✅<sup>1</sup>        |
+| [Linear Regression](sklearn_pmml_model/linear_model)   | ✅             | ✅         | ✅<sup>3</sup>        |
+| [Ridge](sklearn_pmml_model/linear_model)               | ✅             | ✅         | ✅<sup>3</sup>        |
+| [Lasso](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
+| [ElasticNet](sklearn_pmml_model/linear_model)          | ✅<sup>2</sup> | ✅         | ✅                    |
+| [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅             |            |                      |
 
 <sup>1</sup> Categorical feature support using slightly modified internals, based on [scikit-learn#12866](https://github.com/scikit-learn/scikit-learn/pull/12866).
 
+<sup>2</sup> These models differ only in training characteristics, the resulting model is of the same form. Classification is supported using `PMMLLogisticRegression` for regression models and `PMMLRidgeClassifier` for general regression models.
+
+<sup>3</sup> By one-hot encoding categorical features automatically.
 
 ---
 

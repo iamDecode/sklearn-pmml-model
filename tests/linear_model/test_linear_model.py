@@ -1,7 +1,7 @@
 from unittest import TestCase
 import sklearn_pmml_model
-from sklearn.linear_model import LinearRegression, Ridge, Lasso, ElasticNet
-from sklearn_pmml_model.linear_model import PMMLLinearRegression, PMMLRidge, PMMLLasso, PMMLElasticNet
+from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge, RidgeClassifier, Lasso, ElasticNet
+from sklearn_pmml_model.linear_model import PMMLLinearRegression, PMMLLogisticRegression, PMMLRidge, PMMLRidgeClassifier, PMMLLasso, PMMLElasticNet
 import pandas as pd
 import numpy as np
 from os import path
@@ -58,6 +58,53 @@ class TestLinearRegression(TestCase):
     assert str(cm.exception) == 'PMML model is not linear.'
 
 
+class TestLogisticRegression(TestCase):
+  def test_invalid_model(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLLogisticRegression(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                </DataDictionary>
+                <MiningSchema>
+                  <MiningField name="Class" usageType="target"/>
+                </MiningSchema>
+              </PMML>
+              """))
+
+    assert str(cm.exception) == 'PMML model does not contain RegressionModel.'
+
+  def test_nonlinear_model(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLLogisticRegression(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                  <DataField name="a" optype="continuous" dataType="double"/>
+                </DataDictionary>
+                <RegressionModel>
+                  <MiningSchema>
+                    <MiningField name="Class" usageType="target"/>
+                  </MiningSchema>
+                  <RegressionTable>
+                    <NumericPredictor name="a" exponent="1" coefficient="1"/>
+                    <NumericPredictor name="a" exponent="1" coefficient="1"/>
+                  </RegressionTable>
+                </RegressionModel>
+              </PMML>
+              """))
+
+    assert str(cm.exception) == 'PMML model is not linear.'
+
+
 class TestLinearRegressionIntegration(TestCase):
   def setUp(self):
     df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
@@ -65,7 +112,7 @@ class TestLinearRegressionIntegration(TestCase):
     yte = df.iloc[:, 0]
     self.test = (Xte, yte)
 
-    pmml = path.join(BASE_DIR, '../models/linear-regression.pmml')
+    pmml = path.join(BASE_DIR, '../models/linear-model-lm.pmml')
     self.clf = PMMLLinearRegression(pmml)
 
   def test_predict(self):
@@ -88,10 +135,114 @@ class TestLinearRegressionIntegration(TestCase):
     assert self.clf._more_tags() == LinearRegression()._more_tags()
 
 
+class TestLogisticRegressionIntegration(TestCase):
+  def setUp(self):
+    df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
+    Xte = df.iloc[:, 1:]
+    Xte = pd.get_dummies(Xte, prefix_sep='')
+    del Xte['age(20,30]']
+    yte = df.iloc[:, 0]
+    self.test = (Xte, yte)
+
+    pmml = path.join(BASE_DIR, '../models/linear-model-lmc.pmml')
+    self.clf = PMMLLogisticRegression(pmml)
+
+  def test_predict_proba(self):
+    Xte, _ = self.test
+    ref = np.array([
+      [0.3836644757747519, 0.6163355242252481],
+      [0.5572948024306759, 0.4427051975693241],
+      [0.2208655069363070, 0.7791344930636930],
+      [0.1226755439085095, 0.8773244560914905],
+      [0.1116580306897623, 0.8883419693102377],
+      [0.2319071635514390, 0.7680928364485610],
+      [0.3884229315951135, 0.6115770684048865],
+      [0.2465287129542991, 0.7534712870457009],
+      [0.6593253655911793, 0.3406746344088207],
+      [0.2374749130836621, 0.7625250869163379],
+      [0.1540677632287771, 0.8459322367712229],
+      [0.3435398902933879, 0.6564601097066121],
+      [0.1625519980431368, 0.8374480019568632],
+      [0.1469729880397515, 0.8530270119602485],
+      [0.2418801127109025, 0.7581198872890975],
+      [0.3625854866670420, 0.6374145133329580],
+      [0.7838396580528175, 0.2161603419471824],
+      [0.1327352123858896, 0.8672647876141104],
+      [0.4539315153105434, 0.5460684846894566],
+      [0.2653170373440615, 0.7346829626559385],
+      [0.2214510855011292, 0.7785489144988708],
+      [0.3815617982317231, 0.6184382017682769],
+      [0.5460774966173132, 0.4539225033826867],
+      [0.4194973709123712, 0.5805026290876288],
+      [0.5259283752311108, 0.4740716247688892],
+      [0.3775730286932922, 0.6224269713067078],
+      [0.3428809879226986, 0.6571190120773014],
+      [0.7310789777058304, 0.2689210222941696],
+      [0.7808228627650035, 0.2191771372349965],
+      [0.6285876142112172, 0.3714123857887828],
+      [0.4444194848409649, 0.5555805151590351],
+      [0.9253101654677492, 0.0746898345322508],
+      [0.7108575012260019, 0.2891424987739981],
+      [0.6923236892085397, 0.3076763107914603],
+      [0.8658398719063449, 0.1341601280936550],
+      [0.6859457061731435, 0.3140542938268565],
+      [0.7190807857278905, 0.2809192142721096],
+      [0.7983745824241288, 0.2016254175758712],
+      [0.4768552271854714, 0.5231447728145286],
+      [0.5321014224575110, 0.4678985775424890],
+      [0.4293961594534983, 0.5706038405465017],
+      [0.6791961042739789, 0.3208038957260211],
+      [0.8898092885722800, 0.1101907114277199],
+      [0.6579005184496933, 0.3420994815503067],
+      [0.7652153232481362, 0.2347846767518638],
+      [0.5160770109846871, 0.4839229890153129],
+      [0.8067983092623874, 0.1932016907376126],
+      [0.7877539634640341, 0.2122460365359659],
+      [0.6347873007218796, 0.3652126992781204],
+      [0.8190797854627907, 0.1809202145372093],
+      [0.5519351414476166, 0.4480648585523834],
+      [0.4482439620440842, 0.5517560379559158],
+    ])
+    assert np.allclose(ref, self.clf.predict_proba(Xte))
+
+  def test_score(self):
+    Xte, yte = self.test
+    ref = 0.8076923076923077
+    assert np.allclose(ref, self.clf.score(Xte, yte))
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      self.clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
+
+  def test_more_tags(self):
+    assert self.clf._more_tags() == LogisticRegression()._more_tags()
+
+
 class TestGeneralRegression(TestCase):
   def test_invalid_model(self):
     with self.assertRaises(Exception) as cm:
       PMMLRidge(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                </DataDictionary>
+                <MiningSchema>
+                  <MiningField name="Class" usageType="target"/>
+                </MiningSchema>
+              </PMML>
+              """))
+
+    assert str(cm.exception) == 'PMML model does not contain GeneralRegressionModel.'
+
+  def test_invalid_classifier(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLRidgeClassifier(pmml=StringIO("""
               <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
                 <DataDictionary>
                   <DataField name="Class" optype="categorical" dataType="string">
@@ -215,6 +366,36 @@ class TestRidgeIntegration(TestCase):
 
   def test_more_tags(self):
     assert self.clf._more_tags() == Ridge()._more_tags()
+
+
+class TestRidgeClassifierIntegration(TestCase):
+  def setUp(self):
+    df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
+    Xte = df.iloc[:, 1:]
+    yte = df.iloc[:, 0]
+    self.test = (Xte, yte)
+
+    pmml = path.join(BASE_DIR, '../models/linear-model-ridgec.pmml')
+    self.clf = PMMLRidgeClassifier(pmml)
+
+  def test_predict(self):
+    Xte, _ = self.test
+    ref = np.array(['Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','Yes','No','Yes','Yes','Yes','Yes','Yes','Yes','Yes','No','Yes','Yes','No','No','No','No','No','No','No','No','No','No','No','Yes','No','No','No','No','No','No','No','No','No','No','No','No','No'])
+    assert np.all(ref == self.clf.predict(Xte))
+
+  def test_score(self):
+    Xte, yte = self.test
+    ref = 0.9230769230769231
+    assert np.allclose(ref, self.clf.score(Xte, yte))
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      self.clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
+
+  def test_more_tags(self):
+    assert self.clf._more_tags() == RidgeClassifier()._more_tags()
 
 
 class TestLassoIntegration(TestCase):
