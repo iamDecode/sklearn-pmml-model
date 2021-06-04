@@ -1,11 +1,11 @@
 from unittest import TestCase
 import sklearn_pmml_model
-from sklearn_pmml_model.tree import PMMLTreeClassifier
+from sklearn_pmml_model.tree import PMMLTreeClassifier, PMMLTreeRegressor
 from sklearn2pmml.pipeline import PMMLPipeline
 from sklearn2pmml import sklearn2pmml
 from sklearn.datasets import load_iris
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from io import StringIO
 import pandas as pd
 import numpy as np
@@ -263,3 +263,85 @@ class TestCategoricalPimaTreeIntegration(TestCase):
     Xte, yte = self.test
     ref = 0.7692307692307693
     assert ref == self.clf.score(Xte, yte)
+
+
+
+class TestCategoricalPimaTreeRegressionIntegration(TestCase):
+  def setUp(self):
+    df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
+    cats = np.unique(df['age'])
+    df['age'] = pd.Categorical(df['age'], categories=cats)
+    df['age'] = df['age'].cat.codes
+    Xte = df.iloc[:, 1:]
+    yte = df.iloc[:, 0]
+    self.test = (Xte, yte)
+
+    pmml = path.join(BASE_DIR, '../models/tree-cat-pima-regression.pmml')
+    self.clf = PMMLTreeRegressor(pmml)
+
+  def test_predict_proba(self):
+    Xte, _ = self.test
+    ref = np.array([1.0000000, 0.2857143, 0.6000000, 1.0000000, 1.0000000, 1.0000000, 0.6000000, 0.6000000, 0.2857143, 1.0000000, 1.0000000, 1.0000000, 1.0000000, 1.0000000, 1.0000000, 0.6000000, 0.2857143, 0.6000000, 1.0000000, 1.0000000, 0.6000000, 0.6000000, 0.2857143, 0.6000000, 0.6000000, 1.0000000, 0.6000000, 0.2857143, 0.2857143, 0.2857143, 0.6000000, 0.2857143, 0.2857143, 0.2857143, 0.0000000, 0.6000000, 0.0000000, 0.0000000, 0.6000000, 0.0000000, 0.2857143, 0.2857143, 0.2857143, 0.0000000, 0.0000000, 0.6000000, 0.0000000, 0.0000000, 0.0000000, 0.2857143, 0.0000000, 0.6000000])
+    assert np.allclose(ref, self.clf.predict(Xte))
+
+  def test_score(self):
+    Xte, yte = self.test
+    ref = 0.5032967032967033
+    assert ref == self.clf.score(Xte, yte == "Yes")
+
+
+class TestTreeRegression(TestCase):
+  def test_invalid_tree(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLTreeRegressor(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Output" optype="continuous" dataType="double"/>
+        </DataDictionary>
+        <MiningSchema>
+          <MiningField name="Output" usageType="target"/>
+        </MiningSchema>
+      </PMML>
+      """))
+
+    assert str(cm.exception) == 'PMML model does not contain TreeModel.'
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      pmml = path.join(BASE_DIR, '../models/tree-cat-pima-regression.pmml')
+      clf = PMMLTreeRegressor(pmml=pmml)
+      clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
+
+  def test_unsupported_predicate(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLTreeRegressor(pmml=StringIO("""
+        <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+          <DataDictionary>
+            <DataField name="Output" optype="continuous" dataType="double"/>
+          </DataDictionary>
+          <MiningSchema>
+            <MiningField name="Output" usageType="target"/>
+          </MiningSchema>
+          <TreeModel splitCharacteristic="binarySplit">
+            <Node id="1">
+              <True/>
+              <Node id="2" score="1">
+                <UnsupportedPredicate/>
+              </Node>
+              <Node id="3" score="0">
+                <UnsupportedPredicate/>
+              </Node>
+            </Node>
+          </TreeModel>
+        </PMML>
+        """))
+
+    assert str(cm.exception) == 'Unsupported tree format: unknown predicate' \
+                                ' structure in Node 2'
+
+  def test_more_tags(self):
+    pmml = path.join(BASE_DIR, '../models/tree-cat-pima-regression.pmml')
+    clf = PMMLTreeRegressor(pmml=pmml)
+    assert clf._more_tags() == DecisionTreeRegressor()._more_tags()

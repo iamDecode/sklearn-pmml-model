@@ -1,9 +1,9 @@
 import numpy as np
 import struct
 from sklearn.base import clone as _clone
-from sklearn_pmml_model.base import PMMLBaseClassifier
+from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn_pmml_model.datatypes import Category
 from operator import add
 from warnings import warn
@@ -82,6 +82,80 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
 
   def _more_tags(self):
     return DecisionTreeClassifier._more_tags(self)
+
+
+class PMMLTreeRegressor(PMMLBaseRegressor, DecisionTreeRegressor):
+  """
+  A decision tree regressor.
+
+  The PMML model consists out of a <TreeModel> element, containing at least one
+  <Node> element. Every node element contains a predicate, and optional <Node>
+  children. Leaf nodes either have a score attribute or <ScoreDistribution>
+  child describing the classification output.
+
+  Parameters
+  ----------
+  pmml : str, object
+      Filename or file object containing PMML data.
+
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/TreeModel.html
+
+  """
+
+  def __init__(self, pmml):
+    PMMLBaseRegressor.__init__(self, pmml)
+
+    tree_model = self.root.find('TreeModel')
+
+    if tree_model is None:
+      raise Exception('PMML model does not contain TreeModel.')
+
+    # Parse tree
+    self.n_outputs_ = 1
+    n_classes = np.array([1] * self.n_outputs_, dtype=np.intp)
+    self.tree_ = Tree(self.n_features_, n_classes, self.n_outputs_,
+                      np.array([], dtype=np.int32))
+
+    split = tree_model.get('splitCharacteristic')
+    if split == 'binarySplit':
+      first_node = tree_model.find('Node')
+    else:
+      first_node = unflatten(tree_model.find('Node'))
+
+    nodes, values = construct_tree(first_node, None, self.field_mapping, rescale_factor=0.1)
+
+    node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
+    value_ndarray = np.ascontiguousarray(values)
+    max_depth = None
+
+    state = {
+      'max_depth': (2 ** 31) - 1 if max_depth is None else max_depth,
+      'node_count': node_ndarray.shape[0],
+      'nodes': node_ndarray,
+      'values': value_ndarray
+    }
+    self.tree_.__setstate__(state)
+
+    # Required after constructing trees, because categories may be inferred in
+    # the parsing process
+    target = self.target_field.get('name')
+    fields = [field for name, field in self.fields.items() if name != target]
+    n_categories = np.asarray([
+      len(self.field_mapping[field.get('name')][1].categories)
+      if field.get('optype') == 'categorical' else -1
+      for field in fields
+      if field.tag == 'DataField'
+    ], dtype=np.int32, order='C')
+
+    self.tree_.set_n_categories(n_categories)
+
+  def fit(self, x, y):
+    return PMMLBaseRegressor.fit(self, x, y)
+
+  def _more_tags(self):
+    return DecisionTreeRegressor._more_tags(self)
 
 
 def unflatten(node):
@@ -175,7 +249,7 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
   if not child_nodes:
     record_count = node.get('recordCount')
 
-    if record_count is not None:
+    if record_count is not None and classes is not None:
       node_count_weighted = float(record_count)
       node_count = int(node_count_weighted)
       votes = [[[float(votes_for(c).get('recordCount')) if votes_for(c) is not None else 0.0 for c in classes]]]
