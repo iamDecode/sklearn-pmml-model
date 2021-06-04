@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+	<Header>
+		<Application name="JPMML-R" version="1.4.4"/>
+		<Timestamp>2021-06-04T14:28:07Z</Timestamp>
+	</Header>
+	<DataDictionary>
+		<DataField name="type" optype="continuous" dataType="double"/>
+		<DataField name="npreg" optype="continuous" dataType="double"/>
+		<DataField name="glu" optype="continuous" dataType="double"/>
+		<DataField name="bp" optype="continuous" dataType="double"/>
+		<DataField name="skin" optype="continuous" dataType="double"/>
+		<DataField name="bmi" optype="continuous" dataType="double"/>
+		<DataField name="ped" optype="continuous" dataType="double"/>
+		<DataField name="age" optype="categorical" dataType="string">
+			<Value value="(20,30]"/>
+			<Value value="(30,40]"/>
+			<Value value="(40,50]"/>
+			<Value value="(50,60]"/>
+			<Value value="(60,70]"/>
+		</DataField>
+	</DataDictionary>
+	<TreeModel functionName="regression" noTrueChildStrategy="returnLastPrediction">
+		<MiningSchema>
+			<MiningField name="type" usageType="target"/>
+			<MiningField name="npreg"/>
+			<MiningField name="glu"/>
+			<MiningField name="bp"/>
+			<MiningField name="skin"/>
+			<MiningField name="bmi"/>
+			<MiningField name="ped"/>
+			<MiningField name="age"/>
+		</MiningSchema>
+		<Node id="1" score="0.5" recordCount="52">
+			<True/>
+			<Node id="2" score="0.16666666666666666" recordCount="24">
+				<SimplePredicate field="glu" operator="lessThan" value="124.5"/>
+				<Node id="4" score="0.0" recordCount="10">
+					<SimplePredicate field="skin" operator="greaterOrEqual" value="31.32612218622545"/>
+				</Node>
+				<Node id="5" score="0.2857142857142857" recordCount="14">
+					<SimplePredicate field="skin" operator="lessThan" value="31.32612218622545"/>
+				</Node>
+			</Node>
+			<Node id="3" score="0.7857142857142857" recordCount="28">
+				<SimplePredicate field="glu" operator="greaterOrEqual" value="124.5"/>
+				<Node id="7" score="1.0" recordCount="13">
+					<SimplePredicate field="ped" operator="greaterOrEqual" value="0.425"/>
+				</Node>
+				<Node id="6" score="0.6" recordCount="15">
+					<SimplePredicate field="ped" operator="lessThan" value="0.425"/>
+				</Node>
+			</Node>
+		</Node>
+	</TreeModel>
+</PMML>
