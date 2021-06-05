@@ -64,6 +64,22 @@ Pima.tr2
 
 
 
+library(ranger)
+library(r2pmml)
+test = read.csv('/Users/decode/Developer/sklearn-pmml-model/models/categorical-test.csv', header=TRUE, sep=",")
+test$age = as.factor(test$age)
+test$type = as.factor(test$type)
+test$type = ifelse(test$type == "Yes", 1, 0)
+
+clf = ranger(type ~ ., data = test, num.trees = 7, write.forest = TRUE)
+
+predict(clf, test)$predictions
+
+r2pmml(clf, "pima_rfr.pmml",data=test, response_name = "Class")
+
+
+
+
 library(glmnet)
 library(r2pmml)
 test = read.csv('/Users/decode/Developer/sklearn-pmml-model/models/categorical-test.csv', header=TRUE, sep=",")

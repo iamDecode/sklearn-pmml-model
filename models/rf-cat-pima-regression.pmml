@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+    <Header>
+        <Application name="JPMML-R" version="1.4.4"/>
+        <Timestamp>2021-06-05T14:55:03Z</Timestamp>
+    </Header>
+    <DataDictionary>
+        <DataField name="Class" optype="continuous" dataType="double"/>
+        <DataField name="npreg" optype="continuous" dataType="double"/>
+        <DataField name="glu" optype="continuous" dataType="double"/>
+        <DataField name="bp" optype="continuous" dataType="double"/>
+        <DataField name="skin" optype="continuous" dataType="double"/>
+        <DataField name="bmi" optype="continuous" dataType="double"/>
+        <DataField name="ped" optype="continuous" dataType="double"/>
+        <DataField name="age" optype="categorical" dataType="string">
+            <Value value="(20,30]"/>
+            <Value value="(30,40]"/>
+            <Value value="(40,50]"/>
+            <Value value="(50,60]"/>
+            <Value value="(60,70]"/>
+        </DataField>
+    </DataDictionary>
+    <MiningModel functionName="regression">
+        <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+            <MiningField name="npreg"/>
+            <MiningField name="glu"/>
+            <MiningField name="bp"/>
+            <MiningField name="skin"/>
+            <MiningField name="bmi"/>
+            <MiningField name="ped"/>
+            <MiningField name="age"/>
+        </MiningSchema>
+        <Segmentation multipleModelMethod="average">
+            <Segment id="1">
+                <True/>
+                <TreeModel functionName="regression" splitCharacteristic="binarySplit">
+                    <MiningSchema>
+                        <MiningField name="npreg"/>
+                        <MiningField name="bp"/>
+                        <MiningField name="skin"/>
+                        <MiningField name="bmi"/>
+                    </MiningSchema>
+                    <Node>
+                        <True/>
+                        <Node score="0.0">
+                            <SimplePredicate field="bmi" operator="lessOrEqual" value="29.2"/>
+                        </Node>
+                        <Node>
+                            <SimplePredicate field="bmi" operator="greaterThan" value="29.2"/>
+                            <Node>
+                                <SimplePredicate field="bmi" operator="lessOrEqual" value="44.8"/>
+                                <Node>
+                                    <SimplePredicate field="bmi" operator="lessOrEqual" value="38.3"/>
+                                    <Node>
+                                        <SimplePredicate field="npreg" operator="lessOrEqual" value="2.5"/>
+                                        <Node>
+                                            <SimplePredicate field="bp" operator="lessOrEqual" value="79.5"/>
+                                            <Node score="0.3333333333333333">
+                                                <SimplePredicate field="skin" operator="lessOrEqual" value="31.0"/>
+                                            </Node>
+                                            <Node score="0.0">
+                                                <SimplePredicate field="skin" operator="greaterThan" value="31.0"/>
+                                            </Node>
+                                        </Node>
+                                        <Node score="1.0">
+                                            <SimplePredicate field="bp" operator="greaterThan" value="79.5"/>
+                                        </Node>
+                                    </Node>
+                                    <Node>
+                                        <SimplePredicate field="npreg" operator="greaterThan" value="2.5"/>
+                                        <Node score="0.0">
+                                            <SimplePredicate field="bp" operator="lessOrEqual" value="68.0785866601082"/>
+                                        </Node>
+                                        <Node score="1.0">
+                                            <SimplePredicate field="bp" operator="greaterThan" value="68.0785866601082"/>
+                                        </Node>
+                                    </Node>
+                                </Node>
+                                <Node score="1.0">
+                                    <SimplePredicate field="bmi" operator="greaterThan" value="38.3"/>
+                                </Node>
+                            </Node>
+                            <Node score="0.0">
+                                <SimplePredicate field="bmi" operator="greaterThan" value="44.8"/>
+                            </Node>
+                        </Node>
+                    </Node>
+                </TreeModel>
+            </Segment>
+            <Segment id="2">
+                <True/>
+                <TreeModel functionName="regression" splitCharacteristic="binarySplit">
+                    <MiningSchema>
+                        <MiningField name="glu"/>
+                        <MiningField name="bp"/>
+                        <MiningField name="bmi"/>
+                        <MiningField name="ped"/>
+                    </MiningSchema>
+                    <Node>
+                        <True/>
+                        <Node>
+                            <SimplePredicate field="glu" operator="lessOrEqual" value="140.0"/>
+                            <Node>
+                                <SimplePredicate field="bp" operator="lessOrEqual" value="95.0"/>
+                                <Node score="0.0">
+                                    <SimplePredicate field="bmi" operator="lessOrEqual" value="27.450000000000003"/>
+                                </Node>
+                                <Node>
+                                    <SimplePredicate field="bmi" operator="greaterThan" value="27.450000000000003"/>
+                                    <Node score="0.0">
+                                        <SimplePredicate field="ped" operator="lessOrEqual" value="0.3225"/>
+                                    </Node>
+                                    <Node>
+                                        <SimplePredicate field="ped" operator="greaterThan" value="0.3225"/>
+                                        <Node>
+                                            <SimplePredicate field="bmi" operator="lessOrEqual" value="44.599999999999994"/>
+                                            <Node score="0.3333333333333333">
+                                                <SimplePredicate field="ped" operator="lessOrEqual" value="0.47"/>
+                                            </Node>
+                                            <Node score="1.0">
+                                                <SimplePredicate field="ped" operator="greaterThan" value="0.47"/>
+                                            </Node>
+                                        </Node>
+                                        <Node score="0.0">
+                                            <SimplePredicate field="bmi" operator="greaterThan" value="44.599999999999994"/>
+                                        </Node>
+                                    </Node>
+                                </Node>
+                            </Node>
+                            <Node score="1.0">
+                                <SimplePredicate field="bp" operator="greaterThan" value="95.0"/>
+                            </Node>
+                        </Node>
+                        <Node>
+                            <SimplePredicate field="glu" operator="greaterThan" value="140.0"/>
+                            <Node score="0.75">
+                                <SimplePredicate field="ped" operator="lessOrEqual" value="0.315"/>
+                            </Node>
+                            <Node score="1.0">
+                                <SimplePredicate field="ped" operator="greaterThan" value="0.315"/>
+                            </Node>
+                        </Node>
+                    </Node>
+                </TreeModel>
+            </Segment>
+            <Segment id="3">
+                <True/>
+                <TreeModel functionName="regression" splitCharacteristic="binarySplit">
+                    <MiningSchema>
+                        <MiningField name="npreg"/>
+                        <MiningField name="glu"/>
+                        <MiningField name="bp"/>
+                        <MiningField name="skin"/>
+                        <MiningField name="bmi"/>
+                    </MiningSchema>
+                    <Node>
+                        <True/>
+                        <Node>
+                            <SimplePredicate field="glu" operator="lessOrEqual" value="126.5"/>
+                            <Node score="1.0">
+                                <SimplePredicate field="skin" operator="lessOrEqual" value="11.0"/>
+                            </Node>
+                            <Node>
+                                <SimplePredicate field="skin" operator="greaterThan" value="11.0"/>
+                                <Node>
+                                    <SimplePredicate field="skin" operator="lessOrEqual" value="31.0"/>
+                                    <Node score="0.0">
+                                        <SimplePredicate field="bmi" operator="lessOrEqual" value="33.5"/>
+                                    </Node>
+                                    <Node score="0.75">
+                                        <SimplePredicate field="bmi" operator="greaterThan" value="33.5"/>
+                                    </Node>
+                                </Node>
+                                <Node score="0.0">
+                                    <SimplePredicate field="skin" operator="greaterThan" value="31.0"/>
+                                </Node>
+                            </Node>
+                        </Node>
+                        <Node>
+                            <SimplePredicate field="glu" operator="greaterThan" value="126.5"/>
+                            <Node>
+                                <SimplePredicate field="npreg" operator="lessOrEqual" value="0.5"/>
+                                <Node score="0.8">
+                                    <SimplePredicate field="bmi" operator="lessOrEqual" value="45.0"/>
+                                </Node>
+                                <Node score="0.0">
+                                    <SimplePredicate field="bmi" operator="greaterThan" value="45.0"/>
+                                </Node>
+                            </Node>
+                            <Node>
+                                <SimplePredicate field="npreg" operator="greaterThan" value="0.5"/>
+                                <Node>
+                                    <SimplePredicate field="bp" operator="lessOrEqual" value="67.0"/>
+                                    <Node score="0.0">
+                                        <SimplePredicate field="glu" operator="lessOrEqual" value="151.5"/>
+                                    </Node>
+                                    <Node score="1.0">
+                                        <SimplePredicate field="glu" operator="greaterThan" value="151.5"/>
+                                    </Node>
+                                </Node>
+                                <Node score="1.0">
+                                    <SimplePredicate field="bp" operator="greaterThan" value="67.0"/>
+                                </Node>
+                            </Node>
+                        </Node>
+                    </Node>
+                </TreeModel>
+            </Segment>
+            <Segment id="4">
+                <True/>
+                <TreeModel functionName="regression" splitCharacteristic="binarySplit">
+                    <MiningSchema>
+                        <MiningField name="npreg"/>
+                        <MiningField name="glu"/>
+                        <MiningField name="bp"/>
+                        <MiningField name="skin"/>
+                        <MiningField name="bmi"/>
+                        <MiningField name="ped"/>
+                    </MiningSchema>
+                    <Node>
+                        <True/>
+                        <Node>
+                            <SimplePredicate field="skin" operator="lessOrEqual" value="44.5"/>
+                            <Node>
+                                <SimplePredicate field="npreg" operator="lessOrEqual" value="7.0"/>
+                                <Node>
+                                    <SimplePredicate field="bp" operator="lessOrEqual" value="71.0785866601082"/>
+                                    <Node score="0.0">
+                                        <SimplePredicate field="bmi" operator="lessOrEqual" value="40.2"/>
+                                    </Node>
+                                    <Node score="1.0">
+                                        <SimplePredicate field="bmi" operator="greaterThan" value="40.2"/>
+                                    </Node>
+                                </Node>
+                                <Node>
+                                    <SimplePredicate field="bp" operator="greaterThan" value="71.0785866601082"/>
+                                    <Node score="0.0">
+                                        <SimplePredicate field="ped" operator="lessOrEqual" value="0.245"/>
+                                    </Node>
+                                    <Node>
+                                        <SimplePredicate field="ped" operator="greaterThan" value="0.245"/>
+                                        <Node>
+                                            <SimplePredicate field="skin" operator="lessOrEqual" value="39.0"/>
+                                            <Node score="0.6666666666666666">
+                                                <SimplePredicate field="glu" operator="lessOrEqual" value="114.0"/>
+                                            </Node>
+                                            <Node score="1.0">
+                                                <SimplePredicate field="glu" operator="greaterThan" value="114.0"/>
+                                            </Node>
+                                        </Node>
+                                        <Node score="0.0">
+                                            <SimplePredicate field="skin" operator="greaterThan" value="39.0"/>
+                                        </Node>
+                                    </Node>
+                                </Node>
+                            </Node>
+                            <Node>
+                                <SimplePredicate field="npreg" operator="greaterThan" value="7.0"/>
+                                <Node score="0.75">
+                                    <SimplePredicate field="skin" operator="lessOrEqual" value="19.0"/>
+                                </Node>
+                                <Node score="1.0">
+                                    <SimplePredicate field="skin" operator="greaterThan" value="19.0"/>
+                                </Node>
+                            </Node>
+                        </Node>
+                        <Node score="1.0">
+                            <SimplePredicate field="skin" operator="greaterThan" value="44.5"/>
+                        </Node>
+                    </Node>
+                </TreeModel>
+            </Segment>
+            <Segment id="5">
+                <True/>
+                <TreeModel functionName="regression" splitCharacteristic="binarySplit">
+                    <MiningSchema>
+                        <MiningField name="npreg"/>
+                        <MiningField name="glu"/>
+                        <MiningField name="bp"/>
+                        <MiningField name="skin"/>
+                        <MiningField name="ped"/>
+                        <MiningField name="age"/>
+                    </MiningSchema>
+                    <Node>
+                        <True/>
+                        <Node>
+                            <SimplePredicate field="npreg" operator="lessOrEqual" value="6.5"/>
+                            <Node>
+                                <SimplePredicate field="glu" operator="lessOrEqual" value="140.0"/>
+                                <Node score="0.0">
+                                    <SimplePredicate field="age" operator="equal" value="(20,30]"/>
+                                </Node>
+                                <Node>
+                                    <SimpleSetPredicate field="age" booleanOperator="isIn">
+                                        <Array type="string">(30,40] (40,50] (50,60] (60,70]</Array>
+                                    </SimpleSetPredicate>
+                                    <Node>
+                                        <SimplePredicate field="skin" operator="lessOrEqual" value="40.5"/>
+                                        <Node score="0.0">
+                                            <SimplePredicate field="ped" operator="lessOrEqual" value="0.386"/>
+                                        </Node>
+                                        <Node score="1.0">
+                                            <SimplePredicate field="ped" operator="greaterThan" value="0.386"/>
+                                        </Node>
+                                    </Node>
+                                    <Node score="1.0">
+                                        <SimplePredicate field="skin" operator="greaterThan" value="40.5"/>
+                                    </Node>
+                                </Node>
+                            </Node>
+                            <Node>
+                                <SimplePredicate field="glu" operator="greaterThan" value="140.0"/>
+                                <Node score="0.5">
+                                    <SimplePredicate field="bp" operator="lessOrEqual" value="69.0785866601082"/>
+                                </Node>
+                                <Node score="1.0">
+                                    <SimplePredicate field="bp" operator="greaterThan" value="69.0785866601082"/>
+                                </Node>
+                            </Node>
+                        </Node>
+                        <Node>
+                            <SimplePredicate field="npreg" operator="greaterThan" value="6.5"/>
+                            <Node score="1.0">
+                                <SimpleSetPredicate field="age" booleanOperator="isIn">
+                                    <Array type="string">(20,30] (30,40] (40,50] (50,60]</Array>
+                                </SimpleSetPredicate>
+                            </Node>
+                            <Node score="0.0">
+                                <SimplePredicate field="age" operator="equal" value="(60,70]"/>
+                            </Node>
+                        </Node>
+                    </Node>
+                </TreeModel>
+            </Segment>
+            <Segment id="6">
+                <True/>
+                <TreeModel functionName="regression" splitCharacteristic="binarySplit">
+                    <MiningSchema>
+                        <MiningField name="npreg"/>
+                        <MiningField name="bp"/>
+                        <MiningField name="skin"/>
+                        <MiningField name="bmi"/>
+                        <MiningField name="ped"/>
+                    </MiningSchema>
+                    <Node>
+                        <True/>
+                        <Node>
+                            <SimplePredicate field="bmi" operator="lessOrEqual" value="40.95"/>
+                            <Node>
+                                <SimplePredicate field="npreg" operator="lessOrEqual" value="6.5"/>
+                                <Node score="1.0">
+                                    <SimplePredicate field="skin" operator="lessOrEqual" value="15.0"/>
+                                </Node>
+                                <Node>
+                                    <SimplePredicate field="skin" operator="greaterThan" value="15.0"/>
+                                    <Node score="0.0">
+                                        <SimplePredicate field="ped" operator="lessOrEqual" value="0.35"/>
+                                    </Node>
+                                    <Node>
+                                        <SimplePredicate field="ped" operator="greaterThan" value="0.35"/>
+                                        <Node score="0.0">
+                                            <SimplePredicate field="bp" operator="lessOrEqual" value="75.0"/>
+                                        </Node>
+                                        <Node score="1.0">
+                                            <SimplePredicate field="bp" operator="greaterThan" value="75.0"/>
+                                        </Node>
+                                    </Node>
+                                </Node>
+                            </Node>
+                            <Node>
+                                <SimplePredicate field="npreg" operator="greaterThan" value="6.5"/>
+                                <Node score="0.0">
+                                    <SimplePredicate field="skin" operator="lessOrEqual" value="21.5"/>
+                                </Node>
+                                <Node score="1.0">
+                                    <SimplePredicate field="skin" operator="greaterThan" value="21.5"/>
+                                </Node>
+                            </Node>
+                        </Node>
+                        <Node>
+                            <SimplePredicate field="bmi" operator="greaterThan" value="40.95"/>
+                            <Node score="1.0">
+                                <SimplePredicate field="bmi" operator="lessOrEqual" value="44.8"/>
+                            </Node>
+                            <Node score="0.0">
+                                <SimplePredicate field="bmi" operator="greaterThan" value="44.8"/>
+                            </Node>
+                        </Node>
+                    </Node>
+                </TreeModel>
+            </Segment>
+            <Segment id="7">
+                <True/>
+                <TreeModel functionName="regression" splitCharacteristic="binarySplit">
+                    <MiningSchema>
+                        <MiningField name="bp"/>
+                        <MiningField name="bmi"/>
+                        <MiningField name="ped"/>
+                        <MiningField name="age"/>
+                    </MiningSchema>
+                    <Node>
+                        <True/>
+                        <Node score="0.0">
+                            <SimplePredicate field="ped" operator="lessOrEqual" value="0.2485"/>
+                        </Node>
+                        <Node>
+                            <SimplePredicate field="ped" operator="greaterThan" value="0.2485"/>
+                            <Node score="0.0">
+                                <SimplePredicate field="bmi" operator="lessOrEqual" value="27.4"/>
+                            </Node>
+                            <Node>
+                                <SimplePredicate field="bmi" operator="greaterThan" value="27.4"/>
+                                <Node>
+                                    <SimpleSetPredicate field="age" booleanOperator="isIn">
+                                        <Array type="string">(20,30] (30,40]</Array>
+                                    </SimpleSetPredicate>
+                                    <Node score="0.0">
+                                        <SimplePredicate field="bp" operator="lessOrEqual" value="65.0"/>
+                                    </Node>
+                                    <Node>
+                                        <SimplePredicate field="bp" operator="greaterThan" value="65.0"/>
+                                        <Node score="0.0">
+                                            <SimplePredicate field="ped" operator="lessOrEqual" value="0.2645"/>
+                                        </Node>
+                                        <Node>
+                                            <SimplePredicate field="ped" operator="greaterThan" value="0.2645"/>
+                                            <Node>
+                                                <SimplePredicate field="ped" operator="lessOrEqual" value="0.8685"/>
+                                                <Node score="0.6666666666666666">
+                                                    <SimplePredicate field="ped" operator="lessOrEqual" value="0.3225"/>
+                                                </Node>
+                                                <Node score="1.0">
+                                                    <SimplePredicate field="ped" operator="greaterThan" value="0.3225"/>
+                                                </Node>
+                                            </Node>
+                                            <Node score="0.25">
+                                                <SimplePredicate field="ped" operator="greaterThan" value="0.8685"/>
+                                            </Node>
+                                        </Node>
+                                    </Node>
+                                </Node>
+                                <Node score="1.0">
+                                    <SimpleSetPredicate field="age" booleanOperator="isIn">
+                                        <Array type="string">(40,50] (50,60] (60,70]</Array>
+                                    </SimpleSetPredicate>
+                                </Node>
+                            </Node>
+                        </Node>
+                    </Node>
+                </TreeModel>
+            </Segment>
+        </Segmentation>
+    </MiningModel>
+</PMML>
