@@ -3,7 +3,7 @@ The :mod:`sklearn_pmml_model.ensemble` module includes ensemble-based methods fo
 classification, regression and anomaly detection.
 """
 
-from .forest import PMMLForestClassifier
+from .forest import PMMLForestClassifier, PMMLForestRegressor
 from .gb import PMMLGradientBoostingClassifier
 
-__all__ = ["PMMLForestClassifier", "PMMLGradientBoostingClassifier"]
+__all__ = ["PMMLForestClassifier", "PMMLForestRegressor", "PMMLGradientBoostingClassifier"]
