@@ -1,5 +1,6 @@
 import numpy as np
 import struct
+import re
 from sklearn.base import clone as _clone
 from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
@@ -10,6 +11,7 @@ from warnings import warn
 from xml.etree import cElementTree as eTree
 
 SPLIT_UNDEFINED = struct.pack('d', TREE_UNDEFINED)
+cat_regex = re.compile(r"""('.*?'|".*?"|\S+)""")
 
 
 class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
@@ -276,14 +278,14 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
     if predicate.get('operator') == 'equal' and is_categorical:
       set_predicate = eTree.fromstring(f'''
       <SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isIn">
-       <Array type="string">{predicate.get('value')}</Array>
+       <Array type="string">&quot;{predicate.get('value')}&quot;</Array>
       </SimpleSetPredicate>
       ''')
       predicate = None
     elif predicate.get('operator') == 'notEqual' and is_categorical:
       set_predicate = eTree.fromstring(f'''
       <SimpleSetPredicate field="{predicate.get('field')}" booleanOperator="isNotIn">
-       <Array type="string">{predicate.get('value')}</Array>
+       <Array type="string">&quot;{predicate.get('value')}&quot;</Array>
       </SimpleSetPredicate>
       ''')
       predicate = None
@@ -316,8 +318,8 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
 
       array = set_predicate.find('Array')
       categories = [
-        value.replace('\\"', '▲').replace('"', '').replace('▲', '"')
-        for value in array.text.split()
+        x.replace('"', '').replace('▲', '"')
+        for x in cat_regex.findall(array.text.replace('\\"', '▲'))
       ]
 
       mask = 0

@@ -12,9 +12,9 @@
             <Value value="class3"/>
         </DataField>
         <DataField name="test" optype="categorical" dataType="string">
-            <Value value="A"/>
-            <Value value="B"/>
-            <Value value="C"/>
+            <Value value="category A"/>
+            <Value value="category B"/>
+            <Value value="category C"/>
         </DataField>
     </DataDictionary>
     <TreeModel modelName="RPart_Model" functionName="classification" algorithmName="rpart" splitCharacteristic="binarySplit" missingValueStrategy="defaultChild" noTrueChildStrategy="returnLastPrediction">
@@ -33,7 +33,7 @@
 
             <Node id="2" score="class1" recordCount="10">
                 <SimpleSetPredicate field="test" booleanOperator="isIn">
-                    <Array n="1" type="string">&quot;A&quot;</Array>
+                    <Array n="1" type="string">&quot;category A&quot;</Array>
                 </SimpleSetPredicate>
 
                 <ScoreDistribution value="class1" recordCount="8" />
@@ -43,11 +43,11 @@
 
             <Node id="3" recordCount="2">
                 <SimpleSetPredicate field="test" booleanOperator="isIn">
-                    <Array n="2" type="string">&quot;B&quot; &quot;C&quot;</Array>
+                    <Array n="2" type="string">&quot;category B&quot; &quot;category C&quot;</Array>
                 </SimpleSetPredicate>
 
                 <Node id="4" score="class2" recordCount="40">
-                    <SimplePredicate field="test" operator="notEqual" value="C"/>
+                    <SimplePredicate field="test" operator="notEqual" value="category C"/>
                     <ScoreDistribution value="class1" recordCount="1" />
                     <ScoreDistribution value="class2" recordCount="38" />
                     <ScoreDistribution value="class3" recordCount="1" />
@@ -55,7 +55,7 @@
 
                 <Node id="5" score="class3" recordCount="100">
                     <SimpleSetPredicate field="test" booleanOperator="isIn">
-                        <Array n="1" type="string">&quot;C&quot;</Array>
+                        <Array n="1" type="string">&quot;category C&quot;</Array>
                     </SimpleSetPredicate>
                     <ScoreDistribution value="class1" recordCount="1" />
                     <ScoreDistribution value="class2" recordCount="1" />
