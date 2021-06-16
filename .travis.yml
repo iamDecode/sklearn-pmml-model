@@ -4,12 +4,18 @@ jobs:
   include:
     # perform a linux build
     - services: docker
+      env:
+        - CIBW_SKIP="cp27-* cp33-*"
     # and a mac build
     - os: osx
       language: shell
+      env:
+        - CIBW_SKIP="cp27-* cp33-* pp*"
     # and a windows build
     - os: windows
       language: shell
+      env:
+        - CIBW_SKIP="cp27-* cp33-*"
       before_install:
         - choco install python --version 3.8.0
         - cp /c/Python38/python.exe /c/Python38/python3.exe
@@ -18,7 +24,6 @@ jobs:
 env:
   global:
     - TWINE_USERNAME=__token__
-    - CIBW_SKIP="cp27-* cp33-*"
     - CIBW_BEFORE_BUILD="python -m pip install cython numpy"
     # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
 
