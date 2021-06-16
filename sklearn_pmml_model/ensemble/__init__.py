@@ -4,6 +4,6 @@ classification, regression and anomaly detection.
 """
 
 from .forest import PMMLForestClassifier, PMMLForestRegressor
-from .gb import PMMLGradientBoostingClassifier
+from .gb import PMMLGradientBoostingClassifier, PMMLGradientBoostingRegressor
 
-__all__ = ["PMMLForestClassifier", "PMMLForestRegressor", "PMMLGradientBoostingClassifier"]
+__all__ = ["PMMLForestClassifier", "PMMLForestRegressor", "PMMLGradientBoostingClassifier", "PMMLGradientBoostingRegressor"]
