@@ -303,15 +303,13 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
     column, _ = field_mapping[predicate.get('field')]
 
     # We do not use field_mapping type as the Cython tree only supports floats
-    value = np.around(float(predicate.get('value')), decimals=15)
+    value = np.float64(predicate.get('value'))
 
     # Account for `>=` != `>` and `<` != `<=`. scikit-learn only uses `<=`.
     if predicate.get('operator') == 'greaterOrEqual':
-      value -= 0.00000000001
+      value = np.nextafter(value, value - 1)
     if predicate.get('operator') == 'lessThan':
-      value -= 0.00000000001
-
-    value = struct.pack('d', value)  # d = double = float64
+      value = np.nextafter(value, value - 1)
   else:
     if set_predicate is not None:
       column, field_type = field_mapping[set_predicate.get('field')]

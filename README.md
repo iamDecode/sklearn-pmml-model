@@ -24,7 +24,7 @@ This library is in beta, and currently not all models are supported. The library
 |--------------------------------------------------------|----------------|------------|----------------------|
 | [Decision Trees](sklearn_pmml_model/tree)              | ✅             | ✅         | ✅<sup>1</sup>        |
 | [Random Forests](sklearn_pmml_model/ensemble)          | ✅             | ✅         | ✅<sup>1</sup>        |
-| [Gradient Boosting](sklearn_pmml_model/ensemble)       | ✅             |            | ✅<sup>1</sup>        |
+| [Gradient Boosting](sklearn_pmml_model/ensemble)       | ✅             | ✅         | ✅<sup>1</sup>        |
 | [Linear Regression](sklearn_pmml_model/linear_model)   | ✅             | ✅         | ✅<sup>3</sup>        |
 | [Ridge](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
 | [Lasso](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |

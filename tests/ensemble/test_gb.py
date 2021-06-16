@@ -1,10 +1,9 @@
 from unittest import TestCase
 import sklearn_pmml_model
-from sklearn_pmml_model.ensemble import PMMLGradientBoostingClassifier
+from sklearn_pmml_model.ensemble import PMMLGradientBoostingClassifier, PMMLGradientBoostingRegressor
 from sklearn2pmml.pipeline import PMMLPipeline
 from sklearn2pmml import sklearn2pmml
-from sklearn.experimental import enable_hist_gradient_boosting
-from sklearn.ensemble import GradientBoostingClassifier, HistGradientBoostingClassifier
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
 from io import StringIO
 import numpy as np
 from os import path, remove
@@ -90,6 +89,82 @@ class TestGradientBoosting(TestCase):
     assert clf._more_tags() == GradientBoostingClassifier()._more_tags()
 
 
+class TestGradientBoostingRegression(TestCase):
+  def test_invalid_model(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLGradientBoostingRegressor(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Class" optype="categorical" dataType="string">
+            <Value value="setosa"/>
+            <Value value="versicolor"/>
+            <Value value="virginica"/>
+          </DataField>
+        </DataDictionary>
+        <MiningSchema>
+          <MiningField name="Class" usageType="target"/>
+        </MiningSchema>
+      </PMML>
+      """))
+
+    assert str(cm.exception) == 'PMML model does not contain MiningModel.'
+
+  def test_invalid_segmentation(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLGradientBoostingRegressor(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Class" optype="categorical" dataType="string">
+            <Value value="setosa"/>
+            <Value value="versicolor"/>
+            <Value value="virginica"/>
+          </DataField>
+        </DataDictionary>
+        <MiningModel>
+          <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+          </MiningSchema>
+        </MiningModel>
+      </PMML>
+      """))
+
+    assert str(cm.exception) == 'PMML model does not contain Segmentation.'
+
+  def test_non_voting_ensemble(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLGradientBoostingRegressor(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Class" optype="categorical" dataType="string">
+            <Value value="setosa"/>
+            <Value value="versicolor"/>
+            <Value value="virginica"/>
+          </DataField>
+        </DataDictionary>
+        <MiningModel>
+          <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+          </MiningSchema>
+          <Segmentation multipleModelMethod="mean" />
+        </MiningModel>
+      </PMML>
+      """))
+
+    assert str(cm.exception) == 'PMML model ensemble should use sum.'
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      pmml = path.join(BASE_DIR, '../models/gb-gbm-cat-pima-regression.pmml')
+      clf = PMMLGradientBoostingRegressor(pmml)
+      clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
+
+  def test_more_tags(self):
+    clf = PMMLGradientBoostingRegressor(path.join(BASE_DIR, '../models/gb-gbm-cat-pima-regression.pmml'))
+    assert clf._more_tags() == GradientBoostingRegressor()._more_tags()
+
+
 class TestIrisGradientBoostingIntegration(TestCase):
   def setUp(self):
     from sklearn.datasets import load_iris
@@ -99,10 +174,12 @@ class TestIrisGradientBoostingIntegration(TestCase):
                           'petal_width'])
     y = pd.Series(np.array(np.array(['setosa', 'versicolor', 'virginica']))[iris.target])
     y.name = "Class"
+    yreg = pd.Categorical(y).codes
     y2 = pd.Series(np.array(np.array(['setosa', 'other', 'other']))[iris.target])
     y2.name = "Class"
-    self.test = X, y, y2
+    self.test = X, y, y2, yreg
     self.ref = GradientBoostingClassifier(n_estimators=100, random_state=1).fit(X, y)
+    self.ref_regression = GradientBoostingRegressor(n_estimators=100, random_state=1).fit(X, yreg)
 
   def test_sklearn2pmml(self):
     # Export to PMML
@@ -118,7 +195,7 @@ class TestIrisGradientBoostingIntegration(TestCase):
       model = PMMLGradientBoostingClassifier(pmml='gb-sklearn2pmml.pmml')
 
       # Verify classification
-      Xte, yte, _ = self.test
+      Xte, yte, _, _ = self.test
 
       assert np.array_equal(
         self.ref.score(Xte, yte),
@@ -138,7 +215,7 @@ class TestIrisGradientBoostingIntegration(TestCase):
     pipeline = PMMLPipeline([
       ("classifier", self.ref)
     ])
-    Xte, _, yte = self.test
+    Xte, _, yte, _ = self.test
     pipeline.fit(Xte, yte)
 
     sklearn2pmml(pipeline, "gb-sklearn2pmml.pmml", with_repr = True)
@@ -161,12 +238,40 @@ class TestIrisGradientBoostingIntegration(TestCase):
     finally:
       remove("gb-sklearn2pmml.pmml")
 
+  def test_sklearn2pmml_regression(self):
+    Xte, _, _, yte = self.test
+
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", self.ref_regression)
+    ])
+
+    pipeline.fit(Xte, yte)
+    sklearn2pmml(pipeline, "gb-sklearn2pmml-regression.pmml", with_repr = True)
+
+    try:
+      # Import PMML
+      model = PMMLGradientBoostingRegressor(pmml='gb-sklearn2pmml-regression.pmml')
+
+      assert np.array_equal(
+        self.ref_regression.score(Xte, yte),
+        model.score(Xte, yte)
+      )
+
+      assert np.allclose(
+        self.ref_regression.predict(Xte),
+        model.predict(Xte)
+      )
+
+    finally:
+      remove("gb-sklearn2pmml-regression.pmml")
+
   def test_R_xgboost(self):
     pmml = path.join(BASE_DIR, '../models/gb-xgboost-iris.pmml')
     clf = PMMLGradientBoostingClassifier(pmml)
 
     # Verify classification
-    Xte, yte, _ = self.test
+    Xte, yte, _, _ = self.test
 
     ref = 0.9933333333333333
     assert ref == clf.score(Xte, yte)
@@ -328,6 +433,7 @@ class TestIrisGradientBoostingIntegration(TestCase):
       clf.predict_proba(Xte)
     )
 
+
 class TestCategoricalPimaGradientBoostingIntegration(TestCase):
   def setUp(self):
     df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
@@ -404,3 +510,28 @@ class TestCategoricalPimaGradientBoostingIntegration(TestCase):
     Xte, yte = self.test
     ref = 0.9615384615384616
     assert ref == self.clf.score(Xte, yte)
+
+
+class TestCategoricalPimaGradientBoostingRegressionIntegration(TestCase):
+  def setUp(self):
+    df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
+    cats = np.unique(df['age'])
+    df['age'] = pd.Categorical(df['age'], categories=cats)
+    Xte = df.iloc[:, 1:]
+    yte = df.iloc[:, 0]
+    self.test = (Xte, yte)
+
+    pmml = path.join(BASE_DIR, '../models/gb-gbm-cat-pima-regression.pmml')
+    self.clf = PMMLGradientBoostingRegressor(pmml)
+
+  def test_predict_proba(self):
+    Xte, yte = self.test
+
+    ref = np.array([8.7963558386421514, 4.2301487026115723, 10.3074130259255288, 11.0860042614012890, 10.8390882310787244, 11.6744276206624455, 6.8608053925382197, 9.0998439359242642, 6.1702581355388837, 12.9114410951622993, 12.0474364608163835, 9.4157358501361372, 8.9477742716855513, 8.6419978545111871, 6.7908113300154973, 7.8564460175848332, 2.5803039557291312, 7.4870246797282878, 8.8266231982794476, 10.0496192384298837, 8.4405425349964833, 7.1471731945422761, 6.7398521259839423, 6.7249846985687745, 6.0319108950989166, 8.4379837918667207, 4.8378531067712780,-0.1407388954840041,-0.4792882429478054, 1.4349186285165105, 4.3101553536690291,-0.7930196993237724, 0.4815607255042949, 1.4538897420629540, 1.0425325111888282, 2.0425202398853499, 0.3823644412175868, 1.7699741003671532, 4.4468787718050429, 4.4858266945650191, 2.6713073344830360,-0.1407388954840041, 3.3409551722776252, 0.1230805829857022, 2.7432385943292585, 4.4890530381860367, 0.1609319868079373, 0.0683164397100340, 4.9337076961523039, 1.6038396339595518, 2.9159757524348273, 4.9144114866512734])
+
+    assert np.allclose(ref, self.clf.predict(Xte))
+
+  def test_score(self):
+    Xte, yte = self.test
+    ref = 0.6847123751907591
+    assert ref == self.clf.score(Xte, (yte == "Yes")*10)
