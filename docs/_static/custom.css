@@ -107,3 +107,11 @@ a.tile-link:focus {
 main > div > .reference.internal.image-reference img {
     margin-bottom: 25px;
 }
+
+.sig-prename {
+    display: none;
+}
+
+.section > dl.py {
+    margin-top: 70px;
+}
