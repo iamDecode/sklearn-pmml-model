@@ -3,8 +3,9 @@
 # sklearn-pmml-model
 
 [![PyPI version](https://badge.fury.io/py/sklearn-pmml-model.svg)](https://badge.fury.io/py/sklearn-pmml-model)
-[![CircleCI](https://circleci.com/gh/iamDecode/sklearn-pmml-model.svg?style=shield)](https://circleci.com/gh/iamDecode/sklearn-pmml-model)
 [![codecov](https://codecov.io/gh/iamDecode/sklearn-pmml-model/branch/master/graph/badge.svg?token=CGbbgziGwn)](https://codecov.io/gh/iamDecode/sklearn-pmml-model)
+[![Language grade: Python](https://img.shields.io/lgtm/grade/python/g/iamDecode/sklearn-pmml-model.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/iamDecode/sklearn-pmml-model/context:python)
+[![CircleCI](https://circleci.com/gh/iamDecode/sklearn-pmml-model.svg?style=shield)](https://circleci.com/gh/iamDecode/sklearn-pmml-model)
 [![ReadTheDocs](https://readthedocs.org/projects/sklearn-pmml-model/badge/?version=latest&style=flat)](https://sklearn-pmml-model.readthedocs.io/en/latest/)
 
 A library to parse PMML models into Scikit-learn estimators.
