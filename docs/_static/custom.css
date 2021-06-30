@@ -1,57 +1,109 @@
-/*div.sphinxsidebarwrapper h1.logo {
-  font-size: 20px;
-  margin-bottom: 30px;
-  font-family: 'Helvetica', 'Arial', sans-serif;
+.navbar-brand {
+    padding: 0;
+    margin: 15px 0 -15px;
 }
 
-div.body p {
-  white-space: pre-wrap !important;
+.navbar-brand .title {
+    margin: 0;
 }
 
-dl dl {
-  margin: 0;
+.navbar .container-xl {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
 }
 
-dl dl dd {
-  margin-top: 0;
+#navbar-icon-links {
+    display: none;
+}
+@media (min-width: 960px) {
+    #navbar-icon-links {
+        display: flex;
+    }
 }
 
-dd p {
-  margin: 0.5em 0 1.5em 0;
-}*/
-
-dl.class dl.field-list dt, .rubric {
-  background: none;
-  border: none;
-  font-size: 20px;
-  font-weight: bold;
-  margin-bottom: 0px;
-  padding-left: 0px;
+.fas.pypi {
+    font-size: 20px !important;
+    margin-top: -2px;
 }
 
-dl.class dl.field-list dl dt {
-  font-size: 16px;
+.tile {
+    position: relative;
+    display: block;
+    padding: 1rem 1.2rem;
+    border-radius: 6px;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.2)
 }
 
-.classifier:before {
-  font-style: normal;
-  margin: 0.5em;
-  content: ":";
+.tile .tile-title {
+    position: relative;
+    font-size: 22px;
+    line-height: 1.4;
+    margin-top: 0;
+    margin-bottom: .5rem;
 }
 
-.classifier {
-  font-style: oblique;
-  font-weight: normal;
+.tile .tile-title .tile-icon {
+    position: absolute;
+    right: 0;
+    line-height: 1.4;
+    transition: all .2s;
 }
 
-dl.method::before {
-  content: 'Methods';
-  font-size: 20px;
-  font-weight: bold;
-  display: block;
-  padding: 15px 0;
+.tile h3.tile-title  {
+    color: rgba(var(--pst-color-link),1);
 }
 
-div.document > div > .image-reference img {
-  margin-bottom: 20px;
+.tile h3.tile-title:hover {
+    color:rgba(var(--pst-color-link-hover),1);
+}
+
+.tile h3.tile-title:before {
+    height: 0;
+    margin: 0;
+}
+
+.tile .tile-desc {
+    margin-top: 1rem;
+    color: #646976
+}
+
+.tile .tile-desc p:last-child {
+    margin-bottom: 0
+}
+
+.tile:after {
+    content: '';
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: #4ce8ff;
+    background: linear-gradient(90deg, #4ce8ff, #d07cff);
+    opacity: 0;
+    transition: all .2s
+}
+
+.tile:hover:after {
+    opacity: 1
+}
+
+.tile:hover .tile-icon {
+    transform: scale(1.4)
+}
+
+a.tile-link:active,
+a.tile-link:link,
+a.tile-link:hover,
+a.tile-link:focus {
+    text-decoration: none;
+}
+
+.tile .tile-desc pre {
+    font-size: 80%;
+    white-space: pre-line;
+}
+
+main > div > .reference.internal.image-reference img {
+    margin-bottom: 25px;
 }

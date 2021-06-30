@@ -1,3 +1,5 @@
+from datetime import datetime
+
 # Configuration file for the Sphinx documentation builder.
 #
 # This file only contains a selection of the most common options. For a full
@@ -18,7 +20,9 @@
 # -- Project information -----------------------------------------------------
 
 project = 'sklearn-pmml-model'
-copyright = '2019, Dennis Collaris'
+copyright = '2021, Dennis Collaris'
+current_year = datetime.utcnow().year
+copyright = f'2018 - {current_year}, Dennis Collaris'
 author = 'Dennis Collaris'
 
 
@@ -46,10 +50,22 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
+html_theme = 'pydata_sphinx_theme'
 
 html_theme_options = {
-  'collapse_navigation': False
+  "collapse_navigation": False,
+  "icon_links": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/iamDecode/sklearn-pmml-model",
+      "icon": "fab fa-github-square",
+    },
+    {
+      "name": "PyPI",
+      "url": "https://pypi.org/project/sklearn-pmml-model",
+      "icon": "fas fa-box pypi",
+    },
+  ]
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -64,4 +80,4 @@ autoapi_type = 'python'
 autoapi_dirs = ['../sklearn_pmml_model']
 
 def setup(app):
-  app.add_stylesheet('custom.css')
+  app.add_css_file('custom.css')
