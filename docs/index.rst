@@ -18,10 +18,10 @@ This library allows you to parse PMML models into Scikit-learn estimators. It ca
             </h3>
           </a>
           <div class="tile-desc">
-            <p>The easiest way to install <code>sklearn-pmml-model</code> is to use pip by running:</p>
+            <p>The easiest way to install <code>sklearn-pmml-model</code> is to use <a class="reference external" href="https://packaging.python.org/tutorials/installing-packages/#use-pip-for-installing">pip</a> by running:</p>
               <div class="highlight-default notranslate">
                 <div class="highlight">
-                  <pre>pip install sklearn-pmml-model</pre>
+                  <pre>$ pip install sklearn-pmml-model</pre>
                 </div>
               </div>
 
@@ -44,5 +44,6 @@ This library allows you to parse PMML models into Scikit-learn estimators. It ca
     </div>
 
 .. toctree::
-   :maxdepth: 4
-   :caption: Contents:
+    Install <install>
+    :maxdepth: 4
+    :caption: Contents:
