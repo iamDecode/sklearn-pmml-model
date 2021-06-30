@@ -6,8 +6,23 @@ from itertools import chain
 
 class PMMLGaussianNB(PMMLBaseClassifier, GaussianNB):
   """
-  Abstract class for Naive Bayes models.
+  Gaussian Naive Bayes (GaussianNB)
 
+  Can perform online updates to model parameters via :meth:`partial_fit`.
+  For details on algorithm used to update feature means and variance online,
+  see Stanford CS tech report STAN-CS-79-773 by Chan, Golub, and LeVeque:
+
+      http://i.stanford.edu/pub/cstr/reports/cs/tr/79/773/CS-TR-79-773.pdf
+
+  Parameters
+  ----------
+  pmml : str, object
+    Filename or file object containing PMML data.
+
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/NaiveBayes.html
+  
   """
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)

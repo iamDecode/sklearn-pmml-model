@@ -125,7 +125,7 @@ def _get_coefficients(est, table):
   est : PMMLBaseEstimator
     Base estimator containing information about `fields` and `field_mapping`.
 
-  table: eTree.Element
+  table : eTree.Element
       The <RegressionTable> element which contains the feature coefficients.
 
   """
@@ -158,13 +158,34 @@ def _get_coefficients(est, table):
   ]))
 
 
-'''
-NOTE: Many of these variants only differ in the training part, not the 
-classification part. Hence they are equavalent in terms of parsing.
-'''
+# NOTE: Many of these variants only differ in the training part, not the
+# classification part. Hence they are equivalent in terms of parsing.
 
 
 class PMMLRidge(PMMLGeneralizedLinearRegressor, Ridge):
+  """
+  Linear least squares with l2 regularization.
+
+  Minimizes the objective function::
+
+  ||y - Xw||^2_2 + alpha * ||w||^2_2
+
+  This model solves a regression model where the loss function is
+  the linear least squares function and regularization is given by
+  the l2-norm. Also known as Ridge Regression or Tikhonov regularization.
+  This estimator has built-in support for multi-variate regression
+  (i.e., when y is a 2d-array of shape (n_samples, n_targets)).
+
+  Parameters
+  ----------
+  pmml : str, object
+    Filename or file object containing PMML data.
+
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
+
+  """
   def fit(self, x, y):
     return PMMLGeneralizedLinearRegressor.fit(self, x, y)
 
@@ -173,6 +194,23 @@ class PMMLRidge(PMMLGeneralizedLinearRegressor, Ridge):
 
 
 class PMMLRidgeClassifier(PMMLGeneralizedLinearClassifier, RidgeClassifier):
+  """
+  Classifier using Ridge regression.
+
+  This classifier first converts the target values into ``{-1, 1}`` and
+  then treats the problem as a regression task (multi-output regression in
+  the multiclass case).
+
+  Parameters
+  ----------
+  pmml : str, object
+    Filename or file object containing PMML data.
+
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
+
+  """
   def __init__(self, pmml):
     PMMLGeneralizedLinearClassifier.__init__(self, pmml)
     RidgeClassifier.__init__(self)
@@ -185,6 +223,26 @@ class PMMLRidgeClassifier(PMMLGeneralizedLinearClassifier, RidgeClassifier):
 
 
 class PMMLLasso(PMMLGeneralizedLinearRegressor, Lasso):
+  """
+  Linear Model trained with L1 prior as regularizer (aka the Lasso)
+
+  The optimization objective for Lasso is::
+
+      (1 / (2 * n_samples)) * ||y - Xw||^2_2 + alpha * ||w||_1
+
+  Technically the Lasso model is optimizing the same objective function as
+  the Elastic Net with ``l1_ratio=1.0`` (no L2 penalty).
+
+  Parameters
+  ----------
+  pmml : str, object
+    Filename or file object containing PMML data.
+
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
+
+  """
   def __init__(self, pmml):
     PMMLGeneralizedLinearRegressor.__init__(self, pmml)
     self.n_iter_ = 0
@@ -197,6 +255,39 @@ class PMMLLasso(PMMLGeneralizedLinearRegressor, Lasso):
 
 
 class PMMLElasticNet(PMMLGeneralizedLinearRegressor, ElasticNet):
+  """
+  Linear regression with combined L1 and L2 priors as regularizer.
+
+  Minimizes the objective function::
+
+          1 / (2 * n_samples) * ||y - Xw||^2_2
+          + alpha * l1_ratio * ||w||_1
+          + 0.5 * alpha * (1 - l1_ratio) * ||w||^2_2
+
+  If you are interested in controlling the L1 and L2 penalty
+  separately, keep in mind that this is equivalent to::
+
+          a * ||w||_1 + 0.5 * b * ||w||_2^2
+
+  where::
+
+          alpha = a + b and l1_ratio = a / (a + b)
+
+  The parameter l1_ratio corresponds to alpha in the glmnet R package while
+  alpha corresponds to the lambda parameter in glmnet. Specifically, l1_ratio
+  = 1 is the lasso penalty. Currently, l1_ratio <= 0.01 is not reliable,
+  unless you supply your own sequence of alpha.
+
+  Parameters
+  ----------
+  pmml : str, object
+    Filename or file object containing PMML data.
+
+  Notes
+  -----
+  Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
+
+  """
   def __init__(self, pmml):
     PMMLGeneralizedLinearRegressor.__init__(self, pmml)
     self.n_iter_ = 0

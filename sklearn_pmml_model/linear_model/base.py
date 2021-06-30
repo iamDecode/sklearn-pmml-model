@@ -174,11 +174,11 @@ def _get_coefficients(linear_model, model):
 
   Parameters
   ----------
-  linear_model: PMMLGeneralizedLinearRegressor, PMMLGeneralizedLinearClassifier
+  linear_model : PMMLGeneralizedLinearRegressor, PMMLGeneralizedLinearClassifier
       The PMML class representing the classifier. Should contain at least target_field,
       fields and field_mapping properties.
 
-  model: eTree.Element
+  model : eTree.Element
       The <GeneralRegressionModel> element that is assumed to contains a
       <PPMatrix> and <ParamMatrix> element.
 
@@ -247,13 +247,13 @@ def _get_intercept(model):
 
   Parameters
   ----------
-  model: eTree.Element
+  model : eTree.Element
       The <GeneralRegressionModel> element that is assumed to contains a
       <PPMatrix> and <ParamMatrix> element.
 
   Returns
   -------
-  intercept: float
+  intercept : float
       Value of the intercept of the method.
 
   """
