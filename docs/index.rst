@@ -44,6 +44,9 @@ This library allows you to parse PMML models into Scikit-learn estimators. It ca
     </div>
 
 .. toctree::
-    Install <install>
     :maxdepth: 4
     :caption: Contents:
+
+    Install <install>
+    Release notes <release_notes>
+

@@ -34,6 +34,7 @@ author = 'Dennis Collaris'
 extensions = [
   'autoapi.extension',
   'numpydoc',
+  'sphinx_github_changelog',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
