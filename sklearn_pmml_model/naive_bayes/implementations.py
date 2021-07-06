@@ -39,7 +39,13 @@ class PMMLGaussianNB(PMMLBaseClassifier, GaussianNB):
       for target in self.classes_
     }
 
-    self.class_prior_ = np.array([1 / len(self.classes_) for _ in self.classes_])
+    try:
+      outputs = model.find('BayesOutput').find('TargetValueCounts').findall('TargetValueCount')
+      counts = [int(x.get('count')) for x in outputs]
+      self.class_prior_ = np.array([x / np.sum(counts) for x in counts])
+    except AttributeError:
+      self.class_prior_ = np.array([1 / len(self.classes_) for _ in self.classes_])
+
     self.theta_ = np.array([
       [float(value.get('mean', 0)) for value in target_values[target]]
       for target in self.classes_

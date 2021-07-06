@@ -134,11 +134,5 @@
                 </PairCounts>
             </BayesInput>
         </BayesInputs>
-        <BayesOutput fieldName="type">
-            <TargetValueCounts>
-                <TargetValueCount value="No" count="106"/>
-                <TargetValueCount value="Yes" count="106"/>
-            </TargetValueCounts>
-        </BayesOutput>
     </NaiveBayesModel>
 </PMML>
