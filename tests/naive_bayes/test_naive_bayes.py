@@ -2,10 +2,13 @@ from unittest import TestCase
 import sklearn_pmml_model
 from sklearn_pmml_model.naive_bayes import PMMLGaussianNB
 from sklearn.naive_bayes import GaussianNB
+from sklearn.datasets import load_wine
 import pandas as pd
 import numpy as np
-from os import path
+from os import path, remove
 from io import StringIO
+from sklearn2pmml.pipeline import PMMLPipeline
+from sklearn2pmml import sklearn2pmml
 
 
 BASE_DIR = path.dirname(sklearn_pmml_model.__file__)
@@ -78,9 +81,8 @@ class TestGaussianNBIntegration(TestCase):
     pmml = path.join(BASE_DIR, '../models/nb-cat-pima.pmml')
     self.clf = PMMLGaussianNB(pmml)
 
-    ref = GaussianNB()
-    ref.fit(Xte, yte)
-    print(ref)
+    self.ref = GaussianNB()
+    self.ref.fit(Xte, yte)
 
   def test_predict_proba(self):
     Xte, _ = self.test
@@ -102,3 +104,58 @@ class TestGaussianNBIntegration(TestCase):
       self.clf.fit(np.array([[]]), np.array([]))
 
     assert str(cm.exception) == 'Not supported.'
+
+  def test_sklearn2pmml(self):
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", self.ref)
+    ])
+    pipeline.fit(self.test[0], self.test[1])
+    sklearn2pmml(pipeline, "gnb-sklearn2pmml.pmml", with_repr = True)
+
+    try:
+      # Import PMML
+      model = PMMLGaussianNB(pmml='gnb-sklearn2pmml.pmml')
+
+      # Verify classification
+      Xte, _ = self.test
+      assert np.array_equal(
+        self.ref.predict_proba(Xte),
+        model.predict_proba(Xte)
+      )
+
+    finally:
+      remove("gnb-sklearn2pmml.pmml")
+
+
+class TestGaussianNBWineIntegration(TestCase):
+  def setUp(self):
+    df = load_wine(as_frame=True)
+    Xte = df.data
+    yte = df.target
+    self.test = (Xte, yte)
+
+    self.ref = GaussianNB()
+    self.ref.fit(Xte, yte)
+
+  def test_sklearn2pmml(self):
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", self.ref)
+    ])
+    pipeline.fit(self.test[0], self.test[1])
+    sklearn2pmml(pipeline, "gnb-sklearn2pmml.pmml", with_repr = True)
+
+    try:
+      # Import PMML
+      model = PMMLGaussianNB(pmml='gnb-sklearn2pmml.pmml')
+
+      # Verify classification
+      Xte, _ = self.test
+      assert np.array_equal(
+        self.ref.predict_proba(Xte),
+        model.predict_proba(Xte)
+      )
+
+    finally:
+      remove("gnb-sklearn2pmml.pmml")
