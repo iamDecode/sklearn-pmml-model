@@ -1,10 +1,10 @@
-from sklearn_pmml_model.base import PMMLBaseClassifier
+from sklearn_pmml_model.base import PMMLBaseClassifier, OneHotEncodingMixin
 from sklearn.naive_bayes import GaussianNB
 import numpy as np
 from itertools import chain
 
 
-class PMMLGaussianNB(PMMLBaseClassifier, GaussianNB):
+class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
   """
   Gaussian Naive Bayes (GaussianNB)
 
@@ -26,6 +26,7 @@ class PMMLGaussianNB(PMMLBaseClassifier, GaussianNB):
   """
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
+    OneHotEncodingMixin.__init__(self)
 
     model = self.root.find('NaiveBayesModel')
 

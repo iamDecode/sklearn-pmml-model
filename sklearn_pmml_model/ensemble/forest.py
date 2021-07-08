@@ -1,11 +1,11 @@
 import numpy as np
 import warnings
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor
-from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor
+from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor, IntegerEncodingMixin
 from sklearn_pmml_model.tree import get_tree
 
 
-class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
+class PMMLForestClassifier(IntegerEncodingMixin, PMMLBaseClassifier, RandomForestClassifier):
   """
   A random forest classifier.
 
@@ -92,7 +92,7 @@ class PMMLForestClassifier(PMMLBaseClassifier, RandomForestClassifier):
     return RandomForestClassifier._more_tags(self)
 
 
-class PMMLForestRegressor(PMMLBaseRegressor, RandomForestRegressor):
+class PMMLForestRegressor(IntegerEncodingMixin, PMMLBaseRegressor, RandomForestRegressor):
   """
   A random forest regressor.
 

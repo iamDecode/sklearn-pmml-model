@@ -1,11 +1,13 @@
 from sklearn.base import BaseEstimator
-from sklearn.preprocessing import LabelBinarizer
+from sklearn.preprocessing import LabelBinarizer, OneHotEncoder
+from sklearn.compose import ColumnTransformer
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
 from sklearn_pmml_model.datatypes import Category
 from collections import OrderedDict
 import datetime
 import numpy as np
+import pandas as pd
 
 
 class PMMLBaseEstimator(BaseEstimator):
@@ -137,13 +139,18 @@ class PMMLBaseEstimator(BaseEstimator):
     raise Exception('Not supported.')
 
   def _prepare_data(self, X):
-    X = np.asarray(X)
+    pmml_features = [f for f,e in self.fields.items() if e is not self.target_field and e.tag == 'DataField']
 
-    for column, (index, field_type) in self.field_mapping.items():
-      if type(field_type) is Category and index is not None and type(X[0,index]) is str:
-        categories = [str(v) for v in field_type.categories]
-        categories += [c for c in np.unique(X[:,index]) if c not in categories]
-        X[:,index] = [categories.index(x) for x in X[:,index]]
+    if isinstance(X, pd.DataFrame):
+      X.columns = X.columns.map(str)
+
+      try:
+        X = X[pmml_features]
+      except KeyError:
+        raise Exception('The features in the input data do not match features expected by the PMML model.')
+    elif X.shape[1] != len(pmml_features):
+      raise Exception('The number of features in provided data does not match expected number of features in the PMML. '
+                      'Provide pandas.Dataframe, or provide data matching the DataFields in the PMML document.')
 
     return X
 
@@ -258,3 +265,60 @@ def findall(element, path):
   if element is None:
     return []
   return element.findall(path)
+
+
+class OneHotEncodingMixin:
+  """
+  Mixin class to automatically one-hot encode categorical variables.
+
+  """
+  def __init__(self):
+    # Setup a column transformer to encode categorical variables
+    target = self.target_field.get('name')
+    fields = [field for name, field in self.fields.items() if name != target]
+
+    def encoder_for(field):
+      if field.get('optype') != 'categorical':
+        return 'passthrough'
+
+      encoder = OneHotEncoder()
+      encoder.categories_ = np.array([self.field_mapping[field.get('name')][1].categories])
+      encoder.drop_idx_ = np.array([None for x in encoder.categories_])
+      encoder._legacy_mode = False
+      return encoder
+
+    transformer = ColumnTransformer(
+      transformers=[
+        (field.get('name'), encoder_for(field), [self.field_mapping[field.get('name')][0]])
+        for field in fields
+        if field.tag == 'DataField'
+      ]
+    )
+
+    X = np.array([[0 for field in fields if field.tag == "DataField"]])
+    transformer._validate_transformers()
+    transformer._validate_column_callables(X)
+    transformer._validate_remainder(X)
+    transformer.transformers_ = transformer.transformers
+    transformer.sparse_output_ = False
+    transformer._feature_names_in = None
+
+    self.transformer = transformer
+
+  def _prepare_data(self, X):
+    X = super()._prepare_data(X)
+    return self.transformer.transform(X)
+
+
+class IntegerEncodingMixin:
+  def _prepare_data(self, X):
+    X = super()._prepare_data(X)
+    X = np.asarray(X)
+
+    for column, (index, field_type) in self.field_mapping.items():
+      if type(field_type) is Category and index is not None and type(X[0, index]) is str:
+        categories = [str(v) for v in field_type.categories]
+        categories += [c for c in np.unique(X[:, index]) if c not in categories]
+        X[:, index] = [categories.index(x) for x in X[:, index]]
+
+    return X
