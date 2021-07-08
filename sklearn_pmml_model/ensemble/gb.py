@@ -3,13 +3,13 @@ from abc import ABC
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, _gb_losses
-from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor
+from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor, IntegerEncodingMixin
 from sklearn_pmml_model.tree import get_tree
 from scipy.special import expit
 from ._gradient_boosting import predict_stages
 
 
-class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassifier, ABC):
+class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, GradientBoostingClassifier, ABC):
   """
   Gradient Boosting for classification.
 
@@ -135,7 +135,7 @@ class PMMLGradientBoostingClassifier(PMMLBaseClassifier, GradientBoostingClassif
     return GradientBoostingClassifier._more_tags(self)
 
 
-class PMMLGradientBoostingRegressor(PMMLBaseRegressor, GradientBoostingRegressor, ABC):
+class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, GradientBoostingRegressor, ABC):
   """
   Gradient Boosting for regression.
 

@@ -74,15 +74,16 @@ class TestGaussianNBIntegration(TestCase):
   def setUp(self):
     df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
     Xte = df.iloc[:, 1:]
-    Xte = pd.get_dummies(Xte, prefix_sep='')
+    Xenc = pd.get_dummies(Xte, prefix_sep='')
     yte = df.iloc[:, 0]
     self.test = (Xte, yte)
+    self.enc = (Xenc, yte)
 
     pmml = path.join(BASE_DIR, '../models/nb-cat-pima.pmml')
     self.clf = PMMLGaussianNB(pmml)
 
     self.ref = GaussianNB()
-    self.ref.fit(Xte, yte)
+    self.ref.fit(Xenc, yte)
 
   def test_predict_proba(self):
     Xte, _ = self.test
@@ -110,7 +111,7 @@ class TestGaussianNBIntegration(TestCase):
     pipeline = PMMLPipeline([
       ("classifier", self.ref)
     ])
-    pipeline.fit(self.test[0], self.test[1])
+    pipeline.fit(self.enc[0], self.enc[1])
     sklearn2pmml(pipeline, "gnb-sklearn2pmml.pmml", with_repr = True)
 
     try:
@@ -118,10 +119,10 @@ class TestGaussianNBIntegration(TestCase):
       model = PMMLGaussianNB(pmml='gnb-sklearn2pmml.pmml')
 
       # Verify classification
-      Xte, _ = self.test
-      assert np.array_equal(
-        self.ref.predict_proba(Xte),
-        model.predict_proba(Xte)
+      Xenc, _ = self.enc
+      assert np.allclose(
+        self.ref.predict_proba(Xenc),
+        model.predict_proba(Xenc)
       )
 
     finally:
@@ -152,7 +153,7 @@ class TestGaussianNBWineIntegration(TestCase):
 
       # Verify classification
       Xte, _ = self.test
-      assert np.array_equal(
+      assert np.allclose(
         self.ref.predict_proba(Xte),
         model.predict_proba(Xte)
       )

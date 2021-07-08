@@ -1,11 +1,11 @@
 from sklearn.linear_model import LinearRegression, Ridge, RidgeClassifier, Lasso, ElasticNet, LogisticRegression
-from sklearn_pmml_model.linear_model.base import PMMLLinearModel, PMMLLinearClassifier, PMMLGeneralizedLinearRegressor,\
-  PMMLGeneralizedLinearClassifier
+from sklearn_pmml_model.base import PMMLBaseRegressor, PMMLBaseClassifier, OneHotEncodingMixin
+from sklearn_pmml_model.linear_model.base import PMMLGeneralizedLinearRegressor, PMMLGeneralizedLinearClassifier
 from itertools import chain
 import numpy as np
 
 
-class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
+class PMMLLinearRegression(OneHotEncodingMixin, PMMLBaseRegressor, LinearRegression):
   """
   Ordinary least squares Linear Regression.
 
@@ -25,7 +25,8 @@ class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
 
   """
   def __init__(self, pmml):
-    PMMLLinearModel.__init__(self, pmml)
+    PMMLBaseRegressor.__init__(self, pmml)
+    OneHotEncodingMixin.__init__(self)
 
     # Import coefficients and intercepts
     model = self.root.find('RegressionModel')
@@ -51,13 +52,13 @@ class PMMLLinearRegression(PMMLLinearModel, LinearRegression):
       self.intercept_ = self.intercept_[0]
 
   def fit(self, x, y):
-    return PMMLLinearModel.fit(self, x, y)
+    return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
     return LinearRegression._more_tags(self)
 
 
-class PMMLLogisticRegression(PMMLLinearClassifier, LogisticRegression):
+class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRegression):
   """
   Logistic Regression (aka logit, MaxEnt) classifier.
 
@@ -77,7 +78,8 @@ class PMMLLogisticRegression(PMMLLinearClassifier, LogisticRegression):
 
   """
   def __init__(self, pmml):
-    PMMLLinearClassifier.__init__(self, pmml)
+    PMMLBaseClassifier.__init__(self, pmml)
+    OneHotEncodingMixin.__init__(self)
 
     # Import coefficients and intercepts
     model = self.root.find('RegressionModel')
@@ -111,7 +113,7 @@ class PMMLLogisticRegression(PMMLLinearClassifier, LogisticRegression):
     self.solver = 'lbfgs'
 
   def fit(self, x, y):
-    return PMMLLinearClassifier.fit(self, x, y)
+    return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
     return LogisticRegression._more_tags(self)

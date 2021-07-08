@@ -88,15 +88,12 @@ class TestTree(TestCase):
 class TestIrisTreeIntegration(TestCase):
   def setUp(self):
     pair = [0, 1]
-    data = load_iris()
+    data = load_iris(as_frame=True)
 
-    X = pd.DataFrame(data.data[:, pair])
-    X.columns = np.array(data.feature_names)[pair]
-    y = pd.Series(np.array(data.target_names)[data.target])
+    X = data.data
+    y = data.target
     y.name = "Class"
-    X, Xte, y, yte = train_test_split(X, y, test_size=0.33, random_state=123)
-    self.test = (Xte, yte)
-    self.train = (X, y)
+    self.test = (X, y)
 
     pmml = path.join(BASE_DIR, '../models/tree-iris.pmml')
     self.clf = PMMLTreeClassifier(pmml=pmml)
@@ -122,7 +119,7 @@ class TestIrisTreeIntegration(TestCase):
     pipeline = PMMLPipeline([
       ("classifier", self.ref)
     ])
-    pipeline.fit(self.train[0], self.train[1])
+    pipeline.fit(self.test[0], self.test[1])
     sklearn2pmml(pipeline, "tree-sklearn2pmml.pmml", with_repr = True)
 
     try:
@@ -145,9 +142,6 @@ class TestDigitsTreeIntegration(TestCase):
   def setUp(self):
     data = load_digits()
 
-    self.columns = [2, 3, 4, 5, 6, 7, 9, 10, 13, 14, 17, 18, 19, 20, 21, 25, 26,
-                    27, 28, 29, 30, 33, 34, 35, 36, 37, 38, 41, 42, 43, 45, 46,
-                    50, 51, 52, 53, 54, 55, 57, 58, 59, 60, 61, 62, 63]
     X = pd.DataFrame(data.data)
     y = pd.Series(np.array(data.target_names)[data.target])
     y.name = "Class"
@@ -161,19 +155,19 @@ class TestDigitsTreeIntegration(TestCase):
     Xte, _ = self.test
     assert np.array_equal(
       self.ref.predict(Xte),
-      self.clf.predict(Xte[self.columns]).astype(np.int64)
+      self.clf.predict(Xte)
     )
 
   def test_predict_proba(self):
     Xte, _ = self.test
     assert np.array_equal(
       self.ref.predict_proba(Xte),
-      self.clf.predict_proba(Xte[self.columns])
+      self.clf.predict_proba(Xte)
     )
 
   def test_score(self):
     Xte, yte = self.test
-    assert self.ref.score(Xte, yte) == self.clf.score(Xte[self.columns], yte)
+    assert self.ref.score(Xte, yte) == self.clf.score(Xte, yte)
 
 
 class TestCategoricalTreeIntegration(TestCase):

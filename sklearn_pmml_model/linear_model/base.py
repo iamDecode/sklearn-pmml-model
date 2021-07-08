@@ -1,107 +1,9 @@
-from sklearn_pmml_model.base import PMMLBaseRegressor, PMMLBaseClassifier
-from sklearn.preprocessing import OneHotEncoder
-from sklearn.compose import ColumnTransformer
+from sklearn_pmml_model.base import PMMLBaseRegressor, PMMLBaseClassifier, OneHotEncodingMixin
 import numpy as np
 from itertools import chain
 
 
-class PMMLLinearModel(PMMLBaseRegressor):
-  """
-  Abstract class for linear models.
-
-  """
-  def __init__(self, pmml):
-    PMMLBaseRegressor.__init__(self, pmml)
-
-    # Setup a column transformer to deal with categorical variables
-    target = self.target_field.get('name')
-    fields = [field for name, field in self.fields.items() if name != target]
-
-    def encoder_for(field):
-      if field.get('optype') != 'categorical':
-        return 'passthrough'
-
-      encoder = OneHotEncoder()
-      encoder.categories_ = np.array([self.field_mapping[field.get('name')][1].categories])
-      encoder.drop_idx_ = np.array([None for x in encoder.categories_])
-      encoder._legacy_mode = False
-      return encoder
-
-    transformer = ColumnTransformer(
-      transformers=[
-        (field.get('name'), encoder_for(field), [self.field_mapping[field.get('name')][0]])
-        for field in fields
-        if field.tag == 'DataField'
-      ]
-    )
-
-    X = np.array([[0 for field in fields if field.tag == "DataField"]])
-    transformer._validate_transformers()
-    transformer._validate_column_callables(X)
-    transformer._validate_remainder(X)
-    transformer.transformers_ = transformer.transformers
-    transformer.sparse_output_ = False
-    transformer._feature_names_in = None
-
-    self.transformer = transformer
-
-  def _prepare_data(self, X):
-    """
-    Overrides the default data preparation operation by one-hot encoding
-    categorical variables.
-    """
-    return self.transformer.transform(X)
-
-
-class PMMLLinearClassifier(PMMLBaseClassifier):
-  """
-  Abstract class for linear models.
-
-  """
-  def __init__(self, pmml):
-    PMMLBaseClassifier.__init__(self, pmml)
-
-    # Setup a column transformer to deal with categorical variables
-    target = self.target_field.get('name')
-    fields = [field for name, field in self.fields.items() if name != target]
-
-    def encoder_for(field):
-      if field.get('optype') != 'categorical':
-        return 'passthrough'
-
-      encoder = OneHotEncoder()
-      encoder.categories_ = np.array([self.field_mapping[field.get('name')][1].categories])
-      encoder.drop_idx_ = np.array([None for x in encoder.categories_])
-      encoder._legacy_mode = False
-      return encoder
-
-    transformer = ColumnTransformer(
-      transformers=[
-        (field.get('name'), encoder_for(field), [self.field_mapping[field.get('name')][0]])
-        for field in fields
-        if field.tag == 'DataField'
-      ]
-    )
-
-    X = np.array([[0 for field in fields if field.tag == "DataField"]])
-    transformer._validate_transformers()
-    transformer._validate_column_callables(X)
-    transformer._validate_remainder(X)
-    transformer.transformers_ = transformer.transformers
-    transformer.sparse_output_ = False
-    transformer._feature_names_in = None
-
-    self.transformer = transformer
-
-  def _prepare_data(self, X):
-    """
-    Overrides the default data preparation operation by one-hot encoding
-    categorical variables.
-    """
-    return self.transformer.transform(X)
-
-
-class PMMLGeneralizedLinearRegressor(PMMLLinearModel):
+class PMMLGeneralizedLinearRegressor(OneHotEncodingMixin, PMMLBaseRegressor):
   """
   Abstract class for Generalized Linear Models (GLMs).
 
@@ -122,7 +24,8 @@ class PMMLGeneralizedLinearRegressor(PMMLLinearModel):
 
   """
   def __init__(self, pmml):
-    PMMLLinearModel.__init__(self, pmml)
+    PMMLBaseRegressor.__init__(self, pmml)
+    OneHotEncodingMixin.__init__(self)
 
     # Import coefficients and intercepts
     model = self.root.find('GeneralRegressionModel')
@@ -134,7 +37,7 @@ class PMMLGeneralizedLinearRegressor(PMMLLinearModel):
     self.intercept_ = _get_intercept(model)
 
 
-class PMMLGeneralizedLinearClassifier(PMMLLinearClassifier):
+class PMMLGeneralizedLinearClassifier(OneHotEncodingMixin, PMMLBaseClassifier):
   """
   Abstract class for Generalized Linear Models (GLMs).
 
@@ -155,7 +58,8 @@ class PMMLGeneralizedLinearClassifier(PMMLLinearClassifier):
 
   """
   def __init__(self, pmml):
-    PMMLLinearClassifier.__init__(self, pmml)
+    PMMLBaseClassifier.__init__(self, pmml)
+    OneHotEncodingMixin.__init__(self)
 
     # Import coefficients and intercepts
     model = self.root.find('GeneralRegressionModel')

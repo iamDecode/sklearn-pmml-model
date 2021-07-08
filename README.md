@@ -30,7 +30,7 @@ This library is in beta, and currently not all models are supported. The library
 | [Ridge](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
 | [Lasso](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
 | [ElasticNet](sklearn_pmml_model/linear_model)          | ✅<sup>2</sup> | ✅         | ✅                    |
-| [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅             |            |                      |
+| [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅             |            | ✅<sup>3</sup>        |
 
 <sup>1</sup> Categorical feature support using slightly modified internals, based on [scikit-learn#12866](https://github.com/scikit-learn/scikit-learn/pull/12866).
 

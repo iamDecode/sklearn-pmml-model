@@ -221,3 +221,102 @@ class TestBase(TestCase):
       clf.fit(X, y)
 
     assert str(cm.exception) == "Not supported."
+
+  def test_prepare_data_removes_unused_columns(self):
+    clf = PMMLBaseEstimator(pmml=StringIO("""
+      <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+        <DataDictionary>
+          <DataField name="Class" optype="categorical" dataType="string">
+            <Value value="setosa"/>
+            <Value value="versicolor"/>
+            <Value value="virginica"/>
+          </DataField>
+          <DataField name="test1" optype="continuous" dataType="double"/>
+        </DataDictionary>
+        <MiningSchema>
+          <MiningField name="Class" usageType="target"/>
+        </MiningSchema>
+      </PMML>
+      """))
+
+    X = pd.DataFrame(data=[[1, 2], [3, 4], [5, 6]], columns=["test1", "test2"])
+    result = clf._prepare_data(X)
+
+    assert list(X.columns) == ["test1", "test2"]
+    assert list(result.columns) == ["test1"]
+
+  def test_prepare_data_reorders_columns(self):
+    clf = PMMLBaseEstimator(pmml=StringIO("""
+    <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+      <DataDictionary>
+        <DataField name="Class" optype="categorical" dataType="string">
+          <Value value="setosa"/>
+          <Value value="versicolor"/>
+          <Value value="virginica"/>
+        </DataField>
+        <DataField name="test2" optype="continuous" dataType="double"/>
+        <DataField name="test1" optype="continuous" dataType="double"/>
+      </DataDictionary>
+      <MiningSchema>
+        <MiningField name="Class" usageType="target"/>
+      </MiningSchema>
+    </PMML>
+    """))
+
+    X = pd.DataFrame(data=[[1, 2], [3, 4], [5, 6]], columns=["test1", "test2"])
+    result = clf._prepare_data(X)
+
+    assert list(X.columns) == ["test1", "test2"]
+    assert list(result.columns) == ["test2", "test1"]
+
+  def test_prepare_data_exception_mismatch_columns_numpy(self):
+    clf = PMMLBaseEstimator(pmml=StringIO("""
+    <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+      <DataDictionary>
+        <DataField name="Class" optype="categorical" dataType="string">
+          <Value value="setosa"/>
+          <Value value="versicolor"/>
+          <Value value="virginica"/>
+        </DataField>
+        <DataField name="test1" optype="continuous" dataType="double"/>
+      </DataDictionary>
+      <MiningSchema>
+        <MiningField name="Class" usageType="target"/>
+      </MiningSchema>
+    </PMML>
+    """))
+
+    X = pd.DataFrame(data=[[1, 2], [3, 4], [5, 6]], columns=["test1", "test2"])
+
+    with self.assertRaises(Exception) as cm:
+      clf._prepare_data(np.asanyarray(X))
+
+    assert str(cm.exception) == "The number of features in provided data does not match expected number of features " \
+                                "in the PMML. Provide pandas.Dataframe, or provide data matching the DataFields in " \
+                                "the PMML document."
+
+  def test_prepare_data_exception_mismatch_columns_pandas(self):
+    clf = PMMLBaseEstimator(pmml=StringIO("""
+    <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+      <DataDictionary>
+        <DataField name="Class" optype="categorical" dataType="string">
+          <Value value="setosa"/>
+          <Value value="versicolor"/>
+          <Value value="virginica"/>
+        </DataField>
+        <DataField name="test1" optype="continuous" dataType="double"/>
+        <DataField name="test2" optype="continuous" dataType="double"/>
+      </DataDictionary>
+      <MiningSchema>
+        <MiningField name="Class" usageType="target"/>
+      </MiningSchema>
+    </PMML>
+    """))
+
+    X = pd.DataFrame(data=[[1, 2], [3, 4], [5, 6]], columns=["Test_1", "Test_2"])
+
+    with self.assertRaises(Exception) as cm:
+      clf._prepare_data(X)
+
+    assert str(cm.exception) == "The features in the input data do not match features expected by the PMML model."
+
