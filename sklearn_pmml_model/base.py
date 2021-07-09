@@ -88,9 +88,12 @@ class PMMLBaseEstimator(BaseEstimator):
     """
     data_dictionary = self.root.find('DataDictionary')
     global_transforms = self.root.find('TransformationDictionary')
-    local_transforms = self.root.find('.//LocalTransformations')
+    local_transforms = self.root.findall('.//LocalTransformations')
 
-    derived_fields = findall(global_transforms, 'DerivedField') + findall(local_transforms, 'DerivedField')
+    local_derived_fields = [findall(x, 'DerivedField') for x in local_transforms]
+    local_derived_fields = [field for sublist in local_derived_fields for field in sublist]
+
+    derived_fields = findall(global_transforms, 'DerivedField') + local_derived_fields
 
     fields = OrderedDict({
       e.get('name'): e
