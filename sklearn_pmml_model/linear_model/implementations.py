@@ -108,6 +108,7 @@ class PMMLLogisticRegression(PMMLLinearClassifier, LogisticRegression):
     self.coef_ = np.array(self.coef_)
     self.intercept_ = np.array(self.intercept_)
     self.multi_class = 'auto'
+    self.solver = 'lbfgs'
 
   def fit(self, x, y):
     return PMMLLinearClassifier.fit(self, x, y)
