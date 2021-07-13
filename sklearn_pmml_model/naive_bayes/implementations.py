@@ -22,7 +22,7 @@ class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
   Notes
   -----
   Specification: http://dmg.org/pmml/v4-3/NaiveBayes.html
-  
+
   """
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
@@ -72,7 +72,8 @@ class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
 
         if distribution is None:
           distributionName = targetValue.find('*').tag
-          raise NotImplementedError(f'Distribution "{distributionName}" not implemented, or not supported by scikit-learn')
+          raise NotImplementedError(f'Distribution "{distributionName}" not implemented, or not supported '
+                                    f'by scikit-learn')
 
         return [distribution]
       else:

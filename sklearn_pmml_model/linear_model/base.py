@@ -128,7 +128,6 @@ def _get_coefficients(linear_model, model):
 
       return [coefficient_for_parameter(pp_cells[0].get('parameterName'))]
 
-
     return [
       coefficient_for_parameter(parameter_for_category(pp_cells, c))
       for c in linear_model.field_mapping[name][1].categories
@@ -142,6 +141,7 @@ def _get_coefficients(linear_model, model):
     for name, field in fields.items()
 
   ]))
+
 
 def _get_intercept(model):
   """

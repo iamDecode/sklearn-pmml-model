@@ -330,7 +330,7 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
           mask |= 1 << index
         except ValueError:
           warn('Categorical values are missing in the PMML document, '
-               + 'attempting to infer from decision tree splits.')
+               'attempting to infer from decision tree splits.')
           field_type.categories.append(category)
           mask |= 1 << len(field_type.categories) - 1
 

@@ -142,7 +142,7 @@ class PMMLBaseEstimator(BaseEstimator):
     raise Exception('Not supported.')
 
   def _prepare_data(self, X):
-    pmml_features = [f for f,e in self.fields.items() if e is not self.target_field and e.tag == 'DataField']
+    pmml_features = [f for f, e in self.fields.items() if e is not self.target_field and e.tag == 'DataField']
 
     if isinstance(X, pd.DataFrame):
       X.columns = X.columns.map(str)

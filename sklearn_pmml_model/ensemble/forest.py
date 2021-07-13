@@ -139,8 +139,9 @@ class PMMLForestRegressor(IntegerEncodingMixin, PMMLBaseRegressor, RandomForestR
 
     if len(valid_segments) < len(segments):
       warnings.warn(
-        'Warning: {} segment(s) ignored because of unsupported predicate.'
-          .format(len(segments) - len(valid_segments))
+        'Warning: {} segment(s) ignored because of unsupported predicate.'.format(
+          len(segments) - len(valid_segments)
+        )
       )
 
     n_estimators = len(valid_segments)
