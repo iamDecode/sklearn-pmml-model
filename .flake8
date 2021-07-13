@@ -1,0 +1,3 @@
+[flake8]
+ignore = E111,E121,E114  # we use 2-space indent
+max-line-length = 120
