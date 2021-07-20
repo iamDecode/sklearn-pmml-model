@@ -1,92 +1,124 @@
 # Contributing
 
-When contributing to this repository, please first discuss the change you wish to make via issue,
-email, or any other method with the owners of this repository before making a change. 
+When contributing to this repository, please first discuss the change you wish to make via a GitHub issue, email, or any other method with the owners of this repository before making a change. 
 
-Please note we have a code of conduct, please follow it in all your interactions with the project.
+Please note we have a [code of conduct](CODE_OF_CONDUCT.md), please follow it in all your interactions with the project.
 
-## Pull Request Process
 
-1. Ensure any install or build dependencies are removed before the end of the layer when doing a 
-   build.
-2. Update the README.md with details of changes to the interface, this includes new environment 
-   variables, exposed ports, useful file locations and container parameters.
-3. Increase the version numbers in any examples files and the README.md to the new version that this
-   Pull Request would represent. The versioning scheme we use is [SemVer](http://semver.org/).
-4. You may merge the Pull Request in once you have the sign-off of two other developers, or if you 
-   do not have permission to do that, you may request the second reviewer to merge it for you.
+## Scope of this package
 
-## Code of Conduct
+The scope of `sklearn-pmml-model` is to import functionality to all major estimator classes of the popular machine learning library [scikit-learn](https://scikit-learn.org) using [PMML](http://dmg.org/pmml/v4-4/GeneralStructure.html).
 
-### Our Pledge
+The API is designed to closely resemble the `scikit-learn` API. The same directory and component structure is used, and each estimator is a sub-class of a corresponding estimator. Note that some models may not have a `scikit-learn` implementation (e.g., Bayesian networks) and hence cannot currently be represented.
 
-In the interest of fostering an open and welcoming environment, we as
-contributors and maintainers pledge to making participation in our project and
-our community a harassment-free experience for everyone, regardless of age, body
-size, disability, ethnicity, gender identity and expression, level of experience,
-nationality, personal appearance, race, religion, or sexual identity and
-orientation.
+We intend for the library to remain as light-weight as possible, and stick with the minimum number of additions to enable PMML import functionality without affecting the outward facing API of estimators.
 
-### Our Standards
 
-Examples of behavior that contributes to creating a positive environment
-include:
+## Reporting bugs
 
-* Using welcoming and inclusive language
-* Being respectful of differing viewpoints and experiences
-* Gracefully accepting constructive criticism
-* Focusing on what is best for the community
-* Showing empathy towards other community members
+We use GitHub issues to track all bugs and feature requests; feel free to open an issue if you have found a bug or wish to see a feature implemented.
 
-Examples of unacceptable behavior by participants include:
+It is recommended to check that your issue complies with the  following rules before submitting:
 
-* The use of sexualized language or imagery and unwelcome sexual attention or
-advances
-* Trolling, insulting/derogatory comments, and personal or political attacks
-* Public or private harassment
-* Publishing others' private information, such as a physical or electronic
-  address, without explicit permission
-* Other conduct which could reasonably be considered inappropriate in a
-  professional setting
+- Verify that your issue is not being currently addressed by other [issues](https://github.com/iamDecode/sklearn-pmml-model/issues) or [pull requests](https://github.com/iamDecode/sklearn-pmml-model/pulls).
+- Please include code snippets or error messages when reporting issues. When doing so, please make sure to format them using code blocks. See [Creating and highlighting code blocks](https://help.github.com/articles/creating-and-highlighting-code-blocks).
+- It can often be helpful to include your operating system type and version number, as well as your Python, sklearn-pmml-model, scikit-learn, numpy, and scipy versions. This information can be found by running the following code snippet:
+```python
+import platform; print(platform.platform())
+import sys; print("Python", sys.version)
+import numpy; print("NumPy", numpy.__version__)
+import scipy; print("SciPy", scipy.__version__)
+import sklearn; print("Scikit-Learn", sklearn.__version__)
+import sklearn_pmml_model; print("sklearn-pmml-model", sklearn_pmml_model.__version__)
+```
 
-### Our Responsibilities
 
-Project maintainers are responsible for clarifying the standards of acceptable
-behavior and are expected to take appropriate and fair corrective action in
-response to any instances of unacceptable behavior.
+## Get a local copy
 
-Project maintainers have the right and responsibility to remove, edit, or
-reject comments, commits, code, wiki edits, issues, and other contributions
-that are not aligned to this Code of Conduct, or to ban temporarily or
-permanently any contributor for other behaviors that they deem inappropriate,
-threatening, offensive, or harmful.
+These are the steps you need to take to create a copy of the `sklearn-pmml-model` repository on your computer.
 
-### Scope
+1. [Create an account](https://github.com/join) on GitHub if you do not already have one.
 
-This Code of Conduct applies both within project spaces and in public spaces
-when an individual is representing the project or its community. Examples of
-representing a project or community include using an official project e-mail
-address, posting via an official social media account, or acting as an appointed
-representative at an online or offline event. Representation of a project may be
-further defined and clarified by project maintainers.
+2. [Fork](https://help.github.com/en/github/getting-started-with-github/fork-a-repo) the [`sklearn-pmml-model` repository](https://github.com/iamDecode/sklearn-pmml-model).
 
-### Enforcement
+3. Clone your fork of the `sklearn-pmml-model` repository from your GitHub account. Use a git GUI application (e.g., Sourcetree, GitKraken) or from command line, run:
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be
-reported by contacting the proect team. All
-complaints will be reviewed and investigated and will result in a response that
-is deemed necessary and appropriate to the circumstances. The project team is
-obligated to maintain confidentiality with regard to the reporter of an incident.
-Further details of specific enforcement policies may be posted separately.
+   ```
+   $ git clone git@github.com:iamDecode/sklearn-pmml-model.git
+   $ cd sklearn-pmml-model
+   ```
 
-Project maintainers who do not follow or enforce the Code of Conduct in good
-faith may face temporary or permanent repercussions as determined by other
-members of the project's leadership.
+4. Create a feature branch to hold your development changes:
 
-### Attribution
+   ```
+   $ git checkout -b <username>/<feature description>
+   ```
 
-This Code of Conduct is adapted from the [Contributor Covenant][homepage], version 1.4,
-available at [http://contributor-covenant.org/version/1/4][version]
+   (For example: `decode/regression-trees`)
 
-[homepage]: http://contributor-covenant.org
-[version]: http://contributor-covenant.org/version/1/4/
+
+## Setting up a development environment
+
+After you created a copy of our main repository on GitHub, your need to setup a local development environment.  We recommend creating a virtual environment and activating it:
+```
+$ python3 -m venv venv
+$ source venv/bin/activate
+```
+
+and install the dependencies within the virtual environment:
+
+```
+$ pip install -r requirements.txt
+```
+
+The final step is to build the Cython extensions (you need to rebuilt once you make changes to the Cython code):
+
+```
+$ python setup.py build_ext --inplace
+```
+
+## Making changes to the code
+
+For pull requests to be accepted, your changes must at least meet the following requirements:
+
+1. All changes related to *one feature* must belong to *one branch*. Each branch must be self-contained, with a single new feature or bugfix.
+2. Commit messages should be formulated according to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/).
+3. If your pull request addresses an issue, please make sure to [link back](https://github.blog/changelog/2020-12-15-reference-issues-discussions-and-pull-requests-faster-with-multi-word-suggestions/) to the original issue.
+4. Follow the [PEP8 style guide](https://www.python.org/dev/peps/pep-0008/). With the following exceptions or additions:
+   - The max line length is 120 characters instead of 80.
+   - Indents with double spaces, not 4 spaces or tabs.
+  
+   You can check for compliance locally by running:
+   ```
+   $ flake8 sklearn_pmml_model
+   ```
+5. Each function, class, method, and attribute needs to be documented using docstrings. `sklearn-pmml-model` conforms to the [numpy docstring standard](https://numpydoc.readthedocs.io/en/latest/format.html#docstring-standard). 
+6. Finally, ensure all the test cases still pass after you have made your changes. To test locally, you can run:
+   ```
+   $ python setup.py pytest
+   ```
+
+In addition to these requirements, we strongly prefer you to consider the following guidelines. However, they are not strictly required to not be overly prohibitive to new contributors.
+
+7. Your change should include test cases for all new functionality being introduced.
+8. No additional code style issues should be reported by [LGTM](https://lgtm.com).
+
+Continuous integration will automatically verify compliance with all of the discussed requirements.
+
+
+
+## Submitting a Pull Request
+
+1. When you are done coding in your feature branch, [add changed or new files](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#_tracking_files>):
+   ```
+   $ git add path/to/modified_file
+   ```
+2. Create a [commit](https://git-scm.com/book/en/v2/Git-Basics-Recording-Changes-to-the-Repository#_committing_changes) with a message describing what you changed. Commit messages should be formulated according to [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/) standard: 
+   ```
+   $ git commit
+   ```
+3. Push the changes to GitHub:
+   ```
+   $ git push -u origin my_feature
+   ```
+4. [Create a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).
