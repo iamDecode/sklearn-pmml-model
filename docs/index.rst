@@ -48,5 +48,6 @@ This library allows you to parse PMML models into Scikit-learn estimators. It ca
     :caption: Contents:
 
     Install <install>
+    Contribute <contributing>
     Release notes <release_notes>
 

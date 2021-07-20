@@ -35,6 +35,7 @@ extensions = [
   'autoapi.extension',
   'numpydoc',
   'sphinx_github_changelog',
+  'myst_parser',
 ]
 
 # Add any paths that contain templates here, relative to this directory.
