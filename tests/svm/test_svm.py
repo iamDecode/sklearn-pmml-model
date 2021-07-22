@@ -1,4 +1,5 @@
 from unittest import TestCase
+from sklearn.datasets import load_iris
 import sklearn_pmml_model
 from sklearn.svm import LinearSVC, LinearSVR, NuSVC, NuSVR, SVC, SVR
 from sklearn_pmml_model.svm import PMMLLinearSVC, PMMLLinearSVR, PMMLNuSVC, PMMLNuSVR, PMMLSVC, PMMLSVR
@@ -363,6 +364,63 @@ class TestSVCIntegration(TestCase):
 
         finally:
             remove("svc-sklearn2pmml.pmml")
+
+
+class TestSVMIntegrationMultiClass(TestCase):
+    def setUp(self):
+        data = load_iris(as_frame=True)
+
+        X = data.data
+        y = data.target
+        y.name = "Class"
+        self.test = (X, y)
+
+        self.ref = SVC(random_state=1).fit(X, y)
+        self.ref2 = SVR().fit(X, y == 'setosa')
+
+    def test_sklearn2pmml(self):
+        # Export to PMML
+        pipeline = PMMLPipeline([
+            ("classifier", self.ref)
+        ])
+        pipeline.fit(self.test[0], self.test[1])
+        sklearn2pmml(pipeline, "svc-sklearn2pmml.pmml", with_repr=True)
+
+        try:
+            # Import PMML
+            model = PMMLSVC(pmml='svc-sklearn2pmml.pmml')
+
+            # Verify classification
+            Xenc, _ = self.test
+            assert np.allclose(
+                self.ref.decision_function(Xenc),
+                model.decision_function(Xenc)
+            )
+
+        finally:
+            remove("svc-sklearn2pmml.pmml")
+
+    def test_sklearn2pmml_regression(self):
+        # Export to PMML
+        pipeline = PMMLPipeline([
+            ("regressor", self.ref2)
+        ])
+        pipeline.fit(self.test[0], self.test[1])
+        sklearn2pmml(pipeline, "svr-sklearn2pmml.pmml", with_repr=True)
+
+        try:
+            # Import PMML
+            model = PMMLSVR(pmml='svr-sklearn2pmml.pmml')
+
+            # Verify regression
+            Xenc, _ = self.test
+            assert np.allclose(
+                self.ref2.predict(Xenc),
+                model.predict(Xenc)
+            )
+
+        finally:
+            remove("svr-sklearn2pmml.pmml")
 
 
 class TestNuSVRIntegration(TestCase):

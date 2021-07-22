@@ -1,4 +1,4 @@
-from sklearn_pmml_model.base import parse_array
+from sklearn_pmml_model.base import PMMLBaseRegressor, parse_array
 import numpy as np
 
 
@@ -33,22 +33,33 @@ class PMMLBaseSVM:
       raise Exception('PMML model does not contain SupportVectorMachineModel.')
 
     vector_dictionary = model.find('VectorDictionary')
-    svm = model.find('SupportVectorMachine')
-    support_vectors = svm.find('SupportVectors')
-    coefficients = svm.find('Coefficients')
+    svms = model.findall('SupportVectorMachine')
+    coefficients = [svm.find('Coefficients') for svm in svms]
 
     self.shape_fit_ = (0, len(vector_dictionary.find('VectorFields')))
-    self._intercept_ = self.intercept_ = np.array([float(coefficients.get('absoluteValue'))])
-    self._dual_coef_ = self.dual_coef_ = np.array([[
-      float(c.get('value'))
-      for c in coefficients.findall("Coefficient")
-    ]])
     self.support_ = np.array([
-      int(s.get('vectorId'))
-      for s in support_vectors.findall('SupportVector')
+      int(x.get('id'))
+      for x in vector_dictionary.findall('VectorInstance')
     ]).astype(np.int32)
-    self._n_support = (np.repeat(len(self.support_), self.n_classes_) / self.n_classes_).astype(np.int32)
-    self.support_vectors_ = np.array([get_vectors(vector_dictionary, s) for s in self.support_])
+
+    classes = [None, None] if isinstance(self, PMMLBaseRegressor) else self.classes_
+
+    self._n_support = np.array([
+      len(get_overlapping_vectors(get_alt_svms(svms, classes, c)))
+      for c in classes
+    ]).astype(np.int32)
+
+    self.support_vectors_ = np.array([
+      get_vectors(vector_dictionary, s) for s in self.support_
+    ])
+
+    self._intercept_ = self.intercept_ = np.array([float(cs.get('absoluteValue')) for cs in coefficients])
+    self._dual_coef_ = self.dual_coef_ = np.array(
+      get_coefficients(classes, self._n_support, self.support_, svms)
+    )
+
+    if len(classes) == 2:
+      self._n_support = (self._n_support / 2).astype(np.int32)
 
     linear = model.find('LinearKernelType')
     poly = model.find('PolynomialKernelType')
@@ -70,8 +81,6 @@ class PMMLBaseSVM:
       self.kernel = 'sigmoid'
       self._gamma = self.gamma = float(sigmoid.get('gamma'))
       self.coef0 = float(sigmoid.get('coef0'))
-    else:
-      raise Exception('Unknown or missing kernel type.')
 
     self._probA = np.array([])
     self._probB = np.array([])
@@ -94,3 +103,68 @@ def get_vectors(vector_dictionary, s):
     raise Exception(f'PMML model is broken, vector instance (id = {s}) does not contain (Sparse)Array element.')
 
   return np.array(parse_array(array))
+
+
+def get_alt_svms(svms, classes, target_class):
+  """
+  Find alternative SVMs (e.g., for target class 0, find the svms classifying 0 against 1, and 0 against 2)
+
+  Parameters
+  ----------
+  svms : list
+      List of eTree.Element objects describing the different one-to-one support vector machines in the PMML.
+
+  classes : numpy.array
+      The classes to be predicted by the model.
+
+  target_class : str
+      The target class.
+
+  Returns
+  -------
+  alt_svms : list
+      List of eTree.Elements filtered to only include SVMs comparing the target class against alternate classes.
+
+  """
+  # Noop for regression
+  if classes[0] is None:
+    return svms
+
+  alt_svms = [
+    svm for svm in svms
+    if svm.get('targetCategory') == str(target_class) or svm.get('alternateTargetCategory') == str(target_class)
+  ]
+
+  # Sort svms based on target class order
+  alt_svms = [
+    next(svm for svm in alt_svms if svm.get('targetCategory') == str(c) or svm.get('alternateTargetCategory') == str(c))
+    for c in set(classes).difference({target_class})
+  ]
+
+  return alt_svms
+
+
+def get_overlapping_vectors(svms):
+  support_vectors = [svm.find('SupportVectors') for svm in svms]
+  vector_ids = [{int(x.get('vectorId')) for x in s.findall('SupportVector')} for s in support_vectors]
+  return set.intersection(*vector_ids)
+
+
+def get_coefficients(classes, n_support, support_ids, svms):
+  dual_coef = np.zeros((len(classes) - 1, len(support_ids)))
+
+  for i, x in enumerate(classes):
+    alt_svms = get_alt_svms(svms, classes, x)
+    offsets = [0] + np.cumsum(n_support).tolist()
+
+    for j, svm in enumerate(alt_svms):
+      start = offsets[i]
+      end = offsets[i + 1]
+      ids = support_ids[start:end]
+
+      support_vectors = [int(x.get('vectorId')) for x in svm.find('SupportVectors').findall('SupportVector')]
+      coefficients = [float(x.get('value')) for x in svm.find('Coefficients').findall('Coefficient')]
+      indices = [support_vectors.index(x) for x in ids]
+      dual_coef[j, start:end] = np.array(coefficients)[indices]
+
+  return dual_coef
