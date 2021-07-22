@@ -1,11 +1,13 @@
 from unittest import TestCase
-from sklearn_pmml_model.base import PMMLBaseEstimator, get_type
+from sklearn_pmml_model.base import PMMLBaseEstimator, get_type, parse_array, parse_sparse_array
 from sklearn_pmml_model.datatypes import Category
 from sklearn.datasets import load_iris
 import pandas as pd
 import numpy as np
 from io import StringIO
 from collections import namedtuple
+from xml.etree import cElementTree as eTree
+
 
 # Parameters
 pair = [0, 1]
@@ -320,3 +322,89 @@ class TestBase(TestCase):
 
     assert str(cm.exception) == "The features in the input data do not match features expected by the PMML model."
 
+  def test_parse_array_string(self):
+    array = eTree.fromstring(f'''
+      <Array type="string">&quot;test and stuff&quot; more tests</Array>
+    ''')
+    assert parse_array(array) == ['test and stuff', 'more', 'tests']
+
+  def test_parse_array_num(self):
+    array = eTree.fromstring(f'''
+      <NUM-Array>1.2 1.3 2.8</NUM-Array>
+    ''')
+    assert parse_array(array) == [1.2, 1.3, 2.8]
+
+  def test_parse_array_int(self):
+    array = eTree.fromstring(f'''
+      <Array type="int">3 1 4</Array>
+    ''')
+    assert parse_array(array) == [3, 1, 4]
+
+  def test_parse_array_real(self):
+    array = eTree.fromstring(f'''
+      <Array type="real">1.2 1.3 2.8</Array>
+    ''')
+    assert parse_array(array) == [1.2, 1.3, 2.8]
+
+  def test_parse_array_unknown(self):
+    array = eTree.fromstring(f'''
+      <Array type="colors">🔴 🟢 🔵</Array>
+    ''')
+
+    with self.assertRaises(Exception) as cm:
+      parse_array(array)
+
+    assert str(cm.exception) == "Unknown array type encountered."
+
+  def test_parse_sparse_array_num(self):
+    array = eTree.fromstring(f'''
+      <NUM-SparseArray n="4">
+        <Indices>1 2 3</Indices>
+        <NUM-Entries>1.2 1.3 2.8</NUM-Entries>
+      </NUM-SparseArray>
+    ''')
+    assert parse_sparse_array(array) == [1.2, 1.3, 2.8, 0.0]
+
+  def test_parse_sparse_array_int(self):
+    array = eTree.fromstring(f'''
+      <INT-SparseArray n="4">
+        <Indices>1 2 3</Indices>
+        <INT-Entries>3 1 4</INT-Entries>
+      </INT-SparseArray>
+    ''')
+    assert parse_array(array) == [3, 1, 4, 0]
+
+  def test_parse_sparse_array_real(self):
+    array = eTree.fromstring(f'''
+      <SparseArray n="4" type="real">
+        <Indices>1 2 3</Indices>
+        <Entries>1.2 1.3 2.8</Entries>
+      </SparseArray>
+    ''')
+    assert parse_sparse_array(array) == [1.2, 1.3, 2.8, 0.0]
+
+  def test_parse_sparse_array_unknown(self):
+    array = eTree.fromstring(f'''
+      <SparseArray n="4" type="color">
+        <Indices>1 2 3</Indices>
+        <COLOR-Entries>🔴 🟢 🔵</COLOR-Entries>
+      </SparseArray>
+    ''')
+
+    with self.assertRaises(Exception) as cm:
+      parse_sparse_array(array)
+
+    assert str(cm.exception) == "Unknown array type encountered."
+
+  def test_parse_sparse_array_unknown_entries(self):
+    array = eTree.fromstring(f'''
+      <SparseArray n="4" type="num">
+        <Indices>1 2 3</Indices>
+        <COLOR-Entries>🔴 🟢 🔵</COLOR-Entries>
+      </SparseArray>
+    ''')
+
+    with self.assertRaises(Exception) as cm:
+      parse_sparse_array(array)
+
+    assert str(cm.exception) == "Unknown array entries type encountered."

@@ -6,8 +6,12 @@ from cached_property import cached_property
 from sklearn_pmml_model.datatypes import Category
 from collections import OrderedDict
 import datetime
+import re
 import numpy as np
 import pandas as pd
+
+
+array_regex = re.compile(r"""('.*?'|".*?"|\S+)""")
 
 
 class PMMLBaseEstimator(BaseEstimator):
@@ -268,6 +272,98 @@ def findall(element, path):
   if element is None:
     return []
   return element.findall(path)
+
+
+def parse_array(array):
+  """
+  Converts <Array> or <SparseArray> element into list.
+
+  Parameters
+  ----------
+  array : eTree.Element (Array or SparseArray)
+      PMML <Array> or <SparseArray> element, or type-prefixed variant (e.g., <REAL-Array>).
+
+  Returns
+  -------
+  output : list
+    Python list containing the items described in the PMML array element.
+
+  """
+  tag = array.tag.lower()
+  array_type = array.get('type', '').lower()
+
+  def is_type(t):
+    return tag.startswith(t) or array_type == t
+
+  if tag.endswith('sparsearray'):
+    return parse_sparse_array(array)
+
+  if is_type('string'):
+    # Deal with strings containing spaces wrapped in quotes (e.g., "like this")
+    return [
+      x.replace('"', '').replace('▲', '"')
+      for x in array_regex.findall(array.text.replace('\\"', '▲'))
+    ]
+
+  if is_type('int'):
+    return [int(x) for x in array.text.split(' ')]
+
+  if is_type('num') or is_type('real') or is_type('prob') or is_type('percentage'):
+    return [float(x) for x in array.text.split(' ')]
+
+  raise Exception('Unknown array type encountered.')
+
+
+def parse_sparse_array(array):
+  """
+  Converts <SparseArray> element into list.
+
+  Parameters
+  ----------
+  array : eTree.Element (SparseArray)
+      PMML <SparseArray> element, or type-prefixed variant (e.g., <REAL-SparseArray>).
+
+  Returns
+  -------
+  output : list
+    Python list containing the items described in the PMML sparse array element.
+
+  """
+  tag = array.tag.lower()
+  array_type = array.get('type', '').lower()
+
+  def is_type(t):
+    return tag.startswith(t) or array_type == t
+
+  values = [0] * int(array.get('n'))
+  indices = [int(i) - 1 for i in array.find('Indices').text.split(' ')]
+  entries = None
+
+  element = array.find('Entries')
+
+  if is_type('int'):
+    if element is None:
+      element = array.find('INT-Entries')
+
+    entries = [int(x) for x in element.text.split(' ')]
+
+  elif is_type('num') or is_type('real'):
+    if element is None:
+      element = array.find('NUM-Entries')
+    if element is None:
+      element = array.find('REAL-Entries')
+    if element is None:
+      raise Exception('Unknown array entries type encountered.')
+
+    entries = [float(x) for x in element.text.split(' ')]
+
+  else:
+    raise Exception('Unknown array type encountered.')
+
+  for index in indices:
+    values[index] = entries[index]
+
+  return values
 
 
 class OneHotEncodingMixin:

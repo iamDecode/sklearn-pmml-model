@@ -1,8 +1,7 @@
 import numpy as np
 import struct
-import re
 from sklearn.base import clone as _clone
-from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor
+from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor, parse_array
 from sklearn_pmml_model.tree._tree import Tree, NODE_DTYPE, TREE_LEAF, TREE_UNDEFINED
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn_pmml_model.datatypes import Category
@@ -11,7 +10,6 @@ from warnings import warn
 from xml.etree import cElementTree as eTree
 
 SPLIT_UNDEFINED = struct.pack('d', TREE_UNDEFINED)
-cat_regex = re.compile(r"""('.*?'|".*?"|\S+)""")
 
 
 class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
@@ -317,10 +315,7 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
       column, field_type = field_mapping[set_predicate.get('field')]
 
       array = set_predicate.find('Array')
-      categories = [
-        x.replace('"', '').replace('▲', '"')
-        for x in cat_regex.findall(array.text.replace('\\"', '▲'))
-      ]
+      categories = parse_array(array)
 
       mask = 0
 
