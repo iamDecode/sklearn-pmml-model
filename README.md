@@ -41,8 +41,12 @@ This library is in beta, and currently not all models are supported. The library
 ---
 
 The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html) is covered:
+- Array (including typed variants)
+- SparseArray *(including typed variants)*
+  - Indices
+  - Entries *(including typed variants)*
 - DataDictionary
-  - DataField (continuous, categorical, ordinal)
+  - DataField *(continuous, categorical, ordinal)*
     - Value
     - Interval
 - TransformationDictionary / LocalTransformations
