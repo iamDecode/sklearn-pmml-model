@@ -31,6 +31,7 @@ This library is in beta, and currently not all models are supported. The library
 | [Lasso](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
 | [ElasticNet](sklearn_pmml_model/linear_model)          | ✅<sup>2</sup> | ✅         | ✅                    |
 | [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅             |            | ✅<sup>3</sup>        |
+| [Support Vector Machines](sklearn_pmml_model/svm)      | ✅             | ✅         | ✅<sup>3</sup>        |
 
 <sub><sup>1</sup> Categorical feature support using slightly modified internals, based on [scikit-learn#12866](https://github.com/scikit-learn/scikit-learn/pull/12866).</sub>
 
@@ -73,6 +74,19 @@ The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStruct
       - PairCounts
         - TargetValueCounts
           - TargetValueCount
+- SupportVectorMachineModel
+  - LinearKernelType
+  - PolynomialKernelType
+  - RadialBasisKernelType
+  - SigmoidKernelType
+  - VectorDictionary
+    - VectorFields
+    - VectorInstance
+  - SupportVectorMachine
+    - SupportVectors
+      - SupportVector
+    - Coefficients
+      - Coefficient 
   
 ## Example
 A minimal working example is shown below:

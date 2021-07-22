@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<PMML xmlns="http://www.dmg.org/PMML-4_4" xmlns:data="http://jpmml.org/jpmml-model/InlineTable" version="4.4">
+	<Header>
+		<Application name="JPMML-R" version="1.4.4"/>
+		<Timestamp>2021-07-22T11:20:48Z</Timestamp>
+	</Header>
+	<DataDictionary>
+		<DataField name="type" optype="categorical" dataType="string">
+			<Value value="No"/>
+			<Value value="Yes"/>
+		</DataField>
+		<DataField name="npreg" optype="continuous" dataType="double"/>
+		<DataField name="glu" optype="continuous" dataType="double"/>
+		<DataField name="bp" optype="continuous" dataType="double"/>
+		<DataField name="skin" optype="continuous" dataType="double"/>
+		<DataField name="bmi" optype="continuous" dataType="double"/>
+		<DataField name="ped" optype="continuous" dataType="double"/>
+		<DataField name="age" optype="categorical" dataType="string">
+			<Value value="(20,30]"/>
+			<Value value="(30,40]"/>
+			<Value value="(40,50]"/>
+			<Value value="(50,60]"/>
+			<Value value="(60,70]"/>
+		</DataField>
+	</DataDictionary>
+	<TransformationDictionary/>
+	<SupportVectorMachineModel functionName="classification" classificationMethod="OneAgainstOne">
+		<MiningSchema>
+			<MiningField name="type" usageType="target"/>
+			<MiningField name="age"/>
+			<MiningField name="npreg"/>
+			<MiningField name="glu"/>
+			<MiningField name="bp"/>
+			<MiningField name="skin"/>
+			<MiningField name="bmi"/>
+			<MiningField name="ped"/>
+		</MiningSchema>
+		<LocalTransformations>
+			<DerivedField name="scale(npreg)" optype="continuous" dataType="double">
+				<Apply function="/">
+					<Apply function="-">
+						<FieldRef field="npreg"/>
+						<Constant dataType="double">3.7884615384615383</Constant>
+					</Apply>
+					<Constant dataType="double">3.7747174337126292</Constant>
+				</Apply>
+			</DerivedField>
+			<DerivedField name="scale(glu)" optype="continuous" dataType="double">
+				<Apply function="/">
+					<Apply function="-">
+						<FieldRef field="glu"/>
+						<Constant dataType="double">127.6923076923077</Constant>
+					</Apply>
+					<Constant dataType="double">30.590616568175218</Constant>
+				</Apply>
+			</DerivedField>
+			<DerivedField name="scale(bp)" optype="continuous" dataType="double">
+				<Apply function="/">
+					<Apply function="-">
+						<FieldRef field="bp"/>
+						<Constant dataType="double">74.68858981173888</Constant>
+					</Apply>
+					<Constant dataType="double">10.513032937113188</Constant>
+				</Apply>
+			</DerivedField>
+			<DerivedField name="scale(skin)" optype="continuous" dataType="double">
+				<Apply function="/">
+					<Apply function="-">
+						<FieldRef field="skin"/>
+						<Constant dataType="double">31.482109488578555</Constant>
+					</Apply>
+					<Constant dataType="double">10.51639268163093</Constant>
+				</Apply>
+			</DerivedField>
+			<DerivedField name="scale(bmi)" optype="continuous" dataType="double">
+				<Apply function="/">
+					<Apply function="-">
+						<FieldRef field="bmi"/>
+						<Constant dataType="double">34.69397755176341</Constant>
+					</Apply>
+					<Constant dataType="double">6.232781228378887</Constant>
+				</Apply>
+			</DerivedField>
+			<DerivedField name="scale(ped)" optype="continuous" dataType="double">
+				<Apply function="/">
+					<Apply function="-">
+						<FieldRef field="ped"/>
+						<Constant dataType="double">0.47128846153846154</Constant>
+					</Apply>
+					<Constant dataType="double">0.3016158663675463</Constant>
+				</Apply>
+			</DerivedField>
+		</LocalTransformations>
+		<RadialBasisKernelType gamma="0.09090909090909091"/>
+		<VectorDictionary>
+			<VectorFields>
+				<FieldRef field="scale(npreg)"/>
+				<FieldRef field="scale(glu)"/>
+				<FieldRef field="scale(bp)"/>
+				<FieldRef field="scale(skin)"/>
+				<FieldRef field="scale(bmi)"/>
+				<FieldRef field="scale(ped)"/>
+				<CategoricalPredictor name="age" value="(20,30]" coefficient="1.0"/>
+				<CategoricalPredictor name="age" value="(30,40]" coefficient="1.0"/>
+				<CategoricalPredictor name="age" value="(40,50]" coefficient="1.0"/>
+				<CategoricalPredictor name="age" value="(50,60]" coefficient="1.0"/>
+				<CategoricalPredictor name="age" value="(60,70]" coefficient="1.0"/>
+			</VectorFields>
+			<VectorInstance id="1">
+				<Array type="real">-0.47380011083438744 0.0100583885586802 0.3149814338135626 0.5246942253363732 1.3807676112634821 2.495596626021958 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="2">
+				<Array type="real">2.175404809960037 -1.1667730728069075 -1.206939033449189 -2.327994991223717 -1.1381720762896912 1.5075849421907774 0.0 0.0 1.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="7">
+				<Array type="real">0.32096136540393994 0.36964577953149863 0.5052214922214066 0.3345149442323672 -0.496404003027736 -0.36565868654954997 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="9">
+				<Array type="real">-0.7387206029138299 -0.4149085280455598 -0.4459787998178132 -0.1409332585276478 -0.015077948081269651 0.19134118889890142 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="12">
+				<Array type="real">-0.20887961875494498 0.04274815137439097 1.6466618426684703 1.6657699119604092 0.2737176848866097 1.64683491105289 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="13">
+				<Array type="real">-1.0036410949932724 2.298341785658434 -0.8264589166335011 0.049246022576358225 1.0598835746325046 0.10182335177325738 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="14">
+				<Array type="real">-1.0036410949932724 1.9714441575013264 0.6954615506292504 -1.6623675073596957 -0.4322271957015407 0.6986089326108839 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="15">
+				<Array type="real">-0.20887961875494498 0.9907512730300032 0.12474137540571863 0.42960458478437025 -0.496404003027736 1.2589242835084329 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="16">
+				<Array type="real">-1.0036410949932724 0.7619229333200279 1.4564217842606262 1.3805009903044003 1.1882371892848962 -0.3325039320585707 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="17">
+				<Array type="real">-1.0036410949932724 -1.068703784359775 0.9808216382410163 -0.6163814612876628 0.4341597032020985 -0.7436228877467133 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="18">
+				<Array type="real">2.7052457941189223 1.5464772408970864 -1.206939033449189 -0.1409332585276478 -0.17551996639675843 -0.8596645284651405 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="19">
+				<Array type="real">0.8508023495628249 0.04274815137439097 -0.6362188582256572 1.6657699119604092 0.6106459233491364 -0.10705160151991185 0.0 0.0 1.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="20">
+				<Array type="real">1.1157228416422673 0.892681984582871 -1.206939033449189 -0.5212918207356598 -0.11134315907056315 0.2377578451862724 0.0 0.0 1.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="22">
+				<Array type="real">1.1157228416422673 -0.08801089988845211 2.027141959484158 0.22372578857205253 0.01489786606199215 -0.7933550194831821 0.0 0.0 0.0 1.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="23">
+				<Array type="real">-0.47380011083438744 -0.31683923959842747 0.5052214922214066 -0.07891157559922476 1.316590803937287 0.7350791625509607 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="24">
+				<Array type="real">1.1157228416422673 0.17350720263723404 -0.2557387414099693 0.11336682344895582 -0.28782937921760104 -0.667366952417461 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="25">
+				<Array type="real">-1.0036410949932724 0.4350253051629202 0.13682302113358621 0.38335895637305323 1.2363697947795425 -0.8828728566088261 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="26">
+				<Array type="real">-0.20887961875494498 0.4350253051629202 -0.2407884106009078 -0.06409135627114358 -0.7531112323325183 0.9605314930896198 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="27">
+				<Array type="real">-1.0036410949932724 1.2195796127399787 0.12474137540571863 1.0952320686483912 2.1188008955147306 -0.7038371823575382 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="30">
+				<Array type="real">-0.47380011083438744 -0.5783573421241136 -0.06549868300212532 -0.2360228990796508 -0.3680503883753454 0.7516565397964504 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="31">
+				<Array type="real">-0.20887961875494498 0.6638536448728956 -0.8264589166335011 -0.6163814612876628 -0.35200618654379634 -0.7137836087048319 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="33">
+				<Array type="real">-1.0036410949932724 -0.28414947678271674 -0.8264589166335011 -0.4262021801836568 0.6587785288437825 -0.7038371823575382 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="34">
+				<Array type="real">-0.7387206029138299 -1.0033242587283537 -0.6362188582256572 -0.9967400234956748 -1.202348883615887 2.0679002930883263 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="36">
+				<Array type="real">-0.47380011083438744 -0.08801089988845211 -1.3971790918570328 -1.091829664047678 -0.14343156273366137 -1.2707834841532832 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="37">
+				<Array type="real">-0.7387206029138299 -0.44759829086127056 -0.8264589166335011 0.42960458478437025 0.5464691160229411 -0.6043729188846005 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="38">
+				<Array type="real">0.5858818574833824 -1.1667730728069075 -1.206939033449189 0.049246022576358225 -0.4322271957015407 -1.280729910500577 0.0 0.0 1.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="39">
+				<Array type="real">-1.0036410949932724 0.2388867282686556 1.8369019010763141 1.3805009903044003 0.9475741618116631 -0.6209502961300902 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="40">
+				<Array type="real">-0.47380011083438744 -0.2187699511512952 -0.4459787998178132 0.049246022576358225 0.7069111343384299 1.3749659242268604 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="41">
+				<Array type="real">2.175404809960037 -0.2187699511512952 0.3149814338135626 -1.3770985857036868 -1.314658296436729 -0.7038371823575382 0.0 0.0 0.0 0.0 1.0</Array>
+			</VectorInstance>
+			<VectorInstance id="43">
+				<Array type="real">-0.20887961875494498 -2.1801557200939414 0.6954615506292504 -0.33111253963165377 -0.04716635174436787 -0.756884789543105 0.0 0.0 1.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="44">
+				<Array type="real">0.5858818574833824 -0.5456675793084028 -1.016698975041345 0.7148735064403793 -0.07925475540746493 -0.7005217069084403 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="45">
+				<Array type="real">-0.7387206029138299 -1.526360463779726 -0.06549868300212532 0.9050527875443852 1.8620936662099483 2.0712157685374244 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="46">
+				<Array type="real">-1.0036410949932724 0.3042662539000771 0.8857016090370944 -0.4262021801836568 -1.186304681784338 -0.79667049493228 0.0 0.0 0.0 1.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="49">
+				<Array type="real">-1.0036410949932724 -0.9052549702812214 1.2661817258527823 2.7117559580324424 1.9423146753676928 1.6269420583583023 0.0 1.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="51">
+				<Array type="real">-0.20887961875494498 -0.12070066270416287 0.5052214922214066 0.1443356631283612 -0.23969677372295373 -0.5513253116990338 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+			<VectorInstance id="52">
+				<Array type="real">0.32096136540393994 0.36964577953149863 -1.016698975041345 0.3345149442323672 -0.9777300579742023 -0.1998849140946538 1.0 0.0 0.0 0.0 0.0</Array>
+			</VectorInstance>
+		</VectorDictionary>
+		<SupportVectorMachine targetCategory="No" alternateTargetCategory="Yes">
+			<SupportVectors>
+				<SupportVector vectorId="1"/>
+				<SupportVector vectorId="2"/>
+				<SupportVector vectorId="7"/>
+				<SupportVector vectorId="9"/>
+				<SupportVector vectorId="12"/>
+				<SupportVector vectorId="13"/>
+				<SupportVector vectorId="14"/>
+				<SupportVector vectorId="15"/>
+				<SupportVector vectorId="16"/>
+				<SupportVector vectorId="17"/>
+				<SupportVector vectorId="18"/>
+				<SupportVector vectorId="19"/>
+				<SupportVector vectorId="20"/>
+				<SupportVector vectorId="22"/>
+				<SupportVector vectorId="23"/>
+				<SupportVector vectorId="24"/>
+				<SupportVector vectorId="25"/>
+				<SupportVector vectorId="26"/>
+				<SupportVector vectorId="27"/>
+				<SupportVector vectorId="30"/>
+				<SupportVector vectorId="31"/>
+				<SupportVector vectorId="33"/>
+				<SupportVector vectorId="34"/>
+				<SupportVector vectorId="36"/>
+				<SupportVector vectorId="37"/>
+				<SupportVector vectorId="38"/>
+				<SupportVector vectorId="39"/>
+				<SupportVector vectorId="40"/>
+				<SupportVector vectorId="41"/>
+				<SupportVector vectorId="43"/>
+				<SupportVector vectorId="44"/>
+				<SupportVector vectorId="45"/>
+				<SupportVector vectorId="46"/>
+				<SupportVector vectorId="49"/>
+				<SupportVector vectorId="51"/>
+				<SupportVector vectorId="52"/>
+			</SupportVectors>
+			<Coefficients absoluteValue="-0.050320746562785366">
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-0.5644464780552596"/>
+				<Coefficient value="-0.8200625306356393"/>
+				<Coefficient value="-0.7295267913726711"/>
+				<Coefficient value="-0.39963111744411345"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-0.41240221176283304"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-0.9978584268568605"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="-1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="0.5986629800653184"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="0.817336947438522"/>
+				<Coefficient value="0.3880321541690222"/>
+				<Coefficient value="0.11989547445451426"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+				<Coefficient value="1.0"/>
+			</Coefficients>
+		</SupportVectorMachine>
+	</SupportVectorMachineModel>
+</PMML>
