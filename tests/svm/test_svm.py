@@ -2,6 +2,7 @@ from unittest import TestCase
 from sklearn.datasets import load_iris
 import sklearn_pmml_model
 from sklearn.svm import LinearSVC, LinearSVR, NuSVC, NuSVR, SVC, SVR
+from sklearn_pmml_model.svm._base import get_vectors
 from sklearn_pmml_model.svm import PMMLLinearSVC, PMMLLinearSVR, PMMLNuSVC, PMMLNuSVR, PMMLSVC, PMMLSVR
 import pandas as pd
 import numpy as np
@@ -9,6 +10,7 @@ from os import path, remove
 from io import StringIO
 from sklearn2pmml.pipeline import PMMLPipeline
 from sklearn2pmml import sklearn2pmml
+from xml.etree import cElementTree as eTree
 
 BASE_DIR = path.dirname(sklearn_pmml_model.__file__)
 
@@ -33,6 +35,73 @@ class TestBaseSVR(TestCase):
 
         assert str(cm.exception) == 'PMML model does not contain SupportVectorMachineModel.'
 
+    def test_get_vectors_array(self):
+        vector_dictionary = eTree.fromstring(f'''
+          <VectorDictionary>
+            <VectorInstance id="1">
+              <Array type="real">-1.2 0.01 123 0</Array>
+            </VectorInstance>
+          </VectorDictionary>
+        ''')
+        assert get_vectors(vector_dictionary, 1).tolist() == [-1.2, 0.01, 123, 0]
+
+    def test_get_vectors_real_array(self):
+      vector_dictionary = eTree.fromstring(f'''
+          <VectorDictionary>
+            <VectorInstance id="1">
+              <REAL-Array type="real">-1.2 0.01 123 0</REAL-Array>
+            </VectorInstance>
+          </VectorDictionary>
+        ''')
+      assert get_vectors(vector_dictionary, 1).tolist() == [-1.2, 0.01, 123, 0]
+
+    def test_get_vectors_sparse_array(self):
+      vector_dictionary = eTree.fromstring(f'''
+          <VectorDictionary>
+            <VectorInstance id="1">
+              <SparseArray type="real" n="4">
+                <Indices>1 2 3</Indices>
+                <Entries>-1.2 0.01 123</Entries>
+              </SparseArray>
+            </VectorInstance>
+          </VectorDictionary>
+        ''')
+      assert get_vectors(vector_dictionary, 1).tolist() == [-1.2, 0.01, 123, 0]
+
+    def test_get_vectors_real_sparse_array(self):
+      vector_dictionary = eTree.fromstring(f'''
+          <VectorDictionary>
+            <VectorInstance id="1">
+              <REAL-SparseArray n="4">
+                <Indices>1 2 3</Indices>
+                <Entries>-1.2 0.01 123</Entries>
+              </REAL-SparseArray>
+            </VectorInstance>
+          </VectorDictionary>
+        ''')
+      assert get_vectors(vector_dictionary, 1).tolist() == [-1.2, 0.01, 123, 0]
+
+    def test_get_vectors_no_instance(self):
+      with self.assertRaises(Exception) as cm:
+        vector_dictionary = eTree.fromstring(f'''
+            <VectorDictionary/>
+          ''')
+        get_vectors(vector_dictionary, 1)
+
+      assert str(cm.exception) == 'PMML model is broken, vector instance (id = 1) not found.'
+
+    def test_get_vectors_no_array(self):
+      with self.assertRaises(Exception) as cm:
+        vector_dictionary = eTree.fromstring(f'''
+          <VectorDictionary>
+            <VectorInstance id="1">
+            </VectorInstance>
+          </VectorDictionary>
+          ''')
+        get_vectors(vector_dictionary, 1)
+
+      assert str(cm.exception) == 'PMML model is broken, vector instance (id = 1) does not contain (Sparse)Array element.'
+
 
 class TestLinearSVRIntegration(TestCase):
     def setUp(self):
@@ -48,6 +117,25 @@ class TestLinearSVRIntegration(TestCase):
 
         self.ref = LinearSVR()
         self.ref.fit(Xenc, yte == 'Yes')
+
+    def test_invalid_model(self):
+        with self.assertRaises(Exception) as cm:
+            PMMLLinearSVR(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                </DataDictionary>
+                <MiningSchema>
+                  <MiningField name="Class" usageType="target"/>
+                </MiningSchema>
+              </PMML>
+              """))
+
+        assert str(cm.exception) == 'PMML model does not contain RegressionModel.'
 
     def test_fit_exception(self):
         with self.assertRaises(Exception) as cm:
@@ -95,6 +183,25 @@ class TestLinearSVCIntegration(TestCase):
 
         self.ref = LinearSVC()
         self.ref.fit(Xenc, yte)
+
+    def test_invalid_model(self):
+        with self.assertRaises(Exception) as cm:
+            PMMLLinearSVC(pmml=StringIO("""
+                  <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                    <DataDictionary>
+                      <DataField name="Class" optype="categorical" dataType="string">
+                        <Value value="setosa"/>
+                        <Value value="versicolor"/>
+                        <Value value="virginica"/>
+                      </DataField>
+                    </DataDictionary>
+                    <MiningSchema>
+                      <MiningField name="Class" usageType="target"/>
+                    </MiningSchema>
+                  </PMML>
+                  """))
+
+        assert str(cm.exception) == 'PMML model does not contain RegressionModel.'
 
     def test_fit_exception(self):
         with self.assertRaises(Exception) as cm:
