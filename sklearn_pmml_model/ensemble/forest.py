@@ -34,6 +34,7 @@ class PMMLForestClassifier(IntegerEncodingMixin, PMMLBaseClassifier, RandomFores
   Specification: http://dmg.org/pmml/v4-3/MultipleModels.html
 
   """
+
   def __init__(self, pmml, n_jobs=None):
     PMMLBaseClassifier.__init__(self, pmml)
 
@@ -121,6 +122,7 @@ class PMMLForestRegressor(IntegerEncodingMixin, PMMLBaseRegressor, RandomForestR
   Specification: http://dmg.org/pmml/v4-3/MultipleModels.html
 
   """
+
   def __init__(self, pmml, n_jobs=None):
     PMMLBaseRegressor.__init__(self, pmml)
 

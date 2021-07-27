@@ -26,6 +26,7 @@ class PMMLBaseEstimator(BaseEstimator):
       Filename or file object containing PMML data.
 
   """
+
   def __init__(self, pmml):
     it = eTree.iterparse(pmml)
     ns_offset = None
@@ -40,7 +41,7 @@ class PMMLBaseEstimator(BaseEstimator):
   @cached_property
   def field_mapping(self):
     """
-    Mapping from field name to column index and lambda function to process value.
+    Map field name to a column index and lambda function that converts a value to the proper type.
 
     Returns
     -------
@@ -83,8 +84,7 @@ class PMMLBaseEstimator(BaseEstimator):
   @cached_property
   def fields(self):
     """
-    Cached property containing an ordered mapping from field name to XML
-    DataField or DerivedField element.
+    Return an ordered mapping from field name to XML DataField or DerivedField element.
 
     Returns
     -------
@@ -117,8 +117,7 @@ class PMMLBaseEstimator(BaseEstimator):
   @cached_property
   def target_field(self):
     """
-    Cached property containing a reference to the XML DataField or DerivedField
-    element corresponding to the classification target.
+    Return the XML DataField or DerivedField element corresponding to the classification target.
 
     Returns
     -------
@@ -141,10 +140,7 @@ class PMMLBaseEstimator(BaseEstimator):
     return None
 
   def fit(self, x, y):
-    """
-    This method is not supported: PMML models are already fitted.
-
-    """
+    """Not supported: PMML models are already fitted."""
     raise Exception('Not supported.')
 
   def _prepare_data(self, X):
@@ -164,10 +160,30 @@ class PMMLBaseEstimator(BaseEstimator):
     return X
 
   def predict(self, X, *args, **kwargs):
+    """
+    Predict class or regression value for X.
+
+    This call is preceded with a data preprocessing step, that enables data scaling
+    and categorical feature encoding.
+
+    For more information on parameters, check out the specific implementation in the
+    scikit-learn subclass.
+
+    """
     X = self._prepare_data(X)
     return super().predict(X, *args, **kwargs)
 
   def predict_proba(self, X, *args, **kwargs):
+    """
+    Predict class probabilities for X.
+
+    This call is preceded with a data preprocessing step, that enables data scaling
+    and categorical feature encoding.
+
+    For more information on parameters, check out the specific implementation in the
+    scikit-learn subclass.
+
+    """
     X = self._prepare_data(X)
     return super().predict_proba(X, *args, **kwargs)
 
@@ -233,7 +249,7 @@ def get_type(data_field, derives=None):
 
 class PMMLBaseClassifier(PMMLBaseEstimator):
   """
-  Base class for classifiers, preparing classes, target fields
+  Base class for classifiers, preparing classes, target fields.
 
   Parameters
   ----------
@@ -241,6 +257,7 @@ class PMMLBaseClassifier(PMMLBaseEstimator):
       Filename or file object containing PMML data.
 
   """
+
   def __init__(self, pmml):
     PMMLBaseEstimator.__init__(self, pmml)
 
@@ -264,6 +281,7 @@ class PMMLBaseRegressor(PMMLBaseEstimator):
       Filename or file object containing PMML data.
 
   """
+
   def __init__(self, pmml):
     PMMLBaseEstimator.__init__(self, pmml)
 
@@ -271,6 +289,7 @@ class PMMLBaseRegressor(PMMLBaseEstimator):
 # Helper methods
 
 def findall(element, path):
+  """Safe helper method to find XML elements with guaranteed return type."""
   if element is None:
     return []
   return element.findall(path)
@@ -278,7 +297,7 @@ def findall(element, path):
 
 def parse_array(array):
   """
-  Converts <Array> or <SparseArray> element into list.
+  Convert <Array> or <SparseArray> element into list.
 
   Parameters
   ----------
@@ -318,7 +337,7 @@ def parse_array(array):
 
 def parse_sparse_array(array):
   """
-  Converts <SparseArray> element into list.
+  Convert <SparseArray> element into list.
 
   Parameters
   ----------
@@ -369,10 +388,8 @@ def parse_sparse_array(array):
 
 
 class OneHotEncodingMixin:
-  """
-  Mixin class to automatically one-hot encode categorical variables.
+  """Mixin class to automatically one-hot encode categorical variables."""
 
-  """
   def __init__(self):
     # Setup a column transformer to encode categorical variables
     target = self.target_field.get('name')
@@ -396,7 +413,7 @@ class OneHotEncodingMixin:
       ]
     )
 
-    X = np.array([[0 for field in fields if field.tag == "DataField"]])
+    X = np.array([[0 for field in fields if field.tag == 'DataField']])
     transformer._validate_transformers()
     transformer._validate_column_callables(X)
     transformer._validate_remainder(X)
@@ -412,6 +429,8 @@ class OneHotEncodingMixin:
 
 
 class IntegerEncodingMixin:
+  """Mixin class to automatically integer encode categorical variables."""
+
   def _prepare_data(self, X):
     X = super()._prepare_data(X)
     X = np.asarray(X)

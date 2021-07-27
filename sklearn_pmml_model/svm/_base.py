@@ -27,6 +27,7 @@ class PMMLBaseSVM:
   Specification: http://dmg.org/pmml/v4-3/SupportVectorMachineModel.html
 
   """
+
   def __init__(self):
     # Import coefficients and intercepts
     model = self.root.find('SupportVectorMachineModel')
@@ -89,6 +90,7 @@ class PMMLBaseSVM:
 
 
 def get_vectors(vector_dictionary, s):
+  """Return support vector values, parsed as a numpy array."""
   instance = vector_dictionary.find(f"VectorInstance[@id='{s}']")
 
   if instance is None:
@@ -109,7 +111,7 @@ def get_vectors(vector_dictionary, s):
 
 def get_alt_svms(svms, classes, target_class):
   """
-  Find alternative SVMs (e.g., for target class 0, find the svms classifying 0 against 1, and 0 against 2)
+  Find alternative SVMs (e.g., for target class 0, find the svms classifying 0 against 1, and 0 against 2).
 
   Parameters
   ----------
@@ -147,12 +149,44 @@ def get_alt_svms(svms, classes, target_class):
 
 
 def get_overlapping_vectors(svms):
+  """
+  Return support vector ids that are present in all provided SVM elements.
+
+  Parameters
+  ----------
+  svms : list
+      List of eTree.Element objects describing the different one-to-one support vector machines in the PMML.
+
+  Returns
+  -------
+  output : set
+    Set containing all integer vector ids that are present in all provided SVM elements.
+
+  """
   support_vectors = [svm.find('SupportVectors') for svm in svms]
   vector_ids = [{int(x.get('vectorId')) for x in s.findall('SupportVector')} for s in support_vectors]
   return set.intersection(*vector_ids)
 
 
 def get_coefficients(classes, n_support, support_ids, svms):
+  """
+  Return support vector coefficients.
+
+  Parameters
+  ----------
+  classes : numpy.array
+      The classes to be predicted by the model.
+
+  n_support : numpy.array
+      Numpy array describing the number of support vectors for each class.
+
+  support_ids: list
+    A list describing the ids of all support vectors in the model.
+
+  svms : list
+      List of eTree.Element objects describing the different one-to-one support vector machines in the PMML.
+
+  """
   dual_coef = np.zeros((len(classes) - 1, len(support_ids)))
 
   for i, x in enumerate(classes):

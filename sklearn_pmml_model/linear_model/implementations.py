@@ -26,6 +26,7 @@ class PMMLLinearRegression(OneHotEncodingMixin, PMMLBaseRegressor, LinearRegress
   Specification: http://dmg.org/pmml/v4-3/Regression.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseRegressor.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -79,6 +80,7 @@ class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRe
   Specification: http://dmg.org/pmml/v4-3/Regression.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -123,7 +125,7 @@ class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRe
 
 def _get_coefficients(est, table):
   """
-  Helper method to obtain coefficients for <RegressionTable> PMML elements.
+  Obtain coefficients for <RegressionTable> PMML elements.
 
   Parameters
   ----------
@@ -191,6 +193,7 @@ class PMMLRidge(PMMLGeneralizedLinearRegressor, Ridge):
   Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
 
   """
+
   def fit(self, x, y):
     return PMMLGeneralizedLinearRegressor.fit(self, x, y)
 
@@ -216,6 +219,7 @@ class PMMLRidgeClassifier(PMMLGeneralizedLinearClassifier, RidgeClassifier):
   Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
 
   """
+
   def __init__(self, pmml):
     PMMLGeneralizedLinearClassifier.__init__(self, pmml)
     RidgeClassifier.__init__(self)
@@ -229,7 +233,7 @@ class PMMLRidgeClassifier(PMMLGeneralizedLinearClassifier, RidgeClassifier):
 
 class PMMLLasso(PMMLGeneralizedLinearRegressor, Lasso):
   """
-  Linear Model trained with L1 prior as regularizer (aka the Lasso)
+  Linear Model trained with L1 prior as regularizer (aka the Lasso).
 
   The optimization objective for Lasso is::
 
@@ -248,6 +252,7 @@ class PMMLLasso(PMMLGeneralizedLinearRegressor, Lasso):
   Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
 
   """
+
   def __init__(self, pmml):
     PMMLGeneralizedLinearRegressor.__init__(self, pmml)
     self.n_iter_ = 0
@@ -293,6 +298,7 @@ class PMMLElasticNet(PMMLGeneralizedLinearRegressor, ElasticNet):
   Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
 
   """
+
   def __init__(self, pmml):
     PMMLGeneralizedLinearRegressor.__init__(self, pmml)
     self.n_iter_ = 0

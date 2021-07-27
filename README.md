@@ -8,7 +8,7 @@
 [![CircleCI](https://circleci.com/gh/iamDecode/sklearn-pmml-model.svg?style=shield)](https://circleci.com/gh/iamDecode/sklearn-pmml-model)
 [![ReadTheDocs](https://readthedocs.org/projects/sklearn-pmml-model/badge/?version=latest&style=flat)](https://sklearn-pmml-model.readthedocs.io/en/latest/)
 
-A library to parse PMML models into Scikit-learn estimators.
+A Python library that provides *import* functionality to all major estimator classes of the popular machine learning library scikit-learn using PMML.
 
 ## Installation
 

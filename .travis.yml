@@ -28,7 +28,7 @@ env:
     # Note: TWINE_PASSWORD is set to a PyPI API token in Travis settings
 
 install:
-  - python3 -m pip install twine cibuildwheel==1.11.0 flake8
+  - python3 -m pip install twine cibuildwheel==1.11.0 flake8 flake8-docstrings
 
 lint:
   - python3 -m flake8 sklearn_pmml_model/

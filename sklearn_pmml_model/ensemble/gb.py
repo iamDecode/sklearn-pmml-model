@@ -35,6 +35,7 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
   Specification: http://dmg.org/pmml/v4-3/MultipleModels.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
 
@@ -128,7 +129,7 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _raw_predict(self, x):
-    """Override to support categorical features"""
+    """Override to support categorical features."""
     raw_predictions = self._raw_predict_init(x)
     predict_stages(self.estimators_, x, self.learning_rate, raw_predictions)
     return raw_predictions
@@ -161,6 +162,7 @@ class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, Gra
   Specification: http://dmg.org/pmml/v4-3/MultipleModels.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseRegressor.__init__(self, pmml)
 
@@ -223,7 +225,7 @@ class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, Gra
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _raw_predict(self, x):
-    """Override to support categorical features"""
+    """Override to support categorical features."""
     raw_predictions = self._raw_predict_init(x)
     predict_stages(self.estimators_, x, self.learning_rate, raw_predictions)
     return raw_predictions

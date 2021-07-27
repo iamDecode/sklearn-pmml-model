@@ -8,7 +8,7 @@ from itertools import chain
 
 class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
   """
-  Gaussian Naive Bayes (GaussianNB)
+  Gaussian Naive Bayes classifier.
 
   Can perform online updates to model parameters via :meth:`partial_fit`.
   For details on algorithm used to update feature means and variance online,
@@ -26,6 +26,7 @@ class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
   Specification: http://dmg.org/pmml/v4-3/NaiveBayes.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)

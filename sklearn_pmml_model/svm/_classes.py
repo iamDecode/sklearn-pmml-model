@@ -32,6 +32,7 @@ class PMMLLinearSVC(OneHotEncodingMixin, PMMLBaseClassifier, LinearSVC):
   Specification: http://dmg.org/pmml/v4-3/Regression.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -95,6 +96,7 @@ class PMMLLinearSVR(OneHotEncodingMixin, PMMLBaseRegressor, LinearSVR):
   Specification: http://dmg.org/pmml/v4-3/Regression.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseRegressor.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -148,6 +150,7 @@ class PMMLNuSVC(OneHotEncodingMixin, PMMLBaseClassifier, PMMLBaseSVM, NuSVC):
   Specification: http://dmg.org/pmml/v4-3/SupportVectorMachine.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -189,6 +192,7 @@ class PMMLNuSVR(OneHotEncodingMixin, PMMLBaseRegressor, PMMLBaseSVM, NuSVR):
   Specification: http://dmg.org/pmml/v4-3/SupportVectorMachine.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseRegressor.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -228,6 +232,7 @@ class PMMLSVC(OneHotEncodingMixin, PMMLBaseClassifier, PMMLBaseSVM, SVC):
   Specification: http://dmg.org/pmml/v4-3/SupportVectorMachine.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -271,6 +276,7 @@ class PMMLSVR(OneHotEncodingMixin, PMMLBaseRegressor, PMMLBaseSVM, SVR):
   Specification: http://dmg.org/pmml/v4-3/SupportVectorMachine.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseRegressor.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)

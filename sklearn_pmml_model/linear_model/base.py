@@ -25,6 +25,7 @@ class PMMLGeneralizedLinearRegressor(OneHotEncodingMixin, PMMLBaseRegressor):
   Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseRegressor.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -59,6 +60,7 @@ class PMMLGeneralizedLinearClassifier(OneHotEncodingMixin, PMMLBaseClassifier):
   Specification: http://dmg.org/pmml/v4-3/GeneralRegression.html
 
   """
+
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
@@ -75,8 +77,9 @@ class PMMLGeneralizedLinearClassifier(OneHotEncodingMixin, PMMLBaseClassifier):
 
 def _get_coefficients(linear_model, model):
   """
-  Method obtaining the coefficients for the GLM regression. Raises an
-  exception when we notice non linear parameter configurations.
+  Obtain the coefficients for the GLM regression.
+
+  Raises an exception when we notice non linear parameter configurations.
 
   Parameters
   ----------
@@ -147,8 +150,9 @@ def _get_coefficients(linear_model, model):
 
 def _get_intercept(model):
   """
-  Find all parameters that are not included in the <ParamMatrix>. These
-  constitute the intercept. In the very unlikely case there are multiple
+  Find all parameters that are not included in the <ParamMatrix>.
+
+  These constitute the intercept. In the very unlikely case there are multiple
   parameters fitting this criteria, we sum the result.
 
   Parameters

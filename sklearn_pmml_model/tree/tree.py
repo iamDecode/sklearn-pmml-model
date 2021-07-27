@@ -162,8 +162,7 @@ class PMMLTreeRegressor(PMMLBaseRegressor, DecisionTreeRegressor):
 
 def unflatten(node):
   """
-  This method converts a `multiSplit` decision tree into a `binarySplit`
-  decision tree which is expressively equivalent.
+  Convert a `multiSplit` into a `binarySplit` decision tree which is expressively equivalent.
 
   Parameters
   ----------
@@ -203,7 +202,7 @@ def unflatten(node):
 
 def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
   """
-  Generator for nodes and values used for constructing cython Tree class.
+  Generate nodes and values used for constructing Cython Tree class.
 
   Parameters
   ----------
@@ -354,7 +353,7 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
 
 def get_tree(est, segment, rescale_factor=1) -> object:
   """
-  Method to train a single tree for a <Segment> PMML element.
+  Construct a single tree for a <Segment> PMML element.
 
   Parameters
   ----------
@@ -413,8 +412,7 @@ def get_tree(est, segment, rescale_factor=1) -> object:
 
 def clone(est, safe=True):
   """
-  Helper method to clone a DecisionTree, including private properties
-  that are ignored in sklearn.base.clone.
+  Clone a DecisionTree, including private properties that are ignored in sklearn.base.clone.
 
   Parameters
   ----------

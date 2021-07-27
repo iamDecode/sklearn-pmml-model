@@ -20,6 +20,7 @@ class Interval:
       Boolean indicating whether the categories are ordinal (sorting categories makes sense) or not.
 
   """
+
   def __init__(self, closure, left_margin=None, right_margin=None):
     assert left_margin is not None or right_margin is not None
     if left_margin is not None and right_margin is not None:
@@ -45,7 +46,7 @@ class Interval:
 
 class Category:
   """
-  Class describing a categorical data type
+  Class describing a categorical data type.
 
   Parameters
   ----------
@@ -59,6 +60,7 @@ class Category:
       Boolean indicating whether the categories are ordinal (sorting categories makes sense) or not.
 
   """
+
   def __init__(self, base_type, categories, ordered=False):
     assert isinstance(categories, list)
     assert isinstance(ordered, bool)
