@@ -170,8 +170,8 @@ def _get_intercept(model):
   pp = model.find('PPMatrix')
   params = model.find('ParamMatrix')
 
-  specified = [p.get('parameterName') for p in pp.findall("PPCell")]
-  used = [p.get('parameterName') for p in params.findall("PCell")]
+  specified = [p.get('parameterName') for p in pp.findall('PPCell')]
+  used = [p.get('parameterName') for p in params.findall('PCell')]
 
   intercepts = set(used) - set(specified)
   intercepts = list(chain.from_iterable([

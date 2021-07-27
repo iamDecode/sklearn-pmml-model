@@ -8,10 +8,10 @@ from .implementations import PMMLLinearRegression, PMMLLogisticRegression, PMMLR
     PMMLRidgeClassifier, PMMLLasso, PMMLElasticNet
 
 __all__ = [
-    "PMMLLinearRegression",
-    "PMMLLogisticRegression",
-    "PMMLRidge",
-    "PMMLRidgeClassifier",
-    "PMMLLasso",
-    "PMMLElasticNet"
+    'PMMLLinearRegression',
+    'PMMLLogisticRegression',
+    'PMMLRidge',
+    'PMMLRidgeClassifier',
+    'PMMLLasso',
+    'PMMLElasticNet'
 ]

@@ -8,4 +8,4 @@ theorem with strong (naive) feature independence assumptions.
 
 from .implementations import PMMLGaussianNB
 
-__all__ = ["PMMLGaussianNB"]
+__all__ = ['PMMLGaussianNB']

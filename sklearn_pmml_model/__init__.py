@@ -9,4 +9,4 @@ languages, toolkits and enterprise software.
 
 # License: BSD 2-Clause
 
-__version__ = "0.0.17"
+__version__ = '0.0.17'

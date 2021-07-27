@@ -7,4 +7,4 @@ classification and regression.
 
 from .tree import PMMLTreeClassifier, PMMLTreeRegressor, get_tree, clone
 
-__all__ = ["PMMLTreeClassifier", "PMMLTreeRegressor", "get_tree", "clone"]
+__all__ = ['PMMLTreeClassifier', 'PMMLTreeRegressor', 'get_tree', 'clone']

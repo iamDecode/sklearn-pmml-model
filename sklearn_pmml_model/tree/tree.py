@@ -183,8 +183,8 @@ def unflatten(node):
 
   parent = node
   for child in child_nodes:
-    new_node = eTree.Element("Node")
-    new_node.append(eTree.Element("True"))
+    new_node = eTree.Element('Node')
+    new_node.append(eTree.Element('True'))
     new_node.set('score', parent.get('score', 0))
     predicate = [e for e in parent if e.tag != 'Node']
     left_child = unflatten(child)
@@ -335,7 +335,7 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
       if set_predicate.get('booleanOperator') == 'isNotIn':
         value = struct.pack('Q', ~np.uint64(mask))
     else:
-      raise Exception("Unsupported tree format: unknown predicate structure in Node {}"
+      raise Exception('Unsupported tree format: unknown predicate structure in Node {}'
                       .format(child_nodes[0].get('id')))
 
   if classes is None:
@@ -378,7 +378,7 @@ def get_tree(est, segment, rescale_factor=1) -> object:
   """
   tree = clone(est.template_estimator)
 
-  tree_model = segment.find("TreeModel")
+  tree_model = segment.find('TreeModel')
 
   if tree_model is None:
     raise Exception('PMML segment does not contain TreeModel.')
