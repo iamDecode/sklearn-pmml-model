@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 from sklearn_pmml_model.base import PMMLBaseRegressor, parse_array
 import numpy as np
 

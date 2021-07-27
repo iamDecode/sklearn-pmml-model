@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 from sklearn_pmml_model.base import PMMLBaseClassifier, OneHotEncodingMixin
 from sklearn.naive_bayes import GaussianNB
 import numpy as np

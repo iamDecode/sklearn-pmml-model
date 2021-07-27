@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 from sklearn.linear_model import LinearRegression, Ridge, RidgeClassifier, Lasso, ElasticNet, LogisticRegression
 from sklearn_pmml_model.base import PMMLBaseRegressor, PMMLBaseClassifier, OneHotEncodingMixin
 from sklearn_pmml_model.linear_model.base import PMMLGeneralizedLinearRegressor, PMMLGeneralizedLinearClassifier

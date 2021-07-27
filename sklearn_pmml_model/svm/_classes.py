@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 from sklearn.svm import LinearSVC, LinearSVR, NuSVC, NuSVR, SVC, SVR
 import numpy as np
 from scipy.sparse import isspmatrix

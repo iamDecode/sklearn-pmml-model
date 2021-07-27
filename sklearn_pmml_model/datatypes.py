@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 import math
 import operator as op
 

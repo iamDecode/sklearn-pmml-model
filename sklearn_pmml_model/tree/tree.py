@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 import numpy as np
 import struct
 from sklearn.base import clone as _clone

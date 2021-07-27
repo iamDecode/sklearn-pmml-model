@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 from abc import ABC
 
 import numpy as np

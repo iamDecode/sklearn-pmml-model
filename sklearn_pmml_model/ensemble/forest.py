@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 import numpy as np
 import warnings
 from sklearn.ensemble import RandomForestClassifier, RandomForestRegressor

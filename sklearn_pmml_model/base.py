@@ -1,3 +1,5 @@
+# License: BSD 2-Clause
+
 from sklearn.base import BaseEstimator
 from sklearn.preprocessing import LabelBinarizer, OneHotEncoder
 from sklearn.compose import ColumnTransformer

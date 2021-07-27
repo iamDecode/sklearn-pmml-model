@@ -4,6 +4,8 @@ algorithms. These are supervised learning methods based on applying Bayes'
 theorem with strong (naive) feature independence assumptions.
 """
 
+# License: BSD 2-Clause
+
 from .implementations import PMMLGaussianNB
 
 __all__ = ["PMMLGaussianNB"]
