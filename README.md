@@ -8,7 +8,7 @@
 [![CircleCI](https://circleci.com/gh/iamDecode/sklearn-pmml-model.svg?style=shield)](https://circleci.com/gh/iamDecode/sklearn-pmml-model)
 [![ReadTheDocs](https://readthedocs.org/projects/sklearn-pmml-model/badge/?version=latest&style=flat)](https://sklearn-pmml-model.readthedocs.io/en/latest/)
 
-A Python library that provides *import* functionality to all major estimator classes of the popular machine learning library scikit-learn using PMML.
+A Python library that provides *import* functionality to all major estimator classes of the popular machine learning library scikit-learn using PMML. This enables portability and interoperability with a wide range of different languages, toolkits and enterprise software.
 
 ## Installation
 
@@ -89,7 +89,7 @@ The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStruct
       - Coefficient 
   
 ## Example
-A minimal working example is shown below:
+A minimal working example (using [this PMML file](https://github.com/iamDecode/sklearn-pmml-model/blob/master/models/randomForest.pmml)) is shown below:
 
 ```python
 from sklearn.datasets import load_iris
@@ -111,7 +111,7 @@ clf.predict(Xte)
 clf.score(Xte, yte)
 ```
 
-More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble), [linear_model](sklearn_pmml_model/linear_model) and [naive_bayes](sklearn_pmml_model/naive_bayes).
+More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble), [linear_model](sklearn_pmml_model/linear_model), [naive_bayes](sklearn_pmml_model/naive_bayes) and [svm](sklearn_pmml_model/svm).
 
 ## Benchmark
 
