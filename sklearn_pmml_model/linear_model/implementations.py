@@ -87,14 +87,32 @@ class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRe
 
     # Import coefficients and intercepts
     model = self.root.find('RegressionModel')
+    mining_model = self.root.find('MiningModel')
+    tables = []
 
-    if model is None:
-      raise Exception('PMML model does not contain RegressionModel.')
+    if mining_model is not None and self.n_classes_ > 2:
+      self.multi_class = 'ovr'
+      segmentation = mining_model.find('Segmentation')
 
-    tables = [
-      table for table in model.findall('RegressionTable')
-      if table.find('NumericPredictor') is not None
-    ]
+      if segmentation.get('multipleModelMethod') not in ['modelChain']:
+        raise Exception('PMML model for multi-class logistic regression should use modelChain method.')
+
+      # Parse segments
+      segments = segmentation.findall('Segment')
+      valid_segments = [segment for segment in segments if segment.find('True') is not None]
+      models = [segment.find('RegressionModel') for segment in valid_segments]
+
+      tables = [
+        models[i].find('RegressionTable') for i in range(self.n_classes_)
+      ]
+    elif model is not None:
+      self.multi_class = 'auto'
+      tables = [
+        table for table in model.findall('RegressionTable')
+        if table.find('NumericPredictor') is not None
+      ]
+    else:
+      raise Exception('PMML model does not contain RegressionModel or Segmentation.')
 
     self.coef_ = [
       _get_coefficients(self, table)
@@ -113,7 +131,6 @@ class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRe
 
     self.coef_ = np.array(self.coef_)
     self.intercept_ = np.array(self.intercept_)
-    self.multi_class = 'auto'
     self.solver = 'lbfgs'
 
   def fit(self, x, y):
