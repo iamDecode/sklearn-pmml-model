@@ -1,11 +1,16 @@
 from unittest import TestCase
+
+from sklearn.datasets import load_iris
+
 import sklearn_pmml_model
 from sklearn.linear_model import LinearRegression, LogisticRegression, Ridge, RidgeClassifier, Lasso, ElasticNet
 from sklearn_pmml_model.linear_model import PMMLLinearRegression, PMMLLogisticRegression, PMMLRidge, PMMLRidgeClassifier, PMMLLasso, PMMLElasticNet
 import pandas as pd
 import numpy as np
-from os import path
+from os import path, remove
 from io import StringIO
+from sklearn2pmml.pipeline import PMMLPipeline
+from sklearn2pmml import sklearn2pmml
 
 
 BASE_DIR = path.dirname(sklearn_pmml_model.__file__)
@@ -76,7 +81,7 @@ class TestLogisticRegression(TestCase):
               </PMML>
               """))
 
-    assert str(cm.exception) == 'PMML model does not contain RegressionModel.'
+    assert str(cm.exception) == 'PMML model does not contain RegressionModel or Segmentation.'
 
   def test_nonlinear_model(self):
     with self.assertRaises(Exception) as cm:
@@ -103,6 +108,29 @@ class TestLogisticRegression(TestCase):
               """))
 
     assert str(cm.exception) == 'PMML model is not linear.'
+
+  def test_non_modelchain_segmentation(self):
+    with self.assertRaises(Exception) as cm:
+      PMMLLogisticRegression(pmml=StringIO("""
+              <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+                <DataDictionary>
+                  <DataField name="Class" optype="categorical" dataType="string">
+                    <Value value="setosa"/>
+                    <Value value="versicolor"/>
+                    <Value value="virginica"/>
+                  </DataField>
+                  <DataField name="a" optype="continuous" dataType="double"/>
+                </DataDictionary>
+                <MiningSchema>
+                  <MiningField name="Class" usageType="target"/>
+                </MiningSchema>
+                <MiningModel>
+                  <Segmentation multipleModelMethod="notModelChain" />
+                </MiningModel>
+              </PMML>
+              """))
+
+    assert str(cm.exception) == 'PMML model for multi-class logistic regression should use modelChain method.'
 
 
 class TestLinearRegressionIntegration(TestCase):
@@ -146,6 +174,9 @@ class TestLogisticRegressionIntegration(TestCase):
 
     pmml = path.join(BASE_DIR, '../models/linear-model-lmc.pmml')
     self.clf = PMMLLogisticRegression(pmml)
+
+    self.ref = LogisticRegression()
+    self.ref.fit(Xte, yte)
 
   def test_predict_proba(self):
     Xte, _ = self.test
@@ -209,6 +240,90 @@ class TestLogisticRegressionIntegration(TestCase):
     Xte, yte = self.test
     ref = 0.8076923076923077
     assert np.allclose(ref, self.clf.score(Xte, yte))
+
+  def test_sklearn2pmml(self):
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", self.ref)
+    ])
+    pipeline.fit(self.test[0], self.test[1])
+    sklearn2pmml(pipeline, "lmc-sklearn2pmml.pmml", with_repr = True)
+
+    try:
+      # Import PMML
+      model = PMMLLogisticRegression(pmml='lmc-sklearn2pmml.pmml')
+
+      # Verify classification
+      Xenc, _ = self.test
+      assert np.allclose(
+        self.ref.predict_proba(Xenc),
+        model.predict_proba(Xenc)
+      )
+
+    finally:
+      remove("lmc-sklearn2pmml.pmml")
+
+  def test_sklearn2pmml_multiclass_multinomial(self):
+    data = load_iris(as_frame=True)
+
+    X = data.data
+    y = data.target
+    y.name = "Class"
+
+    ref = LogisticRegression()
+    ref.fit(X, y)
+
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", ref)
+    ])
+    pipeline.fit(X, y)
+    sklearn2pmml(pipeline, "lmc-sklearn2pmml.pmml", with_repr=True)
+
+    try:
+      # Import PMML
+      model = PMMLLogisticRegression(pmml='lmc-sklearn2pmml.pmml')
+
+      # Verify classification
+      assert np.allclose(
+        ref.predict_proba(X),
+        model.predict_proba(X)
+      )
+
+    finally:
+      remove("lmc-sklearn2pmml.pmml")
+
+  def test_sklearn2pmml_multiclass_ovr(self):
+    data = load_iris(as_frame=True)
+
+    X = data.data
+    y = data.target
+    y.name = "Class"
+
+    ref = LogisticRegression(
+      multi_class='ovr'
+    )
+    ref.fit(X, y)
+
+    # Export to PMML
+    pipeline = PMMLPipeline([
+      ("classifier", ref)
+    ])
+    pipeline.fit(X, y)
+    sklearn2pmml(pipeline, "lmc-sklearn2pmml.pmml", with_repr=True)
+
+    try:
+      # Import PMML
+      model = PMMLLogisticRegression(pmml='lmc-sklearn2pmml.pmml')
+
+      # Verify classification
+      assert np.allclose(
+        ref.predict_proba(X),
+        model.predict_proba(X)
+      )
+
+    finally:
+      remove("lmc-sklearn2pmml.pmml")
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
