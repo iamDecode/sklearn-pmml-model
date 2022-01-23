@@ -6,6 +6,7 @@ from sklearn.compose import ColumnTransformer
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
 from sklearn_pmml_model.datatypes import Category
+from sklearn.utils.multiclass import type_of_target
 from collections import OrderedDict
 import datetime
 import re
@@ -270,6 +271,7 @@ class PMMLBaseClassifier(PMMLBaseEstimator):
     except AttributeError:
       self._label_binarizer = LabelBinarizer(pos_label=1, neg_label=-1)
       self._label_binarizer.classes_ = np.array(target_type.categories)
+      self._label_binarizer.y_type_ = type_of_target(target_type.categories)
     self.n_classes_ = len(self.classes_)
     self.n_outputs_ = 1
 
