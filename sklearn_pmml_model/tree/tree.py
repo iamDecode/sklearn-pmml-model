@@ -43,8 +43,12 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
       raise Exception('PMML model does not contain TreeModel.')
 
     # Parse tree
-    self.tree_ = Tree(self.n_features_, np.array([self.n_classes_], dtype=np.intp),
-                      self.n_outputs_, np.array([], dtype=np.int32))
+    try:
+      self.tree_ = Tree(self.n_features_in_, np.array([self.n_classes_], dtype=np.intp),
+                        self.n_outputs_, np.array([], dtype=np.int32))
+    except AttributeError:
+      self.tree_ = Tree(self.n_features_, np.array([self.n_classes_], dtype=np.intp),
+                        self.n_outputs_, np.array([], dtype=np.int32))
 
     split = tree_model.get('splitCharacteristic')
     if split == 'binarySplit':
@@ -117,8 +121,12 @@ class PMMLTreeRegressor(PMMLBaseRegressor, DecisionTreeRegressor):
     # Parse tree
     self.n_outputs_ = 1
     n_classes = np.array([1] * self.n_outputs_, dtype=np.intp)
-    self.tree_ = Tree(self.n_features_, n_classes, self.n_outputs_,
-                      np.array([], dtype=np.int32))
+    try:
+      self.tree_ = Tree(self.n_features_in_, n_classes, self.n_outputs_,
+                        np.array([], dtype=np.int32))
+    except AttributeError:
+      self.tree_ = Tree(self.n_features_, n_classes, self.n_outputs_,
+                        np.array([], dtype=np.int32))
 
     split = tree_model.get('splitCharacteristic')
     if split == 'binarySplit':
@@ -425,7 +433,10 @@ def clone(est, safe=True):
 
   """
   new_object = _clone(est, safe=safe)
-  new_object.n_features_ = est.n_features_
+  try:
+    new_object.n_features_in_ = est.n_features_in_
+  except AttributeError:
+    new_object.n_features_ = est.n_features_
   new_object.n_outputs_ = est.n_outputs_
 
   if isinstance(est, DecisionTreeClassifier):
@@ -433,11 +444,19 @@ def clone(est, safe=True):
     new_object.n_classes_ = est.n_classes_
     n_classes = np.asarray([est.n_classes_], dtype=np.intp)
 
-    new_object.tree_ = Tree(est.n_features_, n_classes, est.n_outputs_,
-                            np.array([], dtype=np.int32))
+    try:
+      new_object.tree_ = Tree(est.n_features_in_, n_classes, est.n_outputs_,
+                              np.array([], dtype=np.int32))
+    except AttributeError:
+      new_object.tree_ = Tree(est.n_features_, n_classes, est.n_outputs_,
+                              np.array([], dtype=np.int32))
   else:
     n_classes = np.array([1] * est.n_outputs_, dtype=np.intp)
-    new_object.tree_ = Tree(est.n_features_, n_classes, est.n_outputs_,
-                            np.array([], dtype=np.int32))
+    try:
+      new_object.tree_ = Tree(est.n_features_in_, n_classes, est.n_outputs_,
+                              np.array([], dtype=np.int32))
+    except AttributeError:
+      new_object.tree_ = Tree(est.n_features_, n_classes, est.n_outputs_,
+                              np.array([], dtype=np.int32))
 
   return new_object

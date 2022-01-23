@@ -36,7 +36,10 @@ class PMMLBaseEstimator(BaseEstimator):
       el.tag = el.tag[ns_offset:]  # strip all namespaces
     self.root = it.root
 
-    self.n_features_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
+    try:
+      self.n_features_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
+    except AttributeError:
+      self.n_features_in_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
 
   @cached_property
   def field_mapping(self):
