@@ -1,6 +1,6 @@
 # License: BSD 2-Clause
 
-from sklearn_pmml_model.base import PMMLBaseRegressor, parse_array
+from sklearn_pmml_model.base import PMMLBaseRegressor, PMMLBaseClassifier, parse_array
 import numpy as np
 
 
@@ -61,7 +61,7 @@ class PMMLBaseSVM:
       get_coefficients(classes, self._n_support, self.support_, svms)
     )
 
-    if len(classes) == 2:
+    if isinstance(self, PMMLBaseClassifier) and len(classes) == 2:
       self._n_support = (self._n_support / 2).astype(np.int32)
 
     linear = model.find('LinearKernelType')
