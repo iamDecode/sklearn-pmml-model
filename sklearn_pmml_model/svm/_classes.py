@@ -36,6 +36,7 @@ class PMMLLinearSVC(OneHotEncodingMixin, PMMLBaseClassifier, LinearSVC):
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
+    LinearSVC.__init__(self)
 
     # Import coefficients and intercepts
     model = self.root.find('RegressionModel')

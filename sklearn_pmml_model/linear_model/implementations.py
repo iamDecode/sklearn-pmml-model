@@ -84,6 +84,7 @@ class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRe
   def __init__(self, pmml):
     PMMLBaseClassifier.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
+    LogisticRegression.__init__(self)
 
     # Import coefficients and intercepts
     model = self.root.find('RegressionModel')
