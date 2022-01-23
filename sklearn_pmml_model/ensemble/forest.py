@@ -65,7 +65,10 @@ class PMMLForestClassifier(IntegerEncodingMixin, PMMLBaseClassifier, RandomFores
 
     clf = self._make_estimator(append=False, random_state=123)
     clf.classes_ = self.classes_
-    clf.n_features_ = self.n_features_
+    try:
+      clf.n_features_in_ = self.n_features_in_
+    except AttributeError:
+      clf.n_features_ = self.n_features_
     clf.n_outputs_ = self.n_outputs_
     clf.n_classes_ = self.n_classes_
     self.template_estimator = clf
@@ -154,7 +157,10 @@ class PMMLForestRegressor(IntegerEncodingMixin, PMMLBaseRegressor, RandomForestR
     self._validate_estimator()
 
     clf = self._make_estimator(append=False, random_state=123)
-    clf.n_features_ = self.n_features_
+    try:
+      clf.n_features_in_ = self.n_features_in_
+    except AttributeError:
+      clf.n_features_ = self.n_features_
     clf.n_outputs_ = self.n_outputs_
     self.template_estimator = clf
 

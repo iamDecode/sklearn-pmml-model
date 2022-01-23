@@ -70,7 +70,10 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
     GradientBoostingClassifier.__init__(self, n_estimators=n_estimators)
 
     clf = DecisionTreeRegressor(random_state=123)
-    clf.n_features_ = self.n_features_
+    try:
+      clf.n_features_in_ = self.n_features_in_
+    except AttributeError:
+      clf.n_features_ = self.n_features_
     clf.n_outputs_ = self.n_outputs_
     self.template_estimator = clf
 
@@ -189,7 +192,10 @@ class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, Gra
     GradientBoostingRegressor.__init__(self, n_estimators=n_estimators)
 
     clf = DecisionTreeRegressor(random_state=123)
-    clf.n_features_ = self.n_features_
+    try:
+      clf.n_features_in_ = self.n_features_in_
+    except AttributeError:
+      clf.n_features_ = self.n_features_
     clf.n_outputs_ = self.n_outputs_
     self.template_estimator = clf
 

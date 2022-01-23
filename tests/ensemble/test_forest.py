@@ -103,7 +103,7 @@ class TestForest(TestCase):
         </MiningModel>
       </PMML>
       """))
-    assert len(w) == 1
+    assert len([w for w in w if not isinstance(w.message, FutureWarning)]) == 1
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
@@ -191,7 +191,7 @@ class TestForestRegression(TestCase):
         </MiningModel>
       </PMML>
       """))
-        assert len(w) == 1
+        assert len([w for w in w if not isinstance(w.message, FutureWarning)]) == 1
 
     def test_fit_exception(self):
         with self.assertRaises(Exception) as cm:
