@@ -54,10 +54,16 @@ class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
       [float(value.get('mean', 0)) for value in target_values[target]]
       for target in self.classes_
     ])
-    self.sigma_ = np.array([
-      [float(value.get('variance', 0)) for value in target_values[target]]
-      for target in self.classes_
-    ])
+    try:
+      self.sigma_ = np.array([
+        [float(value.get('variance', 0)) for value in target_values[target]]
+        for target in self.classes_
+      ])
+    except AttributeError:
+      self.var_ = np.array([
+        [float(value.get('variance', 0)) for value in target_values[target]]
+        for target in self.classes_
+      ])
 
   def _get_target_values(self, inputs, target):
     def target_value_for_category(bayesInput, category):
