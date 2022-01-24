@@ -10,8 +10,10 @@ from sklearn.utils.multiclass import type_of_target
 from collections import OrderedDict
 import datetime
 import re
+from io import StringIO
 import numpy as np
 import pandas as pd
+import zipfile
 
 
 array_regex = re.compile(r"""('.*?'|".*?"|\S+)""")
@@ -29,6 +31,13 @@ class PMMLBaseEstimator(BaseEstimator):
   """
 
   def __init__(self, pmml):
+    if isinstance(pmml, str) and pmml.endswith(".zip"):
+      with zipfile.ZipFile(pmml, 'r') as zip_ref:
+        files = zip_ref.namelist()
+
+        if len(files) == 1:
+          pmml = StringIO(zip_ref.read(files[0]).decode('utf8'))
+
     it = eTree.iterparse(pmml)
     ns_offset = None
     for _, el in it:
