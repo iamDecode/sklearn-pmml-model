@@ -19,7 +19,7 @@ $ pip install sklearn-pmml-model
 ```
 
 ## Status
-This library is in beta, and currently not all models are supported. The library currently does support the following models:
+The library currently supports the following models:
 
 | Model                                                  | Classification | Regression | Categorical features |
 |--------------------------------------------------------|----------------|------------|----------------------|
