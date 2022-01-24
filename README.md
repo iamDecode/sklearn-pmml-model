@@ -8,7 +8,7 @@
 [![CircleCI](https://circleci.com/gh/iamDecode/sklearn-pmml-model.svg?style=shield)](https://circleci.com/gh/iamDecode/sklearn-pmml-model)
 [![ReadTheDocs](https://readthedocs.org/projects/sklearn-pmml-model/badge/?version=latest&style=flat)](https://sklearn-pmml-model.readthedocs.io/en/latest/)
 
-A Python library that provides *import* functionality to all major estimator classes of the popular machine learning library scikit-learn using PMML. This enables portability and interoperability with a wide range of different languages, toolkits and enterprise software.
+A Python library that provides *import* functionality to all major estimator classes of the popular machine learning library scikit-learn using [PMML](http://dmg.org/pmml/v4-3/GeneralStructure.html). This enables portability and interoperability with a wide range of different languages, toolkits and enterprise software.
 
 ## Installation
 
@@ -40,53 +40,6 @@ This library is in beta, and currently not all models are supported. The library
 <sub><sup>3</sup> By one-hot encoding categorical features automatically.</sub>
 
 ---
-
-The following part of the [specification](http://dmg.org/pmml/v4-3/GeneralStructure.html) is covered:
-- Array (including typed variants)
-- SparseArray *(including typed variants)*
-  - Indices
-  - Entries *(including typed variants)*
-- DataDictionary
-  - DataField *(continuous, categorical, ordinal)*
-    - Value
-    - Interval
-- TransformationDictionary / LocalTransformations
-  - DerivedField
-- TreeModel
-  - SimplePredicate
-  - SimpleSetPredicate
-- Segmentation *('majorityVote' for Random Forests, 'modelChain' and 'sum' for Gradient Boosting)*
-- Regression
-  - RegressionTable
-    - NumericPredictor
-    - CategoricalPredictor
-- GeneralRegressionModel *(only linear models)*
-  - PPMatrix
-    - PPCell
-  - ParamMatrix
-    - PCell
-- NaiveBayesModel
-  - BayesInputs
-    - BayesInput
-      - TargetValueStats
-        - TargetValueStat
-          - GaussianDistribution
-      - PairCounts
-        - TargetValueCounts
-          - TargetValueCount
-- SupportVectorMachineModel
-  - LinearKernelType
-  - PolynomialKernelType
-  - RadialBasisKernelType
-  - SigmoidKernelType
-  - VectorDictionary
-    - VectorFields
-    - VectorInstance
-  - SupportVectorMachine
-    - SupportVectors
-      - SupportVector
-    - Coefficients
-      - Coefficient 
   
 ## Example
 A minimal working example (using [this PMML file](https://github.com/iamDecode/sklearn-pmml-model/blob/master/models/randomForest.pmml)) is shown below:
