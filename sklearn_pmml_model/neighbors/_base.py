@@ -1,5 +1,6 @@
 # License: BSD 2-Clause
 
+import numpy as np
 import pandas as pd
 
 
@@ -38,6 +39,7 @@ class PMMLBaseKNN:
     self.leaf_size = leaf_size
     self.p = 2
     self.metric_params = None
+    self.outputs_2d_ = False
 
     # Set metric and parameters
     measure_element = knn_model.find('ComparisonMeasure')
@@ -84,11 +86,8 @@ class PMMLBaseKNN:
       for row in instances.find('InlineTable')
     ]
 
-    X = pd.DataFrame(data, columns=fields)
-    y = [
-      next(x for x in row if x.tag.endswith(mapping[target])).text
+    self._X = pd.DataFrame(data, columns=fields)
+    self._y = np.array([
+      self.field_mapping[target][1](next(x for x in row if x.tag.endswith(mapping[target])).text)
       for row in instances.find('InlineTable')
-    ]
-
-    self._fit(X, y)
-
+    ])
