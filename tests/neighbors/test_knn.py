@@ -82,23 +82,23 @@ class TestKNeighborsClassifierIntegration(TestCase):
   def setUp(self):
     df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
     cats = np.unique(df['age'])
-    df['age'] = pd.Categorical(df['age'], categories=cats).codes
+    df['age'] = pd.Categorical(df['age'], categories=cats).codes + 1
     Xte = df.iloc[:, 1:]
     yte = df.iloc[:, 0]
     self.test = (Xte, yte)
 
-    pmml = path.join(BASE_DIR, '../models/knn-cat-pima.pmml')
+    pmml = path.join(BASE_DIR, '../models/knn-clf-pima.pmml')
     self.clf = PMMLKNeighborsClassifier(pmml)
 
   def test_predict(self):
     Xte, yte = self.test
-    ref = np.array(['1','0','1','1','1','1','1','1','0','1','1','1','1','1','1','1','0','1','1','1','1','1','0','1','1','1','1','0','0','0','1','0','0','0','0','0','0','0','1','0','0','0','0','0','0','1','0','0','0','0','1','1'])
+    ref = np.array(['Yes','No','Yes','Yes','Yes','Yes','Yes','Yes','No','Yes','Yes','Yes','Yes','Yes','Yes','Yes','No','Yes','Yes','Yes','Yes','Yes','No','Yes','Yes','Yes','Yes','No','No','No','Yes','No','No','No','No','No','No','No','Yes','No','No','No','No','No','No','Yes','No','No','No','No','Yes','Yes'])
     assert np.array_equal(ref, np.array(self.clf.predict(Xte)))
 
   def test_score(self):
     Xte, yte = self.test
     ref = 0.807692307692307
-    assert np.allclose(ref, self.clf.score(Xte, (yte == 'Yes').astype(int).astype(str)))
+    assert np.allclose(ref, self.clf.score(Xte, yte))
 
   def test_fit_exception(self):
     with self.assertRaises(Exception) as cm:
@@ -156,3 +156,88 @@ class TestKNeighborsClassifierIntegration(TestCase):
 
     finally:
       remove("knn-sklearn2pmml.pmml")
+
+
+class TestKNeighborsRegressorIntegration(TestCase):
+  def setUp(self):
+    df = pd.read_csv(path.join(BASE_DIR, '../models/categorical-test.csv'))
+    cats = np.unique(df['age'])
+    df['age'] = pd.Categorical(df['age'], categories=cats).codes + 1
+    Xte = df.iloc[:, 1:]
+    yte = df.iloc[:, 0]
+    self.test = (Xte, yte)
+
+    pmml = path.join(BASE_DIR, '../models/knn-reg-pima.pmml')
+    self.clf = PMMLKNeighborsRegressor(pmml)
+
+  def test_predict(self):
+    Xte, yte = self.test
+    ref = np.array([
+      0.7142857,
+      0.1428571,
+      0.7142857,
+      1.0000000,
+      0.8571429,
+      0.8571429,
+      0.7142857,
+      0.8571429,
+      0.2857143,
+      0.8571429,
+      0.8571429,
+      0.7142857,
+      0.8571429,
+      1.0000000,
+      0.8571429,
+      0.7142857,
+      0.1428571,
+      1.0000000,
+      0.5714286,
+      0.7142857,
+      0.8571429,
+      0.5714286,
+      0.4285714,
+      0.5714286,
+      1.0000000,
+      0.5714286,
+      0.8571429,
+      0.1428571,
+      0.1428571,
+      0.2857143,
+      0.7142857,
+      0.1428571,
+      0.2857143,
+      0.0000000,
+      0.1428571,
+      0.2857143,
+      0.1428571,
+      0.0000000,
+      0.8571429,
+      0.4285714,
+      0.2857143,
+      0.1428571,
+      0.1428571,
+      0.1428571,
+      0.1428571,
+      0.7142857,
+      0.0000000,
+      0.1428571,
+      0.2857143,
+      0.1428571,
+      0.7142857,
+      0.7142857,
+    ])
+    assert np.allclose(ref, np.array(self.clf.predict(Xte)))
+
+  def test_score(self):
+    Xte, yte = self.test
+    ref = 0.383045525902668
+    assert np.allclose(ref, self.clf.score(Xte, (yte == 'Yes').astype(int)))
+
+  def test_fit_exception(self):
+    with self.assertRaises(Exception) as cm:
+      self.clf.fit(np.array([[]]), np.array([]))
+
+    assert str(cm.exception) == 'Not supported.'
+
+  def test_more_tags(self):
+    assert self.clf._more_tags() == KNeighborsRegressor()._more_tags()

@@ -25,6 +25,8 @@ class PMMLKNeighborsClassifier(PMMLBaseClassifier, PMMLBaseKNN, KNeighborsClassi
     KNeighborsClassifier.__init__(self)
     PMMLBaseKNN.__init__(self)
 
+    KNeighborsClassifier.fit(self, self._X, self._y)
+
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
 
@@ -54,6 +56,8 @@ class PMMLKNeighborsRegressor(PMMLBaseRegressor, PMMLBaseKNN, KNeighborsRegresso
     PMMLBaseRegressor.__init__(self, pmml)
     KNeighborsRegressor.__init__(self)
     PMMLBaseKNN.__init__(self)
+
+    KNeighborsRegressor.fit(self, self._X, self._y)
 
   def fit(self, x, y):
     return PMMLBaseRegressor.fit(self, x, y)

@@ -3,7 +3,7 @@
  <Header copyright="Copyright (c) 2022 decode" description="K Nearest Neighbors Model">
   <Extension name="user" value="decode" extender="SoftwareAG PMML Generator"/>
   <Application name="SoftwareAG PMML Generator" version="2.5.1"/>
-  <Timestamp>2022-01-23 16:03:06</Timestamp>
+  <Timestamp>2022-01-24 15:31:14</Timestamp>
  </Header>
  <DataDictionary numberOfFields="8">
   <DataField name="npreg" optype="continuous" dataType="double"/>
@@ -13,9 +13,9 @@
   <DataField name="bmi" optype="continuous" dataType="double"/>
   <DataField name="ped" optype="continuous" dataType="double"/>
   <DataField name="age" optype="continuous" dataType="double"/>
-  <DataField name="type" optype="categorical" dataType="string"/>
+  <DataField name="type" optype="continuous" dataType="double"/>
  </DataDictionary>
- <NearestNeighborModel modelName="kNN_model" categoricalScoringMethod="majorityVote" numberOfNeighbors="13" functionName="classification">
+ <NearestNeighborModel modelName="kNN_model" continuousScoringMethod="average" numberOfNeighbors="7" functionName="regression">
   <MiningSchema>
    <MiningField name="npreg" usageType="active"/>
    <MiningField name="glu" usageType="active"/>
@@ -27,7 +27,7 @@
    <MiningField name="type" usageType="predicted"/>
   </MiningSchema>
   <Output>
-   <OutputField name="Predicted_type" feature="predictedValue" dataType="string" optype="categorical"/>
+   <OutputField name="Predicted_type" feature="predictedValue" dataType="double" optype="continuous"/>
   </Output>
   <TrainingInstances recordCount="52" fieldCount="8" isTransformed="false">
    <InstanceFields>
