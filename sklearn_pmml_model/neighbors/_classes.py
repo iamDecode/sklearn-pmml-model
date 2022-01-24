@@ -14,15 +14,22 @@ class PMMLKNeighborsClassifier(PMMLBaseClassifier, PMMLBaseKNN, KNeighborsClassi
   pmml : str, object
     Filename or file object containing PMML data.
 
+  n_jobs : int, default=None
+    The number of parallel jobs to run for neighbors search.
+    ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
+    ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+    for more details.
+    Doesn't affect :meth:`fit` method.
+
   Notes
   -----
   Specification: http://dmg.org/pmml/v4-3/KNN.html
 
   """
 
-  def __init__(self, pmml):
+  def __init__(self, pmml, n_jobs=None):
     PMMLBaseClassifier.__init__(self, pmml)
-    KNeighborsClassifier.__init__(self)
+    KNeighborsClassifier.__init__(self, n_jobs=n_jobs)
     PMMLBaseKNN.__init__(self)
 
     KNeighborsClassifier.fit(self, self._X, self._y)
@@ -46,15 +53,22 @@ class PMMLKNeighborsRegressor(PMMLBaseRegressor, PMMLBaseKNN, KNeighborsRegresso
   pmml : str, object
     Filename or file object containing PMML data.
 
+  n_jobs : int, default=None
+    The number of parallel jobs to run for neighbors search.
+    ``None`` means 1 unless in a :obj:`joblib.parallel_backend` context.
+    ``-1`` means using all processors. See :term:`Glossary <n_jobs>`
+    for more details.
+    Doesn't affect :meth:`fit` method.
+
   Notes
   -----
   Specification: http://dmg.org/pmml/v4-3/KNN.html
 
   """
 
-  def __init__(self, pmml):
+  def __init__(self, pmml, n_jobs=None):
     PMMLBaseRegressor.__init__(self, pmml)
-    KNeighborsRegressor.__init__(self)
+    KNeighborsRegressor.__init__(self, n_jobs=n_jobs)
     PMMLBaseKNN.__init__(self)
 
     KNeighborsRegressor.fit(self, self._X, self._y)
