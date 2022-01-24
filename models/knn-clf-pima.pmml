@@ -567,7 +567,7 @@
    </InlineTable>
   </TrainingInstances>
   <ComparisonMeasure kind="distance">
-   <euclidean/>
+   <minkowski p-parameter="2.1"/>
   </ComparisonMeasure>
   <KNNInputs>
    <KNNInput field="npreg" compareFunction="absDiff"/>
