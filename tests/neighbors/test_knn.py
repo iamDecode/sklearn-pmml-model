@@ -107,7 +107,7 @@ class TestKNeighborsClassifierIntegration(TestCase):
     assert str(cm.exception) == 'Not supported.'
 
   def test_more_tags(self):
-    assert self.clf._more_tags() == KNeighborsClassifier()._more_tags()
+    assert self.clf._more_tags() == {'requires_y': True, **KNeighborsClassifier()._more_tags()}
 
   def test_sklearn2pmml(self):
     X, y = self.test
