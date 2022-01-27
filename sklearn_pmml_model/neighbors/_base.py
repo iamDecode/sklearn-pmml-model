@@ -6,25 +6,26 @@ import pandas as pd
 
 class PMMLBaseKNN:
   """
-  Abstract class for Support Vector Machines.
+  Abstract class for k-nearest neighbor models.
 
-  The PMML model consists out of a <SupportVectorMachineModel> element,
+  The PMML model consists out of a <NearestNeighborModel> element,
   containing a <SupportVectorMachine> element that contains a <SupportVectors>
-  element describing support vectors, and a <Coefficients> element describing
-  the coefficients for each support vector. Support vectors are referenced from
-  a <VectorDictionary> element, in which the true support vectors are described
-  using <VectorInstance> elements. Furthermore, the model contains one out of
-  <LinearKernelType>, <PolynomialKernelType>, <RadialBasisKernelType> or
-  <SigmoidKernelType> describing the kernel function used.
+  element describing support vectors, and a <TrainingInstances> element that
+  describes the training data points, a <ComparisonMeasure> element describing
+  the distance metric used, and a <KNNInputs> element describing which features
+  are considered when calculating distance. k is indicated using the
+  numberOfNeighbors attribute on the <NearestNeighborModel> element.
 
   Parameters
   ----------
-  pmml : str, object
-    Filename or file object containing PMML data.
+  leaf_size : int, default=30
+    Leaf size passed to BallTree or KDTree. This can affect the speed of the
+    construction and query, as well as the memory required to store the tree.
+    The optimal value depends on the nature of the problem.
 
   Notes
   -----
-  Specification: http://dmg.org/pmml/v4-3/SupportVectorMachineModel.html
+  Specification: http://dmg.org/pmml/v4-3/KNN.html
 
   """
 
