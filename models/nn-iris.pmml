@@ -1,0 +1,128 @@
+<?xml version="1.0"?>
+<PMML version="4.4.1" xmlns="http://www.dmg.org/PMML-4_4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.dmg.org/PMML-4_4 http://www.dmg.org/pmml/v4-4/pmml-4-4.xsd">
+ <Header copyright="Copyright (c) 2022 decode" description="Neural Network Model">
+  <Extension name="user" value="decode" extender="SoftwareAG PMML Generator"/>
+  <Application name="SoftwareAG PMML Generator" version="2.5.1"/>
+  <Timestamp>2022-01-28 11:41:54</Timestamp>
+ </Header>
+ <DataDictionary numberOfFields="5">
+  <DataField name="Class" optype="categorical" dataType="string">
+      <Value value="versicolor"/>
+      <Value value="setosa"/>
+      <Value value="virginica"/>
+  </DataField>
+  <DataField name="sepal length (cm)" optype="continuous" dataType="float"/>
+  <DataField name="sepal width (cm)" optype="continuous" dataType="float"/>
+  <DataField name="petal length (cm)" optype="continuous" dataType="float"/>
+  <DataField name="petal width (cm)" optype="continuous" dataType="float"/>
+ </DataDictionary>
+ <NeuralNetwork modelName="NeuralNet_model" functionName="classification" numberOfLayers="2" activationFunction="logistic">
+  <MiningSchema>
+   <MiningField name="Class" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="sepal length (cm)" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="sepal width (cm)" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="petal length (cm)" usageType="active" invalidValueTreatment="returnInvalid"/>
+   <MiningField name="petal width (cm)" usageType="active" invalidValueTreatment="returnInvalid"/>
+  </MiningSchema>
+  <Output>
+   <OutputField name="Predicted_Class" optype="categorical" dataType="string" feature="predictedValue"/>
+   <OutputField name="Probability_versicolor" optype="continuous" dataType="double" feature="probability" value="versicolor"/>
+   <OutputField name="Probability_setosa" optype="continuous" dataType="double" feature="probability" value="setosa"/>
+   <OutputField name="Probability_viginica" optype="continuous" dataType="double" feature="probability" value="virginica"/>
+  </Output>
+  <NeuralInputs numberOfInputs="4">
+   <NeuralInput id="1">
+    <DerivedField name="derivedNI_sepal length (cm)" optype="continuous" dataType="double">
+     <FieldRef field="sepal length (cm)"/>
+    </DerivedField>
+   </NeuralInput>
+   <NeuralInput id="2">
+    <DerivedField name="derivedNI_sepal width (cm)" optype="continuous" dataType="double">
+     <FieldRef field="sepal width (cm)"/>
+    </DerivedField>
+   </NeuralInput>
+   <NeuralInput id="3">
+    <DerivedField name="derivedNI_petal length (cm)" optype="continuous" dataType="double">
+     <FieldRef field="petal length (cm)"/>
+    </DerivedField>
+   </NeuralInput>
+   <NeuralInput id="4">
+    <DerivedField name="derivedNI_petal width (cm)" optype="continuous" dataType="double">
+     <FieldRef field="petal width (cm)"/>
+    </DerivedField>
+   </NeuralInput>
+  </NeuralInputs>
+  <NeuralLayer numberOfNeurons="5">
+   <Neuron id="5" bias="6.48585945924381">
+    <Con from="1" weight="4.54587431828472"/>
+    <Con from="2" weight="5.52146633781706"/>
+    <Con from="3" weight="-9.17023767457325"/>
+    <Con from="4" weight="-3.33030423024173"/>
+   </Neuron>
+   <Neuron id="6" bias="-0.219171178910383">
+    <Con from="1" weight="-0.621178185846089"/>
+    <Con from="2" weight="-0.251461468530296"/>
+    <Con from="3" weight="0.191483166902765"/>
+    <Con from="4" weight="0.110745459632997"/>
+   </Neuron>
+   <Neuron id="7" bias="-0.403390824874627">
+    <Con from="1" weight="-0.75197406561544"/>
+    <Con from="2" weight="-1.83034558198221"/>
+    <Con from="3" weight="3.14589785761204"/>
+    <Con from="4" weight="1.69002269627064"/>
+   </Neuron>
+   <Neuron id="8" bias="-0.503134825404882">
+    <Con from="1" weight="-0.49881585534317"/>
+    <Con from="2" weight="1.59778404626156"/>
+    <Con from="3" weight="-0.0324193085084592"/>
+    <Con from="4" weight="0.0903405534052034"/>
+   </Neuron>
+   <Neuron id="9" bias="-0.195288296527289">
+    <Con from="1" weight="0.641867291385391"/>
+    <Con from="2" weight="0.119223840923296"/>
+    <Con from="3" weight="-0.401058887116727"/>
+    <Con from="4" weight="-0.536453517669621"/>
+   </Neuron>
+  </NeuralLayer>
+  <NeuralLayer numberOfNeurons="3" activationFunction="identity" normalizationMethod="softmax">
+   <Neuron id="10" bias="-3.92364759629226">
+    <Con from="5" weight="9.05216771475619"/>
+    <Con from="6" weight="-0.754661354448251"/>
+    <Con from="7" weight="6.54676332447574"/>
+    <Con from="8" weight="-4.08076405029937"/>
+    <Con from="9" weight="-2.99574486936919"/>
+   </Neuron>
+   <Neuron id="11" bias="1.58442024136309">
+    <Con from="5" weight="2.66383665553495"/>
+    <Con from="6" weight="-1.25438096411401"/>
+    <Con from="7" weight="-8.2424400278915"/>
+    <Con from="8" weight="1.99704085891973"/>
+    <Con from="9" weight="0.448610898349359"/>
+   </Neuron>
+   <Neuron id="12" bias="2.33921725721368">
+    <Con from="5" weight="-11.7159867913009"/>
+    <Con from="6" weight="2.0090441922176"/>
+    <Con from="7" weight="1.69567608217778"/>
+    <Con from="8" weight="2.08373122967452"/>
+    <Con from="9" weight="2.54713021209121"/>
+   </Neuron>
+  </NeuralLayer>
+  <NeuralOutputs numberOfOutputs="3">
+   <NeuralOutput outputNeuron="10">
+    <DerivedField name="derivedNO_Class" optype="continuous" dataType="double">
+     <NormDiscrete field="Class" value="versicolor"/>
+    </DerivedField>
+   </NeuralOutput>
+   <NeuralOutput outputNeuron="11">
+    <DerivedField name="derivedNO_Class" optype="continuous" dataType="double">
+     <NormDiscrete field="Class" value="setosa"/>
+    </DerivedField>
+   </NeuralOutput>
+   <NeuralOutput outputNeuron="12">
+    <DerivedField name="derivedNO_Class" optype="continuous" dataType="double">
+     <NormDiscrete field="Class" value="virginica"/>
+    </DerivedField>
+   </NeuralOutput>
+  </NeuralOutputs>
+ </NeuralNetwork>
+</PMML>
