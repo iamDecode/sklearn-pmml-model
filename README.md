@@ -33,14 +33,13 @@ The library currently supports the following models:
 | [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅             |            | ✅<sup>3</sup>        |
 | [Support Vector Machines](sklearn_pmml_model/svm)      | ✅             | ✅         | ✅<sup>3</sup>        |
 | [Nearest Neighbors](sklearn_pmml_model/neighbors)      | ✅             | ✅         |                      |
+| [Neural Networks](sklearn_pmml_model/neural_network)   | ✅             | ✅         |                      |
 
 <sub><sup>1</sup> Categorical feature support using slightly modified internals, based on [scikit-learn#12866](https://github.com/scikit-learn/scikit-learn/pull/12866).</sub>
 
 <sub><sup>2</sup> These models differ only in training characteristics, the resulting model is of the same form. Classification is supported using `PMMLLogisticRegression` for regression models and `PMMLRidgeClassifier` for general regression models.</sub>
 
 <sub><sup>3</sup> By one-hot encoding categorical features automatically.</sub>
-
----
   
 ## Example
 A minimal working example (using [this PMML file](https://github.com/iamDecode/sklearn-pmml-model/blob/master/models/randomForest.pmml)) is shown below:
