@@ -64,7 +64,7 @@ clf.predict(Xte)
 clf.score(Xte, yte)
 ```
 
-More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble), [linear_model](sklearn_pmml_model/linear_model), [naive_bayes](sklearn_pmml_model/naive_bayes) and [svm](sklearn_pmml_model/svm).
+More examples can be found in the subsequent packages: [tree](sklearn_pmml_model/tree), [ensemble](sklearn_pmml_model/ensemble), [linear_model](sklearn_pmml_model/linear_model), [naive_bayes](sklearn_pmml_model/naive_bayes), [svm](sklearn_pmml_model/svm), [neighbors](sklearn_pmml_model/neighbors) and [neural_network](sklearn_pmml_model/neural_network).
 
 ## Benchmark
 
