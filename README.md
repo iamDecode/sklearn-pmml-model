@@ -29,7 +29,7 @@ The library currently supports the following models:
 | [Linear Regression](sklearn_pmml_model/linear_model)   | ✅             | ✅         | ✅<sup>3</sup>        |
 | [Ridge](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
 | [Lasso](sklearn_pmml_model/linear_model)               | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
-| [ElasticNet](sklearn_pmml_model/linear_model)          | ✅<sup>2</sup> | ✅         | ✅                    |
+| [ElasticNet](sklearn_pmml_model/linear_model)          | ✅<sup>2</sup> | ✅         | ✅<sup>3</sup>        |
 | [Gaussian Naive Bayes](sklearn_pmml_model/naive_bayes) | ✅             |            | ✅<sup>3</sup>        |
 | [Support Vector Machines](sklearn_pmml_model/svm)      | ✅             | ✅         | ✅<sup>3</sup>        |
 | [Nearest Neighbors](sklearn_pmml_model/neighbors)      | ✅             | ✅         |                      |
