@@ -8,7 +8,8 @@
 [![CircleCI](https://circleci.com/gh/iamDecode/sklearn-pmml-model.svg?style=shield)](https://circleci.com/gh/iamDecode/sklearn-pmml-model)
 [![ReadTheDocs](https://readthedocs.org/projects/sklearn-pmml-model/badge/?version=latest&style=flat)](https://sklearn-pmml-model.readthedocs.io/en/latest/)
 
-A Python library that provides *import* functionality to all major estimator classes of the popular machine learning library scikit-learn using [PMML](http://dmg.org/pmml/v4-3/GeneralStructure.html). This enables portability and interoperability with a wide range of different languages, toolkits and enterprise software.
+A library to effortlessly import models trained on different platforms and with programming languages into scikit-learn in Python. First export your model to [PMML](http://dmg.org/pmml/v4-3/GeneralStructure.html) (widely supported). Next, load the exported PMML file with this library, and use the class as any other scikit-learn estimator.
+
 
 ## Installation
 

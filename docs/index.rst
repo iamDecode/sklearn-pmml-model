@@ -5,7 +5,7 @@
 Documentation
 =============
 
-This library allows you to parse PMML models into Scikit-learn estimators. It can be used to effortlessly move models trained on different platforms and programming languages to Python.
+A library to effortlessly import models trained on different platforms and with programming languages into scikit-learn in Python. First export your model to PMML (widely supported). Next, load the exported PMML file with this library, and use the class as any other scikit-learn estimator.
 
 .. raw:: html
 
