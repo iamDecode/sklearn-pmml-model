@@ -9,4 +9,4 @@ before-build = "python -m pip install cython numpy"
 skip = "pp*"
 
 [tool.cibuildwheel.windows]
-skip = "pp38*"
+skip = "pp*"
