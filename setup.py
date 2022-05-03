@@ -1,5 +1,6 @@
 from __future__ import division, print_function, absolute_import
 from sklearn_pmml_model import __version__ as version
+import platform
 
 # Choose build type.
 build_type="optimized" # "debug"
@@ -43,8 +44,13 @@ except ImportError:
 # Note that -O3 may sometimes cause mysterious problems, so we limit ourselves to -O2.
 
 # Modules involving numerical computations
-extra_compile_args_math_optimized    = ['-march=native', '-O2', '-msse', '-msse2', '-mfma', '-mfpmath=sse']
-extra_compile_args_math_debug        = ['-march=native', '-O0', '-g']
+if platform.system() == 'Darwin' and platform.machine() == 'aarch64' or 'universal2' in os.environ.get('CIBW_ARCHS', ''):  # Apple Silicon
+  extra_compile_args_math_optimized = ['-O2']
+  extra_compile_args_math_debug = ['-O0', '-g']
+else:
+  extra_compile_args_math_optimized = ['-mtune=native', '-march=native', '-O2', '-msse', '-msse2', '-mfma', '-mfpmath=sse']
+  extra_compile_args_math_debug = ['-mtune=native', '-march=native', '-O0', '-g']
+
 extra_link_args_math_optimized       = []
 extra_link_args_math_debug           = []
 
