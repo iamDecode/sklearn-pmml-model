@@ -20,7 +20,6 @@ from datetime import datetime
 # -- Project information -----------------------------------------------------
 
 project = 'sklearn-pmml-model'
-copyright = '2021, Dennis Collaris'
 current_year = datetime.utcnow().year
 copyright = f'2018 - {current_year}, Dennis Collaris'
 author = 'Dennis Collaris'
