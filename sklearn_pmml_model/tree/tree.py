@@ -249,11 +249,13 @@ def construct_tree(node, classes, field_mapping, i=0, rescale_factor=1):
   i += 1
 
   def votes_for(field):
-    # Deal with case where target field is a double, but ScoreDistribution value is an integer.
-    if isinstance(field, float) and field.is_integer():
-      return node.find(f"ScoreDistribution[@value='{field}']") or node.find(f"ScoreDistribution[@value='{int(field)}']")
+    distribution = node.find(f"ScoreDistribution[@value='{field}']")
 
-    return node.find(f"ScoreDistribution[@value='{field}']")
+    # Deal with case where target field is a double, but ScoreDistribution value is an integer.
+    if distribution is None and isinstance(field, float) and field.is_integer():
+      return node.find(f"ScoreDistribution[@value='{int(field)}']")
+
+    return distribution
 
   if not child_nodes:
     record_count = node.get('recordCount')
