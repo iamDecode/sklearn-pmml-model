@@ -1,5 +1,5 @@
 [flake8]
-ignore = E111,E121,E114  # we use 2-space indent
+ignore = E111,E121,E114
          D100,D105,D102
 per-file-ignores =
     __init__.py: D200,D205,D400
