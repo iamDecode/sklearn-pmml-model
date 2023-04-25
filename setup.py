@@ -44,7 +44,7 @@ except ImportError:
 # Note that -O3 may sometimes cause mysterious problems, so we limit ourselves to -O2.
 
 # Modules involving numerical computations
-if platform.system() == 'Darwin' and platform.machine() == 'aarch64' or 'universal2' in os.environ.get('CIBW_ARCHS', ''):  # Apple Silicon
+if platform.system() == 'Darwin' and platform.machine() == 'aarch64' or 'universal2' or 'arm64' in os.environ.get('CIBW_ARCHS', ''):  # Apple Silicon
   extra_compile_args_math_optimized = ['-O2']
   extra_compile_args_math_debug = ['-O0', '-g']
 else:
