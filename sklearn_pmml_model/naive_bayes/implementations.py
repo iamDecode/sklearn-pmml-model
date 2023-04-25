@@ -59,11 +59,16 @@ class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
         [float(value.get('variance', 0)) for value in target_values[target]]
         for target in self.classes_
       ])
-    except AttributeError:
+    finally:
+      pass
+
+    try:
       self.var_ = np.array([
         [float(value.get('variance', 0)) for value in target_values[target]]
         for target in self.classes_
       ])
+    finally:
+      pass
 
   def _get_target_values(self, inputs, target):
     def target_value_for_category(bayesInput, category):
