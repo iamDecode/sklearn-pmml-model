@@ -175,7 +175,7 @@ class TestNeuralNetworkIntegrationIris(TestCase):
   def test_more_tags_regressor(self):
     pmml = path.join(BASE_DIR, '../models/nn-iris.pmml')
     clf = PMMLMLPRegressor(pmml=pmml)
-    assert clf._more_tags() == MLPClassifier()._more_tags()
+    assert clf._more_tags() == MLPRegressor()._more_tags()
 
   def test_predict_proba(self):
     Xte, _ = self.test
