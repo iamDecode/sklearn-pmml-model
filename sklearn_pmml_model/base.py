@@ -85,6 +85,11 @@ class PMMLBaseEstimator(BaseEstimator):
 
     return field_mapping
 
+  @classmethod
+  def _get_param_names(cls):
+    param_names = super()._get_param_names()
+    return [p for p in param_names if p != 'pmml']
+
   @cached_property
   def fields(self):
     """
