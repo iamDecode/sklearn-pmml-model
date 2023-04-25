@@ -68,6 +68,10 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
 
     n_estimators = len(valid_segments[0])
     GradientBoostingClassifier.__init__(self, n_estimators=n_estimators)
+    try:
+      self.n_features_in_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
+    finally:
+      pass
 
     clf = DecisionTreeRegressor(random_state=123)
     try:
@@ -190,6 +194,10 @@ class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, Gra
     n_estimators = len(valid_segments)
     self.n_outputs_ = 1
     GradientBoostingRegressor.__init__(self, n_estimators=n_estimators)
+    try:
+      self.n_features_in_ = len([0 for e in self.fields.values() if e.tag == 'DataField']) - 1
+    finally:
+      pass
 
     clf = DecisionTreeRegressor(random_state=123)
     try:
