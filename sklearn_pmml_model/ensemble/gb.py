@@ -85,8 +85,12 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
 
     if self.n_classes_ == 2 and len(segments) == 3 and segments[-1].find('TreeModel') is None:
       # For binary classification where both sides are specified, we need to force multinomial deviance
-      self.loss_ = _gb_losses.MultinomialDeviance(self.n_classes_ + 1)
-      self.loss_.K = 2
+      try:
+        self.loss_ = _gb_losses.MultinomialDeviance(self.n_classes_ + 1)
+        self.loss_.K = 2
+      except AttributeError:
+        self._loss = _gb_losses.MultinomialDeviance(self.n_classes_ + 1)
+        self._loss.K = 2
 
     try:
       self.init = None
