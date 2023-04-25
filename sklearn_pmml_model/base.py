@@ -405,9 +405,7 @@ class OneHotEncodingMixin:
         return 'passthrough'
 
       encoder = OneHotEncoder()
-      encoder.categories_ = np.array([self.field_mapping[field.get('name')][1].categories])
-      encoder.drop_idx_ = np.array([None for x in encoder.categories_])
-      encoder._legacy_mode = False
+      encoder.fit(np.array([self.field_mapping[field.get('name')][1].categories]).reshape(-1, 1))
       return encoder
 
     transformer = ColumnTransformer(
@@ -422,6 +420,7 @@ class OneHotEncodingMixin:
     transformer._validate_transformers()
     transformer._validate_column_callables(X)
     transformer._validate_remainder(X)
+    transformer._name_to_fitted_passthrough = {}
     transformer.transformers_ = transformer.transformers
     transformer.sparse_output_ = False
     transformer._feature_names_in = None
