@@ -534,7 +534,7 @@ cdef class CategoryCacheMgr:
         self.n_nodes = 0
         self.bits = NULL
 
-    def _dealloc__(self):
+    def __dealloc__(self):
         cdef int i
 
         if self.bits != NULL:
