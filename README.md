@@ -50,8 +50,9 @@ from sklearn.model_selection import train_test_split
 import pandas as pd
 import numpy as np
 from sklearn_pmml_model.ensemble import PMMLForestClassifier
+from sklearn_pmml_model.auto_detect import auto_detect_estimator
 
-# Prepare data
+# Prepare the data
 iris = load_iris()
 X = pd.DataFrame(iris.data)
 X.columns = np.array(iris.feature_names)
@@ -59,7 +60,13 @@ y = pd.Series(np.array(iris.target_names)[iris.target])
 y.name = "Class"
 Xtr, Xte, ytr, yte = train_test_split(X, y, test_size=0.33, random_state=123)
 
-clf = PMMLForestClassifier(pmml="models/randomForest.pmml")
+# Specify the model type for the least overhead...
+#clf = PMMLForestClassifier(pmml="models/randomForest.pmml")
+
+# ...or simply let the library auto-detect the model type
+clf = auto_detect_estimator(pmml="models/randomForest.pmml")
+
+# Use the model as any other scikit-learn model
 clf.predict(Xte)
 clf.score(Xte, yte)
 ```
