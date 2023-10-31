@@ -48,7 +48,7 @@ def auto_detect_classifier(pmml, **kwargs):
 
   for line in file:
     if '<Segmentation' in line:
-      clfs = [clf for line in file if (clf := detect_classifier(line)) is not None]
+      clfs = [x for x in (detect_classifier(line) for line in file) if x is not None]
       if all(clf is PMMLTreeClassifier or clf is PMMLLogisticRegression for clf in clfs):
         if 'multipleModelMethod="majorityVote"' in line or 'multipleModelMethod="average"' in line:
           return PMMLForestClassifier(pmml=pmml, **kwargs)
@@ -56,7 +56,8 @@ def auto_detect_classifier(pmml, **kwargs):
           return PMMLGradientBoostingClassifier(pmml=pmml, **kwargs)
       raise Exception('Unsupported PMML classifier: invalid segmentation.')
 
-    if clf := detect_classifier(line):
+    clf = detect_classifier(line)
+    if clf:
       return clf(pmml, **kwargs)
 
   raise Exception('Unsupported PMML classifier.')
@@ -82,7 +83,7 @@ def auto_detect_regressor(pmml, **kwargs):
 
   for line in file:
     if '<Segmentation' in line:
-      regs = [reg for line in file if (reg := detect_regressor(line)) is not None]
+      regs = [x for x in (detect_regressor(line) for line in file) if x is not None]
       if all(reg is PMMLTreeRegressor or reg is PMMLLinearRegression for reg in regs):
         if 'multipleModelMethod="majorityVote"' in line or 'multipleModelMethod="average"' in line:
           return PMMLForestRegressor(pmml=pmml, **kwargs)
@@ -90,7 +91,8 @@ def auto_detect_regressor(pmml, **kwargs):
           return PMMLGradientBoostingRegressor(pmml=pmml, **kwargs)
       raise Exception('Unsupported PMML regressor: invalid segmentation.')
 
-    if reg := detect_regressor(line):
+    reg = detect_regressor(line)
+    if reg:
       return reg(pmml, **kwargs)
 
   raise Exception('Unsupported PMML regressor.')
