@@ -27,6 +27,7 @@ cdef extern from "numpy/arrayobject.h":
                                 int nd, np.npy_intp* dims,
                                 np.npy_intp* strides,
                                 void* data, int flags, object obj)
+    int PyArray_SetBaseObject(np.ndarray arr, PyObject* obj)
 
 
 # XXX using (size_t)(-1) is ugly, but SIZE_MAX is not available in C89
@@ -78,7 +79,7 @@ cdef class _QuadTree:
         # Parameters of the tree
         self.n_dimensions = n_dimensions
         self.verbose = verbose
-        self.n_cells_per_cell = 2 ** self.n_dimensions
+        self.n_cells_per_cell = <int> (2 ** self.n_dimensions)
 
         # Inner structures
         self.max_depth = 0
@@ -138,7 +139,7 @@ cdef class _QuadTree:
         self._resize(capacity=self.cell_count)
 
     cdef int insert_point(self, DTYPE_t[3] point, SIZE_t point_index,
-                          SIZE_t cell_id=0) nogil except -1:
+                          SIZE_t cell_id=0) except -1 nogil:
         """Insert a point in the QuadTree."""
         cdef int ax
         cdef DTYPE_t n_frac
@@ -327,7 +328,7 @@ cdef class _QuadTree:
         self.cell_count += 1
 
     cdef int _check_point_in_cell(self, DTYPE_t[3] point, Cell* cell
-                                  ) nogil except -1:
+                                  ) except -1 nogil:
         """Check that the given point is in the cell boundaries."""
 
         if self.verbose >= 50:
@@ -395,7 +396,7 @@ cdef class _QuadTree:
 
     cdef long summarize(self, DTYPE_t[3] point, DTYPE_t* results,
                         float squared_theta=.5, SIZE_t cell_id=0, long idx=0
-                        ) nogil:
+                        ) noexcept nogil:
         """Summarize the tree compared to a query point.
 
         Input arguments
@@ -486,7 +487,7 @@ cdef class _QuadTree:
         return self._get_cell(query_pt, 0)
 
     cdef int _get_cell(self, DTYPE_t[3] point, SIZE_t cell_id=0
-                       ) nogil except -1:
+                       ) except -1 nogil:
         """guts of get_cell.
         
         Return the id of the cell containing the query point or raise ValueError
@@ -576,10 +577,11 @@ cdef class _QuadTree:
                                    strides, <void*> self.cells,
                                    np.NPY_DEFAULT, None)
         Py_INCREF(self)
-        arr.base = <PyObject*> self
+        if PyArray_SetBaseObject(arr, <PyObject*> self) < 0:
+            raise ValueError("Can't intialize array!")
         return arr
 
-    cdef int _resize(self, SIZE_t capacity) nogil except -1:
+    cdef int _resize(self, SIZE_t capacity) except -1 nogil:
         """Resize all inner arrays to `capacity`, if `capacity` == -1, then
            double the size of the inner arrays.
 
@@ -591,7 +593,7 @@ cdef class _QuadTree:
             with gil:
                 raise MemoryError()
 
-    cdef int _resize_c(self, SIZE_t capacity=DEFAULT) nogil except -1:
+    cdef int _resize_c(self, SIZE_t capacity=DEFAULT) except -1 nogil:
         """Guts of _resize
 
         Returns -1 in case of failure to allocate memory (and raise MemoryError)
