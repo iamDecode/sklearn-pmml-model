@@ -24,7 +24,6 @@ current_year = datetime.utcnow().year
 copyright = f'2018 - {current_year}, Dennis Collaris'
 author = 'Dennis Collaris'
 
-
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -45,13 +44,13 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
 html_theme = 'pydata_sphinx_theme'
+html_title = project
 
 html_theme_options = {
   "collapse_navigation": False,
@@ -79,6 +78,7 @@ master_doc = 'index'
 # -- AutoAPI -----------------------------------------------------------------
 autoapi_type = 'python'
 autoapi_dirs = ['../sklearn_pmml_model']
+
 
 def setup(app):
   app.add_css_file('custom.css')
