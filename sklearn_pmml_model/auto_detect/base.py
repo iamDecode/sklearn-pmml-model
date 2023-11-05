@@ -23,6 +23,9 @@ def auto_detect_estimator(pmml, **kwargs):
       Filename or file object containing PMML data.
 
   """
+  if isinstance(pmml, io.IOBase) and not pmml.seekable():
+    pmml = io.StringIO(pmml.read())
+
   base = PMMLBaseEstimator(pmml=pmml)
   target_field_name = base.target_field.attrib['name']
   target_field_type = base.field_mapping[target_field_name][1]
