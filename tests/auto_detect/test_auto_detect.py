@@ -1,5 +1,5 @@
 from unittest import TestCase
-from io import StringIO
+from io import StringIO, UnsupportedOperation
 import sklearn_pmml_model
 from sklearn_pmml_model.auto_detect import auto_detect_estimator
 from sklearn_pmml_model.tree import PMMLTreeClassifier, PMMLTreeRegressor
@@ -148,6 +148,41 @@ class TestAutoDetect(TestCase):
         </RegressionModel>
       </PMML>
       """))
+
+    assert isinstance(clf, PMMLLinearRegression)
+
+  def test_auto_detect_non_seekable_file_object(self):
+    class NoSeekStringIO(StringIO):
+      def seekable(self) -> bool:
+        return False
+
+      def seek(self, __cookie: int, __whence: int = ...) -> int:
+        raise UnsupportedOperation('seek')
+
+    string = NoSeekStringIO("""
+        <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+          <DataDictionary>
+            <DataField name="feature" optype="continuous" dataType="float"/>
+            <DataField name="Class" optype="continuous" dataType="float"/>
+          </DataDictionary>
+          <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+          </MiningSchema>
+          <RegressionModel>
+              <MiningSchema>
+                  <MiningField name="feature" usageType="active" invalidValueTreatment="returnInvalid"/>
+                  <MiningField name="Class" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+              </MiningSchema>
+              <Output>
+                  <OutputField name="Predicted_Class" optype="continuous" dataType="float" feature="predictedValue"/>
+              </Output>
+              <RegressionTable intercept="-1">
+                  <NumericPredictor name="feature" exponent="1" coefficient="0.1"/>
+              </RegressionTable>
+          </RegressionModel>
+        </PMML>
+        """)
+    clf = auto_detect_estimator(string)
 
     assert isinstance(clf, PMMLLinearRegression)
 
