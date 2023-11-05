@@ -1,3 +1,6 @@
+import io
+from collections.abc import Iterator
+
 from sklearn_pmml_model.base import PMMLBaseEstimator
 from sklearn_pmml_model.datatypes import Category
 from sklearn_pmml_model.tree import PMMLTreeClassifier, PMMLTreeRegressor
@@ -40,32 +43,34 @@ def auto_detect_classifier(pmml, **kwargs):
       Filename or file object containing PMML data.
 
   """
+
+  def parse(file: Iterator, seek=False):
+    for line in file:
+      if '<Segmentation' in line:
+        clfs = [x for x in (detect_classifier(line) for line in file) if x is not None]
+
+        if all(clf is PMMLTreeClassifier or clf is PMMLLogisticRegression for clf in clfs):
+          if 'multipleModelMethod="majorityVote"' in line or 'multipleModelMethod="average"' in line:
+            return PMMLForestClassifier(pmml=pmml, **kwargs)
+          if 'multipleModelMethod="modelChain"' in line:
+            return PMMLGradientBoostingClassifier(pmml=pmml, **kwargs)
+
+        raise Exception('Unsupported PMML classifier: invalid segmentation.')
+
+      clf = detect_classifier(line)
+      if clf:
+        if seek:
+          pmml.seek(0)
+        return clf(pmml, **kwargs)
+
+    raise Exception('Unsupported PMML classifier.')
+
   if isinstance(pmml, str):
-    file = open(pmml, 'r')
+    with io.open(pmml, 'r') as f:
+      return parse(f)
   else:
     pmml.seek(0)
-    file = pmml
-
-  for line in file:
-    if '<Segmentation' in line:
-      clfs = [x for x in (detect_classifier(line) for line in file) if x is not None]
-      file.close()
-
-      if all(clf is PMMLTreeClassifier or clf is PMMLLogisticRegression for clf in clfs):
-        if 'multipleModelMethod="majorityVote"' in line or 'multipleModelMethod="average"' in line:
-          return PMMLForestClassifier(pmml=pmml, **kwargs)
-        if 'multipleModelMethod="modelChain"' in line:
-          return PMMLGradientBoostingClassifier(pmml=pmml, **kwargs)
-
-      raise Exception('Unsupported PMML classifier: invalid segmentation.')
-
-    clf = detect_classifier(line)
-    if clf:
-      file.close()
-      return clf(pmml, **kwargs)
-
-  file.close()
-  raise Exception('Unsupported PMML classifier.')
+    return parse(pmml, seek=True)
 
 
 def auto_detect_regressor(pmml, **kwargs):
@@ -78,32 +83,34 @@ def auto_detect_regressor(pmml, **kwargs):
       Filename or file object containing PMML data.
 
   """
+
+  def parse(file: Iterator, seek=False):
+    for line in file:
+      if '<Segmentation' in line:
+        regs = [x for x in (detect_regressor(line) for line in file) if x is not None]
+
+        if all(reg is PMMLTreeRegressor or reg is PMMLLinearRegression for reg in regs):
+          if 'multipleModelMethod="majorityVote"' in line or 'multipleModelMethod="average"' in line:
+            return PMMLForestRegressor(pmml=pmml, **kwargs)
+          if 'multipleModelMethod="sum"' in line:
+            return PMMLGradientBoostingRegressor(pmml=pmml, **kwargs)
+
+        raise Exception('Unsupported PMML regressor: invalid segmentation.')
+
+      reg = detect_regressor(line)
+      if reg:
+        if seek:
+          pmml.seek(0)
+        return reg(pmml, **kwargs)
+
+    raise Exception('Unsupported PMML regressor.')
+
   if isinstance(pmml, str):
-    file = open(pmml, 'r')
+    with io.open(pmml, 'r') as f:
+      return parse(f)
   else:
     pmml.seek(0)
-    file = pmml
-
-  for line in file:
-    if '<Segmentation' in line:
-      regs = [x for x in (detect_regressor(line) for line in file) if x is not None]
-      file.close()
-
-      if all(reg is PMMLTreeRegressor or reg is PMMLLinearRegression for reg in regs):
-        if 'multipleModelMethod="majorityVote"' in line or 'multipleModelMethod="average"' in line:
-          return PMMLForestRegressor(pmml=pmml, **kwargs)
-        if 'multipleModelMethod="sum"' in line:
-          return PMMLGradientBoostingRegressor(pmml=pmml, **kwargs)
-
-      raise Exception('Unsupported PMML regressor: invalid segmentation.')
-
-    reg = detect_regressor(line)
-    if reg:
-      file.close()
-      return reg(pmml, **kwargs)
-
-  file.close()
-  raise Exception('Unsupported PMML regressor.')
+    return parse(pmml, seek=True)
 
 
 def detect_classifier(line):
