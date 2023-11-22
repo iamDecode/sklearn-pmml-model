@@ -13,6 +13,6 @@ from sklearn_pmml_model.linear_model import PMMLLinearRegression
 df = pd.read_csv('models/categorical-test.csv')
 Xte = df.iloc[:, 1:]
 
-clf = PMMLLinearRegression(pmml="models/linear-regression.pmml")
+clf = PMMLLinearRegression(pmml="models/linear-model-lm.pmml")
 clf.predict(Xte)
 ```

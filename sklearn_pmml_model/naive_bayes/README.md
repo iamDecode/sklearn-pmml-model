@@ -12,8 +12,7 @@ from sklearn_pmml_model.naive_bayes import PMMLGaussianNB
 # Prepare data
 df = pd.read_csv('models/categorical-test.csv')
 Xte = df.iloc[:, 1:]
-Xte = pd.get_dummies(Xte, prefix_sep='')  # create categorical variable
 
-clf = PMMLGaussianNB(pmml="models/naive_bayes.pmml")
+clf = PMMLGaussianNB(pmml="models/nb-cat-pima.pmml")
 clf.predict(Xte)
 ```

@@ -12,8 +12,7 @@ from sklearn_pmml_model.svm import PMMLSVC
 # Prepare data
 df = pd.read_csv('models/categorical-test.csv')
 Xte = df.iloc[:, 1:]
-Xte = pd.get_dummies(Xte, prefix_sep='')  # create categorical variable
 
-clf = PMMLSVC(pmml="models/svc_cat_pima.pmml")
+clf = PMMLSVC(pmml="models/svc-cat-pima.pmml")
 clf.predict(Xte)
 ```
