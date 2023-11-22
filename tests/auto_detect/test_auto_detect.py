@@ -1,5 +1,5 @@
 from unittest import TestCase
-from io import StringIO, UnsupportedOperation
+from io import open, StringIO, BytesIO, UnsupportedOperation
 import sklearn_pmml_model
 from sklearn_pmml_model.auto_detect import auto_detect_estimator
 from sklearn_pmml_model.tree import PMMLTreeClassifier, PMMLTreeRegressor
@@ -151,7 +151,47 @@ class TestAutoDetect(TestCase):
 
     assert isinstance(clf, PMMLLinearRegression)
 
-  def test_auto_detect_non_seekable_file_object(self):
+  def test_auto_detect_non_seekable_file_object_classifier(self):
+    class NoSeekStringIO(StringIO):
+      def seekable(self) -> bool:
+        return False
+
+      def seek(self, __cookie: int, __whence: int = ...) -> int:
+        raise UnsupportedOperation('seek')
+
+    string = NoSeekStringIO("""
+        <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+          <DataDictionary>
+            <DataField name="feature" optype="continuous" dataType="float"/>
+            <DataField name="Class" optype="categorical" dataType="string">
+                <Value value="A"/>
+                <Value value="B"/>
+              </DataField>
+          </DataDictionary>
+          <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+          </MiningSchema>
+          <RegressionModel>
+              <MiningSchema>
+                  <MiningField name="feature" />
+                  <MiningField name="Class" usageType="target" />
+              </MiningSchema>
+              <Output>
+                  <OutputField name="probability(A)" optype="continuous" dataType="double" feature="probability" value="A"/>
+                  <OutputField name="probability(B)" optype="continuous" dataType="double" feature="probability" value="B"/>
+              </Output>
+              <RegressionTable intercept="-1">
+                  <NumericPredictor name="feature" exponent="1" coefficient="0.1"/>
+              </RegressionTable>
+          </RegressionModel>
+        </PMML>
+        """)
+    clf = auto_detect_estimator(string)
+
+    assert isinstance(clf, PMMLLogisticRegression)
+
+
+  def test_auto_detect_non_seekable_file_object_regressor(self):
     class NoSeekStringIO(StringIO):
       def seekable(self) -> bool:
         return False
@@ -185,6 +225,163 @@ class TestAutoDetect(TestCase):
     clf = auto_detect_estimator(string)
 
     assert isinstance(clf, PMMLLinearRegression)
+
+  def test_auto_detect_bytes_file_object_classifier(self):
+    bytes = BytesIO(b"""
+        <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+          <DataDictionary>
+            <DataField name="feature" optype="continuous" dataType="float"/>
+            <DataField name="Class" optype="categorical" dataType="string">
+                <Value value="A"/>
+                <Value value="B"/>
+              </DataField>
+          </DataDictionary>
+          <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+          </MiningSchema>
+          <RegressionModel>
+              <MiningSchema>
+                  <MiningField name="feature" />
+                  <MiningField name="Class" usageType="target" />
+              </MiningSchema>
+              <Output>
+                  <OutputField name="probability(A)" optype="continuous" dataType="double" feature="probability" value="A"/>
+                  <OutputField name="probability(B)" optype="continuous" dataType="double" feature="probability" value="B"/>
+              </Output>
+              <RegressionTable intercept="-1">
+                  <NumericPredictor name="feature" exponent="1" coefficient="0.1"/>
+              </RegressionTable>
+          </RegressionModel>
+        </PMML>
+        """)
+    clf = auto_detect_estimator(bytes)
+
+    assert isinstance(clf, PMMLLogisticRegression)
+
+  def test_auto_detect_non_seekable_bytes_file_object_classifier(self):
+    class NoSeekBytesIO(BytesIO):
+      def seekable(self) -> bool:
+        return False
+
+      def seek(self, __cookie: int, __whence: int = ...) -> int:
+        raise UnsupportedOperation('seek')
+
+    bytes = NoSeekBytesIO(b"""
+        <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+          <DataDictionary>
+            <DataField name="feature" optype="continuous" dataType="float"/>
+            <DataField name="Class" optype="categorical" dataType="string">
+                <Value value="A"/>
+                <Value value="B"/>
+              </DataField>
+          </DataDictionary>
+          <MiningSchema>
+            <MiningField name="Class" usageType="target"/>
+          </MiningSchema>
+          <RegressionModel>
+              <MiningSchema>
+                  <MiningField name="feature" />
+                  <MiningField name="Class" usageType="target" />
+              </MiningSchema>
+              <Output>
+                  <OutputField name="probability(A)" optype="continuous" dataType="double" feature="probability" value="A"/>
+                  <OutputField name="probability(B)" optype="continuous" dataType="double" feature="probability" value="B"/>
+              </Output>
+              <RegressionTable intercept="-1">
+                  <NumericPredictor name="feature" exponent="1" coefficient="0.1"/>
+              </RegressionTable>
+          </RegressionModel>
+        </PMML>
+        """)
+    clf = auto_detect_estimator(bytes)
+
+    assert isinstance(clf, PMMLLogisticRegression)
+
+  def test_auto_detect_bytes_file_object_regressor(self):
+    bytes = BytesIO(b"""
+          <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+            <DataDictionary>
+              <DataField name="feature" optype="continuous" dataType="float"/>
+              <DataField name="Class" optype="continuous" dataType="float"/>
+            </DataDictionary>
+            <MiningSchema>
+              <MiningField name="Class" usageType="target"/>
+            </MiningSchema>
+            <RegressionModel>
+                <MiningSchema>
+                    <MiningField name="feature" usageType="active" invalidValueTreatment="returnInvalid"/>
+                    <MiningField name="Class" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+                </MiningSchema>
+                <Output>
+                    <OutputField name="Predicted_Class" optype="continuous" dataType="float" feature="predictedValue"/>
+                </Output>
+                <RegressionTable intercept="-1">
+                    <NumericPredictor name="feature" exponent="1" coefficient="0.1"/>
+                </RegressionTable>
+            </RegressionModel>
+          </PMML>
+          """)
+    clf = auto_detect_estimator(bytes)
+
+    assert isinstance(clf, PMMLLinearRegression)
+
+  def test_auto_detect_non_seekable_bytes_file_object_regressor(self):
+    class NoSeekBytesIO(BytesIO):
+      def seekable(self) -> bool:
+        return False
+
+      def seek(self, __cookie: int, __whence: int = ...) -> int:
+        raise UnsupportedOperation('seek')
+
+    bytes = NoSeekBytesIO(b"""
+          <PMML xmlns="http://www.dmg.org/PMML-4_3" version="4.3">
+            <DataDictionary>
+              <DataField name="feature" optype="continuous" dataType="float"/>
+              <DataField name="Class" optype="continuous" dataType="float"/>
+            </DataDictionary>
+            <MiningSchema>
+              <MiningField name="Class" usageType="target"/>
+            </MiningSchema>
+            <RegressionModel>
+                <MiningSchema>
+                    <MiningField name="feature" usageType="active" invalidValueTreatment="returnInvalid"/>
+                    <MiningField name="Class" usageType="predicted" invalidValueTreatment="returnInvalid"/>
+                </MiningSchema>
+                <Output>
+                    <OutputField name="Predicted_Class" optype="continuous" dataType="float" feature="predictedValue"/>
+                </Output>
+                <RegressionTable intercept="-1">
+                    <NumericPredictor name="feature" exponent="1" coefficient="0.1"/>
+                </RegressionTable>
+            </RegressionModel>
+          </PMML>
+          """)
+    clf = auto_detect_estimator(bytes)
+
+    assert isinstance(clf, PMMLLinearRegression)
+
+  def test_auto_detect_bytes_random_forest_classifier(self):
+    pmml = path.join(BASE_DIR, '../models/rf-cat-pima.pmml')
+    with open(pmml) as file:
+      content = str.encode(file.read())
+      assert isinstance(auto_detect_estimator(pmml=BytesIO(content)), PMMLForestClassifier)
+
+  def test_auto_detect_bytes_random_forest_regressor(self):
+    pmml = path.join(BASE_DIR, '../models/rf-cat-pima-regression.pmml')
+    with open(pmml) as file:
+      content = str.encode(file.read())
+      assert isinstance(auto_detect_estimator(pmml=BytesIO(content)), PMMLForestRegressor)
+  def test_auto_detect_bytes_gradient_boosting_classifier(self):
+    pmml = path.join(BASE_DIR, '../models/gb-xgboost-iris.pmml')
+    with open(pmml) as file:
+      content = str.encode(file.read())
+      assert isinstance(auto_detect_estimator(pmml=BytesIO(content)), PMMLGradientBoostingClassifier)
+
+  def test_auto_detect_bytes_gradient_boosting_regressor(self):
+    pmml = path.join(BASE_DIR, '../models/gb-gbm-cat-pima-regression.pmml')
+    with open(pmml) as file:
+      content = str.encode(file.read())
+      assert isinstance(auto_detect_estimator(pmml=BytesIO(content)), PMMLGradientBoostingRegressor)
 
   def test_auto_detect_tree_classifier(self):
     pmml = path.join(BASE_DIR, '../models/tree-iris.pmml')

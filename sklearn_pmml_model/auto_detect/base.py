@@ -24,7 +24,11 @@ def auto_detect_estimator(pmml, **kwargs):
 
   """
   if isinstance(pmml, io.IOBase) and not pmml.seekable():
-    pmml = io.StringIO(pmml.read())
+    content = pmml.read()
+    if isinstance(content, bytes):
+      pmml = io.BytesIO(content)
+    if isinstance(content, str):
+      pmml = io.StringIO(content)
 
   base = PMMLBaseEstimator(pmml=pmml)
   target_field_name = base.target_field.attrib['name']
@@ -49,6 +53,8 @@ def auto_detect_classifier(pmml, **kwargs):
 
   def parse(file: Iterator, seek=False):
     for line in file:
+      if isinstance(line, bytes):
+        line = line.decode('utf8')
       if '<Segmentation' in line:
         clfs = [x for x in (detect_classifier(line) for line in file) if x is not None]
 
@@ -93,6 +99,8 @@ def auto_detect_regressor(pmml, **kwargs):
 
   def parse(file: Iterator, seek=False):
     for line in file:
+      if isinstance(line, bytes):
+        line = line.decode('utf8')
       if '<Segmentation' in line:
         regs = [x for x in (detect_regressor(line) for line in file) if x is not None]
 
@@ -130,13 +138,16 @@ def detect_classifier(line):
 
   Parameters
   ----------
-  line : str
+  line : str, bytes
       Line of a PMML file as a string.
 
   pmml : str, object
       Filename or file object containing PMML data.
 
   """
+  if isinstance(line, bytes):
+    line = line.decode('utf8')
+
   if '<TreeModel' in line:
     return PMMLTreeClassifier
 
@@ -167,13 +178,16 @@ def detect_regressor(line):
 
   Parameters
   ----------
-  line : str
+  line : str, bytes
       Line of a PMML file as a string.
 
   pmml : str, object
       Filename or file object containing PMML data.
 
   """
+  if isinstance(line, bytes):
+    line = line.decode('utf8')
+
   if '<TreeModel' in line:
     return PMMLTreeRegressor
 
