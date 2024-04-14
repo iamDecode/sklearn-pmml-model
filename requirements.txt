@@ -1,6 +1,6 @@
 numpy==1.26.4
 scipy==1.13.0
-scikit-learn==1.2.2
+scikit-learn==1.4.1.post1
 cached-property==1.5.2
 pytest==8.1.1
 pandas==2.2.2
