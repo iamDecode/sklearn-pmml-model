@@ -1,7 +1,7 @@
 # License: BSD 2-Clause
 
 from sklearn.base import BaseEstimator
-from sklearn.preprocessing import LabelBinarizer, OneHotEncoder
+from sklearn.preprocessing import LabelBinarizer, OneHotEncoder, FunctionTransformer
 from sklearn.compose import ColumnTransformer
 from xml.etree import cElementTree as eTree
 from cached_property import cached_property
@@ -407,7 +407,14 @@ class OneHotEncodingMixin:
 
     def encoder_for(field):
       if field.get('optype') != 'categorical':
-        return 'passthrough'
+        # Manually implement 'passthrough' since it causes issues in scikit-learn 1.4+
+        trans = FunctionTransformer(
+          accept_sparse=True,
+          check_inverse=False,
+          feature_names_out="one-to-one",
+        ).set_output(transform='pandas')
+        trans.fit(pd.DataFrame(columns=[field.get('name')]))
+        return trans
 
       encoder = OneHotEncoder()
       encoder.fit(np.array([self.field_mapping[field.get('name')][1].categories]).reshape(-1, 1))
@@ -422,13 +429,17 @@ class OneHotEncodingMixin:
     )
 
     X = np.array([[0 for field in fields if field.tag == 'DataField']])
+    transformer.sparse_output_ = False
+    transformer._feature_names_in = None
+    try:
+      transformer._check_n_features(X, reset=True)
+    except AttributeError:
+      pass
     transformer._validate_transformers()
     transformer._validate_column_callables(X)
     transformer._validate_remainder(X)
     transformer._name_to_fitted_passthrough = {}
     transformer.transformers_ = transformer.transformers
-    transformer.sparse_output_ = False
-    transformer._feature_names_in = None
 
     self.transformer = transformer
 
