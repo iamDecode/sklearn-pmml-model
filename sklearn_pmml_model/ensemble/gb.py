@@ -5,10 +5,6 @@ from abc import ABC
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
-try:
-  from sklearn.ensemble._gb_losses import MultinomialDeviance
-except ImportError:
-  pass
 from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor, IntegerEncodingMixin
 from sklearn_pmml_model.tree import get_tree
 from scipy.special import expit
@@ -86,6 +82,7 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
     self.template_estimator = clf
 
     try:
+      from sklearn.ensemble._gb_losses import MultinomialDeviance
       self._check_params()
 
       if self.n_classes_ == 2 and len(segments) == 3 and segments[-1].find('TreeModel') is None:
@@ -96,10 +93,18 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
         except AttributeError:
           self._loss = MultinomialDeviance(self.n_classes_ + 1)
           self._loss.K = 2
-    except AttributeError:
+    except ImportError:
+      from sklearn._loss.loss import HalfMultinomialLoss
+
       self._set_max_features()
-      self._loss = self._get_loss(sample_weight=None)
-      self.n_trees_per_iteration_ = 1 if self.n_classes_ == 2 else self.n_classes_
+
+      if self.n_classes_ == 2 and len(segments) == 3 and segments[-1].find('TreeModel') is None:
+        # For binary classification where both sides are specified, we need to force multinomial deviance
+        self._loss = HalfMultinomialLoss(sample_weight=None, n_classes=self.n_classes_ + 1)
+        self.n_trees_per_iteration_ = self.n_classes_
+      else:
+        self._loss = self._get_loss(sample_weight=None)
+        self.n_trees_per_iteration_ = 1 if self.n_classes_ == 2 else self.n_classes_
 
     try:
       self.init = None
