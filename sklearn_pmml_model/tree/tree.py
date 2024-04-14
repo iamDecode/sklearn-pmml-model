@@ -82,6 +82,8 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     ], dtype=np.int32, order='C')
 
     self.tree_.set_n_categories(n_categories)
+    self.splitter = 'best'
+    self.criterion = 'gini'
 
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
@@ -160,6 +162,8 @@ class PMMLTreeRegressor(PMMLBaseRegressor, DecisionTreeRegressor):
     ], dtype=np.int32, order='C')
 
     self.tree_.set_n_categories(n_categories)
+    self.splitter = 'best'
+    self.criterion = 'squared_error'
 
   def fit(self, x, y):
     return PMMLBaseRegressor.fit(self, x, y)
