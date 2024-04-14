@@ -4,7 +4,11 @@ from abc import ABC
 
 import numpy as np
 from sklearn.tree import DecisionTreeRegressor
-from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor, _gb_losses
+from sklearn.ensemble import GradientBoostingClassifier, GradientBoostingRegressor
+try:
+  from sklearn.ensemble._gb_losses import MultinomialDeviance
+except ImportError:
+  pass
 from sklearn_pmml_model.base import PMMLBaseClassifier, PMMLBaseRegressor, IntegerEncodingMixin
 from sklearn_pmml_model.tree import get_tree
 from scipy.special import expit
@@ -81,16 +85,21 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
     clf.n_outputs_ = self.n_outputs_
     self.template_estimator = clf
 
-    self._check_params()
+    try:
+      self._check_params()
 
-    if self.n_classes_ == 2 and len(segments) == 3 and segments[-1].find('TreeModel') is None:
-      # For binary classification where both sides are specified, we need to force multinomial deviance
-      try:
-        self.loss_ = _gb_losses.MultinomialDeviance(self.n_classes_ + 1)
-        self.loss_.K = 2
-      except AttributeError:
-        self._loss = _gb_losses.MultinomialDeviance(self.n_classes_ + 1)
-        self._loss.K = 2
+      if self.n_classes_ == 2 and len(segments) == 3 and segments[-1].find('TreeModel') is None:
+        # For binary classification where both sides are specified, we need to force multinomial deviance
+        try:
+          self.loss_ = MultinomialDeviance(self.n_classes_ + 1)
+          self.loss_.K = 2
+        except AttributeError:
+          self._loss = MultinomialDeviance(self.n_classes_ + 1)
+          self._loss.K = 2
+    except AttributeError:
+      self._set_max_features()
+      self._loss = self._get_loss(sample_weight=None)
+      self.n_trees_per_iteration_ = 1 if self.n_classes_ == 2 else self.n_classes_
 
     try:
       self.init = None
@@ -211,7 +220,13 @@ class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, Gra
     clf.n_outputs_ = self.n_outputs_
     self.template_estimator = clf
 
-    self._check_params()
+    try:
+      self._check_params()
+    except AttributeError:
+      self._set_max_features()
+      self._loss = self._get_loss(sample_weight=None)
+      self.n_trees_per_iteration_ = 1
+
     self._init_state()
 
     mean = mining_model.find('Targets').find('Target').get('rescaleConstant', 0)
