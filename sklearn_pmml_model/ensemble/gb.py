@@ -106,7 +106,7 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
       self._init_state()
 
       self.init_.class_prior_ = [
-        expit(-float(segments[i].find('MiningModel').find('Targets').find('Target').get('rescaleConstant')))
+        expit(-float(segments[i].find('MiningModel').find('Targets').find('Target').get('rescaleConstant', 0)))
         for i in indices
       ]
 
