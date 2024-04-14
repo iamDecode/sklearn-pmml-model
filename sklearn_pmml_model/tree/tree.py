@@ -84,6 +84,7 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     self.tree_.set_n_categories(n_categories)
     self.splitter = 'best'
     self.criterion = 'gini'
+    self.monotonic_cst = None
 
   def fit(self, x, y):
     return PMMLBaseClassifier.fit(self, x, y)
@@ -164,6 +165,7 @@ class PMMLTreeRegressor(PMMLBaseRegressor, DecisionTreeRegressor):
     self.tree_.set_n_categories(n_categories)
     self.splitter = 'best'
     self.criterion = 'squared_error'
+    self.monotonic_cst = None
 
   def fit(self, x, y):
     return PMMLBaseRegressor.fit(self, x, y)
