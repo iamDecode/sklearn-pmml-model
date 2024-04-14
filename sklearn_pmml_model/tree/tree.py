@@ -59,7 +59,11 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     nodes, values = construct_tree(first_node, self.classes_, self.field_mapping)
 
     node_ndarray = np.ascontiguousarray(nodes, dtype=NODE_DTYPE)
-    value_ndarray = np.ascontiguousarray(values)
+    # Since this change in scikit-learn 1.4, trees expect normalized values
+    if hasattr(DecisionTreeClassifier(), 'monotonic_cst'):
+      value_ndarray = np.ascontiguousarray([[x[0] / np.sum(x[0])] for x in values])
+    else:
+      value_ndarray = np.ascontiguousarray(values)
     max_depth = None
 
     state = {
