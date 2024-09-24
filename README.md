@@ -75,23 +75,26 @@ More examples can be found in the subsequent packages: [tree](sklearn_pmml_model
 
 ## Benchmark
 
-Depending on the data set and model, `sklearn-pmml-model` is between 5 and a 1000 times faster than competing libraries, by leveraging the optimization and industry-tested robustness of `sklearn`. Source code for this benchmark can be found in the corresponding [jupyter notebook](benchmark.ipynb). 
+Depending on the data set and model, `sklearn-pmml-model` is between 1 and 10 times faster than competing libraries, by leveraging the optimization and industry-tested robustness of `sklearn`. Source code for this benchmark can be found in the corresponding [jupyter notebook](benchmark.ipynb). 
 
 
 ### Running times (load + predict, in seconds)
+
 |               |                     | Linear model | Naive Bayes | Decision tree | Random Forest | Gradient boosting |
 |---------------|---------------------|--------------|-------------|---------------|---------------|-------------------|
-| Wine          | `PyPMML`            | 0.773291     | 0.77384     | 0.777425      | 0.895204      | 0.902355          |
-|               | `sklearn-pmml-model`| 0.005813     | 0.006357    | 0.002693      | 0.108882      | 0.121823          |
-| Breast cancer | `PyPMML`            | 3.849855     | 3.878448    | 3.83623       | 4.16358       | 4.13766           |
-|               | `sklearn-pmml-model`| 0.015723     | 0.011278    | 0.002807      | 0.146234      | 0.044016          |
+| Wine          | `PyPMML`            | 0.013038     | 0.005674    | 0.005587      | 0.032734      | 0.034649          |
+|               | `sklearn-pmml-model`| 0.00404      | 0.004059    | 0.000964      | 0.030008      | 0.032949          |
+| Breast cancer | `PyPMML`            | 0.009838     | 0.01153     | 0.009367      | 0.058941      | 0.031196          |
+|               | `sklearn-pmml-model`| 0.010749     | 0.008481    | 0.001106      | 0.044021      | 0.013411          |
 
 ### Improvement
 
 |               |                    | Linear model | Naive Bayes | Decision tree | Random Forest | Gradient boosting |
 |---------------|--------------------|--------------|-------------|---------------|---------------|-------------------|
-| Wine          | Improvement        | 133×         | 122×        | 289×          | 8×            | 7×                |
-| Breast cancer | Improvement        | 245×         | 344×        | **1,367×**    | 28×           | 94×               |
+| Wine          | Improvement        | 3.23×        | 1.40×       | 5.80×         | 1.09×         | 1.05×             |
+| Breast cancer | Improvement        | 0.91×        | 1.36×       | **8.47×**     | 1.34×         | 2.33×             |
+
+*Benchmark ran on: 24 september 2024 17:19*
 
 ## Development
 
