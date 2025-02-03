@@ -6,7 +6,7 @@ jobs:
     docker:
       # specify the version you desire here
       # use `-browsers` prefix for selenium tests, e.g. `3.6.1-browsers`
-      - image: circleci/python:3.9.2
+      - image: cimg/python:3.12.8
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
@@ -33,7 +33,7 @@ jobs:
             python3 -m venv venv
             . venv/bin/activate
             pip install -r requirements.txt
-            sudo pip install codecov
+            pip install codecov setuptools
 
       - run:
           name: install openjdk
@@ -55,7 +55,9 @@ jobs:
 
       - run:
           name: coverage report
-          command: codecov
+          command: |
+            . venv/bin/activate
+            python -m codecov
 
       - store_artifacts:
           path: test-reports
