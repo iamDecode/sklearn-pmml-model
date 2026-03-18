@@ -4,4 +4,3 @@ build-backend = "setuptools.build_meta:__legacy__"
 
 [tool.cibuildwheel]
 before-build = "python -m pip install cython numpy"
-skip = "pp*"

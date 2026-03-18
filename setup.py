@@ -190,6 +190,7 @@ setup(
   ],
 
   setup_requires = ["cython", "numpy>=1.16.0", "pytest-runner"],
+  python_requires = '>=3.11',
   install_requires = [
     'numpy>=1.16.0',
     'pandas',
