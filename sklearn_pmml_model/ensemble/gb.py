@@ -274,4 +274,3 @@ class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, Gra
     if hasattr(GradientBoostingRegressor, '_more_tags'):
       return GradientBoostingRegressor._more_tags(self)
     return {}
-
