@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 from sklearn.datasets import load_iris
 import sklearn_pmml_model
 from sklearn.svm import LinearSVC, LinearSVR, NuSVC, NuSVR, SVC, SVR
@@ -143,9 +144,6 @@ class TestLinearSVRIntegration(TestCase):
 
         assert str(cm.exception) == 'Not supported.'
 
-    def test_more_tags(self):
-        assert self.clf._more_tags() == LinearSVR()._more_tags()
-
     def test_sklearn2pmml(self):
         # Export to PMML
         pipeline = PMMLPipeline([
@@ -167,6 +165,10 @@ class TestLinearSVRIntegration(TestCase):
 
         finally:
             remove("svm-sklearn2pmml.pmml")
+
+    @unittest.skipUnless(hasattr(LinearSVR, '_more_tags'), 'sklearn version does not support _more_tags')
+    def test_more_tags(self):
+        assert self.clf._more_tags() == LinearSVR()._more_tags()
 
 
 class TestLinearSVCIntegration(TestCase):
@@ -209,9 +211,6 @@ class TestLinearSVCIntegration(TestCase):
 
         assert str(cm.exception) == 'Not supported.'
 
-    def test_more_tags(self):
-        assert self.clf._more_tags() == LinearSVC()._more_tags()
-
     def test_sklearn2pmml(self):
         # Export to PMML
         pipeline = PMMLPipeline([
@@ -233,6 +232,10 @@ class TestLinearSVCIntegration(TestCase):
 
         finally:
             remove("svm-sklearn2pmml.pmml")
+
+    @unittest.skipUnless(hasattr(LinearSVC, '_more_tags'), 'sklearn version does not support _more_tags')
+    def test_more_tags(self):
+        assert self.clf._more_tags() == LinearSVC()._more_tags()
 
 
 class TestSVRIntegration(TestCase):
@@ -261,9 +264,6 @@ class TestSVRIntegration(TestCase):
             self.clf.fit(np.array([[]]), np.array([]))
 
         assert str(cm.exception) == 'Not supported.'
-
-    def test_more_tags(self):
-        assert self.clf._more_tags() == SVR()._more_tags()
 
     def test_sklearn2pmml_rbf(self):
         # Export to PMML
@@ -353,6 +353,10 @@ class TestSVRIntegration(TestCase):
         finally:
             remove("svr-sklearn2pmml.pmml")
 
+    @unittest.skipUnless(hasattr(SVR, '_more_tags'), 'sklearn version does not support _more_tags')
+    def test_more_tags(self):
+        assert self.clf._more_tags() == SVR()._more_tags()
+
 
 class TestSVCIntegration(TestCase):
     def setUp(self):
@@ -380,9 +384,6 @@ class TestSVCIntegration(TestCase):
             self.clf.fit(np.array([[]]), np.array([]))
 
         assert str(cm.exception) == 'Not supported.'
-
-    def test_more_tags(self):
-        assert self.clf._more_tags() == SVC()._more_tags()
 
     def test_sklearn2pmml_rbf(self):
         # Export to PMML
@@ -472,6 +473,10 @@ class TestSVCIntegration(TestCase):
         finally:
             remove("svc-sklearn2pmml.pmml")
 
+    @unittest.skipUnless(hasattr(SVC, '_more_tags'), 'sklearn version does not support _more_tags')
+    def test_more_tags(self):
+        assert self.clf._more_tags() == SVC()._more_tags()
+
 
 class TestSVMIntegrationMultiClass(TestCase):
     def setUp(self):
@@ -551,9 +556,6 @@ class TestNuSVRIntegration(TestCase):
 
         assert str(cm.exception) == 'Not supported.'
 
-    def test_more_tags(self):
-        assert self.clf._more_tags() == NuSVR()._more_tags()
-
     def test_sklearn2pmml(self):
         # Export to PMML
         pipeline = PMMLPipeline([
@@ -575,6 +577,10 @@ class TestNuSVRIntegration(TestCase):
 
         finally:
             remove("svr-sklearn2pmml.pmml")
+
+    @unittest.skipUnless(hasattr(NuSVR, '_more_tags'), 'sklearn version does not support _more_tags')
+    def test_more_tags(self):
+        assert self.clf._more_tags() == NuSVR()._more_tags()
 
 
 class TestNuSVCIntegration(TestCase):
@@ -598,9 +604,6 @@ class TestNuSVCIntegration(TestCase):
 
         assert str(cm.exception) == 'Not supported.'
 
-    def test_more_tags(self):
-        assert self.clf._more_tags() == NuSVC()._more_tags()
-
     def test_sklearn2pmml(self):
         # Export to PMML
         pipeline = PMMLPipeline([
@@ -622,3 +625,7 @@ class TestNuSVCIntegration(TestCase):
 
         finally:
             remove("svc-sklearn2pmml.pmml")
+
+    @unittest.skipUnless(hasattr(NuSVC, '_more_tags'), 'sklearn version does not support _more_tags')
+    def test_more_tags(self):
+        assert self.clf._more_tags() == NuSVC()._more_tags()

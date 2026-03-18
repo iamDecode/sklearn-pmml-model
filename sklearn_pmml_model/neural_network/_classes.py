@@ -46,7 +46,9 @@ class PMMLMLPClassifier(PMMLBaseClassifier, PMMLBaseNeuralNetwork, MLPClassifier
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return MLPClassifier._more_tags(self)
+    if hasattr(MLPClassifier, '_more_tags'):
+      return MLPClassifier._more_tags(self)
+    return {}
 
 
 class PMMLMLPRegressor(PMMLBaseRegressor, PMMLBaseNeuralNetwork, MLPRegressor):
@@ -75,4 +77,6 @@ class PMMLMLPRegressor(PMMLBaseRegressor, PMMLBaseNeuralNetwork, MLPRegressor):
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return MLPRegressor._more_tags(self)
+    if hasattr(MLPRegressor, '_more_tags'):
+      return MLPRegressor._more_tags(self)
+    return {}

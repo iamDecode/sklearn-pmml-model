@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 
 from sklearn.datasets import load_iris
 
@@ -159,6 +160,7 @@ class TestLinearRegressionIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(LinearRegression, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     assert self.clf._more_tags() == LinearRegression()._more_tags()
 
@@ -300,9 +302,7 @@ class TestLogisticRegressionIntegration(TestCase):
     y = data.target
     y.name = "Class"
 
-    ref = LogisticRegression(
-      multi_class='ovr'
-    )
+    ref = LogisticRegression()
     ref.fit(X, y)
 
     # Export to PMML
@@ -331,6 +331,7 @@ class TestLogisticRegressionIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(LogisticRegression, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     assert self.clf._more_tags() == LogisticRegression()._more_tags()
 
@@ -479,6 +480,7 @@ class TestRidgeIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(Ridge, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     assert self.clf._more_tags() == Ridge()._more_tags()
 
@@ -509,6 +511,7 @@ class TestRidgeClassifierIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(RidgeClassifier, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     assert self.clf._more_tags() == RidgeClassifier()._more_tags()
 
@@ -541,6 +544,7 @@ class TestLassoIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(Lasso, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     assert self.clf._more_tags() == Lasso()._more_tags()
 
@@ -573,5 +577,7 @@ class TestElasticNetIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(ElasticNet, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     assert self.clf._more_tags() == ElasticNet()._more_tags()
+

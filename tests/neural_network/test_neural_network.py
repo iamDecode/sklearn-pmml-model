@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 
 from sklearn.datasets import load_iris
 import sklearn_pmml_model
@@ -168,14 +169,6 @@ class TestNeuralNetworkIntegrationIris(TestCase):
     pmml = path.join(BASE_DIR, '../models/nn-iris.pmml')
     self.clf = PMMLMLPClassifier(pmml=pmml)
     self.ref = MLPClassifier(random_state=1).fit(X, y)
-
-  def test_more_tags(self):
-    assert self.clf._more_tags() == MLPClassifier()._more_tags()
-
-  def test_more_tags_regressor(self):
-    pmml = path.join(BASE_DIR, '../models/nn-iris.pmml')
-    clf = PMMLMLPRegressor(pmml=pmml)
-    assert clf._more_tags() == MLPRegressor()._more_tags()
 
   def test_predict_proba(self):
     Xte, _ = self.test
@@ -356,6 +349,15 @@ class TestNeuralNetworkIntegrationIris(TestCase):
       clf.fit(np.array([[]]), np.array([]))
 
     assert str(cm.exception) == 'Not supported.'
+
+  @unittest.skipUnless(hasattr(MLPClassifier, '_more_tags'), 'sklearn version does not support _more_tags')
+  def test_more_tags(self):
+    assert self.clf._more_tags() == MLPClassifier()._more_tags()
+
+  @unittest.skipUnless(hasattr(MLPRegressor, '_more_tags'), 'sklearn version does not support _more_tags')
+  def test_more_tags_regressor(self):
+    clf = PMMLMLPRegressor(path.join(BASE_DIR, '../models/nn-iris.pmml'))
+    assert clf._more_tags() == MLPRegressor()._more_tags()
 
 
 class TestNeuralNetworkIntegrationPima(TestCase):

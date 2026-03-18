@@ -30,6 +30,7 @@ class PMMLLinearRegression(OneHotEncodingMixin, PMMLBaseRegressor, LinearRegress
   def __init__(self, pmml):
     PMMLBaseRegressor.__init__(self, pmml)
     OneHotEncodingMixin.__init__(self)
+    self.positive = False
 
     # Import coefficients and intercepts
     model = self.root.find('RegressionModel')
@@ -58,7 +59,9 @@ class PMMLLinearRegression(OneHotEncodingMixin, PMMLBaseRegressor, LinearRegress
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return LinearRegression._more_tags(self)
+    if hasattr(LinearRegression, '_more_tags'):
+      return LinearRegression._more_tags(self)
+    return {}
 
 
 class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRegression):
@@ -138,7 +141,9 @@ class PMMLLogisticRegression(OneHotEncodingMixin, PMMLBaseClassifier, LogisticRe
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return LogisticRegression._more_tags(self)
+    if hasattr(LogisticRegression, '_more_tags'):
+      return LogisticRegression._more_tags(self)
+    return {}
 
 
 def _get_coefficients(est, table):
@@ -212,11 +217,18 @@ class PMMLRidge(PMMLGeneralizedLinearRegressor, Ridge):
 
   """
 
+  def __init__(self, pmml):
+    PMMLGeneralizedLinearRegressor.__init__(self, pmml)
+    self.solver = 'auto'
+    self.fit_intercept = True
+
   def fit(self, x, y):
     return PMMLGeneralizedLinearRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return Ridge._more_tags(self)
+    if hasattr(Ridge, '_more_tags'):
+      return Ridge._more_tags(self)
+    return {}
 
 
 class PMMLRidgeClassifier(PMMLGeneralizedLinearClassifier, RidgeClassifier):
@@ -240,13 +252,22 @@ class PMMLRidgeClassifier(PMMLGeneralizedLinearClassifier, RidgeClassifier):
 
   def __init__(self, pmml):
     PMMLGeneralizedLinearClassifier.__init__(self, pmml)
+    classes = self.__dict__.get('classes_')
     RidgeClassifier.__init__(self)
+
+    if classes is not None:
+      from sklearn.preprocessing import LabelBinarizer
+      self._label_binarizer = LabelBinarizer(pos_label=1, neg_label=-1)
+      self._label_binarizer.fit(classes)
+      self.classes_ = classes
 
   def fit(self, x, y):
     return PMMLGeneralizedLinearClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return RidgeClassifier._more_tags(self)
+    if hasattr(RidgeClassifier, '_more_tags'):
+      return RidgeClassifier._more_tags(self)
+    return {}
 
 
 class PMMLLasso(PMMLGeneralizedLinearRegressor, Lasso):
@@ -279,7 +300,9 @@ class PMMLLasso(PMMLGeneralizedLinearRegressor, Lasso):
     return PMMLGeneralizedLinearRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return Lasso._more_tags(self)
+    if hasattr(Lasso, '_more_tags'):
+      return Lasso._more_tags(self)
+    return {}
 
 
 class PMMLElasticNet(PMMLGeneralizedLinearRegressor, ElasticNet):
@@ -325,4 +348,6 @@ class PMMLElasticNet(PMMLGeneralizedLinearRegressor, ElasticNet):
     return PMMLGeneralizedLinearRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return ElasticNet._more_tags(self)
+    if hasattr(ElasticNet, '_more_tags'):
+      return ElasticNet._more_tags(self)
+    return {}

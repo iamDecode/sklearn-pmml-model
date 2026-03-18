@@ -71,7 +71,9 @@ class PMMLLinearSVC(OneHotEncodingMixin, PMMLBaseClassifier, LinearSVC):
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return LinearSVC._more_tags(self)
+    if hasattr(LinearSVC, '_more_tags'):
+      return LinearSVC._more_tags(self)
+    return {}
 
 
 class PMMLLinearSVR(OneHotEncodingMixin, PMMLBaseRegressor, LinearSVR):
@@ -129,7 +131,9 @@ class PMMLLinearSVR(OneHotEncodingMixin, PMMLBaseRegressor, LinearSVR):
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return LinearSVR._more_tags(self)
+    if hasattr(LinearSVR, '_more_tags'):
+      return LinearSVR._more_tags(self)
+    return {}
 
 
 class PMMLNuSVC(OneHotEncodingMixin, PMMLBaseClassifier, PMMLBaseSVM, NuSVC):
@@ -170,7 +174,9 @@ class PMMLNuSVC(OneHotEncodingMixin, PMMLBaseClassifier, PMMLBaseSVM, NuSVC):
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return NuSVC._more_tags(self)
+    if hasattr(NuSVC, '_more_tags'):
+      return NuSVC._more_tags(self)
+    return {}
 
 
 class PMMLNuSVR(OneHotEncodingMixin, PMMLBaseRegressor, PMMLBaseSVM, NuSVR):
@@ -208,7 +214,9 @@ class PMMLNuSVR(OneHotEncodingMixin, PMMLBaseRegressor, PMMLBaseSVM, NuSVR):
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return NuSVR._more_tags(self)
+    if hasattr(NuSVR, '_more_tags'):
+      return NuSVR._more_tags(self)
+    return {}
 
 
 class PMMLSVC(OneHotEncodingMixin, PMMLBaseClassifier, PMMLBaseSVM, SVC):
@@ -252,7 +260,9 @@ class PMMLSVC(OneHotEncodingMixin, PMMLBaseClassifier, PMMLBaseSVM, SVC):
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return SVC._more_tags(self)
+    if hasattr(SVC, '_more_tags'):
+      return SVC._more_tags(self)
+    return {}
 
 
 class PMMLSVR(OneHotEncodingMixin, PMMLBaseRegressor, PMMLBaseSVM, SVR):
@@ -292,4 +302,6 @@ class PMMLSVR(OneHotEncodingMixin, PMMLBaseRegressor, PMMLBaseSVM, SVR):
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return SVR._more_tags(self)
+    if hasattr(SVR, '_more_tags'):
+      return SVR._more_tags(self)
+    return {}

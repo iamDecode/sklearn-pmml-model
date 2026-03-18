@@ -431,6 +431,7 @@ class OneHotEncodingMixin:
     X = np.array([[0 for field in fields if field.tag == 'DataField']])
     transformer.sparse_output_ = False
     transformer._feature_names_in = None
+    transformer.n_features_in_ = X.shape[1]
     try:
       transformer._check_n_features(X, reset=True)
     except AttributeError:
@@ -438,7 +439,8 @@ class OneHotEncodingMixin:
     transformer._validate_transformers()
     transformer._validate_column_callables(X)
     transformer._validate_remainder(X)
-    transformer._name_to_fitted_passthrough = {}
+    if hasattr(ColumnTransformer, '_name_to_fitted_passthrough'):
+      transformer._name_to_fitted_passthrough = {}
     transformer.transformers_ = transformer.transformers
 
     self.transformer = transformer

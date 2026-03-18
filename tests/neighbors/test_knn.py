@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 import sklearn_pmml_model
 from sklearn.neighbors import KNeighborsClassifier, KNeighborsRegressor
 from sklearn_pmml_model.neighbors import PMMLKNeighborsClassifier, PMMLKNeighborsRegressor
@@ -106,9 +107,6 @@ class TestKNeighborsClassifierIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
-  def test_more_tags(self):
-    assert self.clf._more_tags() == {'requires_y': True, **KNeighborsClassifier()._more_tags()}
-
   def test_sklearn2pmml(self):
     X, y = self.test
     ref = KNeighborsClassifier(n_neighbors=11)
@@ -132,6 +130,10 @@ class TestKNeighborsClassifierIntegration(TestCase):
 
     finally:
       remove("knn-sklearn2pmml.pmml")
+
+  @unittest.skipUnless(hasattr(KNeighborsClassifier, '_more_tags'), 'sklearn version does not support _more_tags')
+  def test_more_tags(self):
+    assert self.clf._more_tags() == {'requires_y': True, **KNeighborsClassifier()._more_tags()}
 
   def test_sklearn2pmml_manhattan(self):
     X, y = self.test
@@ -239,5 +241,7 @@ class TestKNeighborsRegressorIntegration(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(KNeighborsRegressor, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     assert self.clf._more_tags() == KNeighborsRegressor()._more_tags()
+
