@@ -94,7 +94,9 @@ class PMMLTreeClassifier(PMMLBaseClassifier, DecisionTreeClassifier):
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return DecisionTreeClassifier._more_tags(self)
+    if hasattr(DecisionTreeClassifier, '_more_tags'):
+      return DecisionTreeClassifier._more_tags(self)
+    return {}
 
 
 class PMMLTreeRegressor(PMMLBaseRegressor, DecisionTreeRegressor):
@@ -175,7 +177,9 @@ class PMMLTreeRegressor(PMMLBaseRegressor, DecisionTreeRegressor):
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return DecisionTreeRegressor._more_tags(self)
+    if hasattr(DecisionTreeRegressor, '_more_tags'):
+      return DecisionTreeRegressor._more_tags(self)
+    return {}
 
 
 def unflatten(node):

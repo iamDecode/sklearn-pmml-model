@@ -38,7 +38,9 @@ class PMMLKNeighborsClassifier(PMMLBaseClassifier, PMMLBaseKNN, KNeighborsClassi
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return {'requires_y': True, **KNeighborsClassifier._more_tags(self)}
+    if hasattr(KNeighborsClassifier, '_more_tags'):
+      return {'requires_y': True, **KNeighborsClassifier._more_tags(self)}
+    return {'requires_y': True}
 
 
 class PMMLKNeighborsRegressor(PMMLBaseRegressor, PMMLBaseKNN, KNeighborsRegressor):
@@ -77,4 +79,6 @@ class PMMLKNeighborsRegressor(PMMLBaseRegressor, PMMLBaseKNN, KNeighborsRegresso
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return KNeighborsRegressor._more_tags(self)
+    if hasattr(KNeighborsRegressor, '_more_tags'):
+      return KNeighborsRegressor._more_tags(self)
+    return {}

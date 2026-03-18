@@ -160,7 +160,9 @@ class PMMLGradientBoostingClassifier(IntegerEncodingMixin, PMMLBaseClassifier, G
     return raw_predictions
 
   def _more_tags(self):
-    return GradientBoostingClassifier._more_tags(self)
+    if hasattr(GradientBoostingClassifier, '_more_tags'):
+      return GradientBoostingClassifier._more_tags(self)
+    return {}
 
 
 class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, GradientBoostingRegressor, ABC):
@@ -269,4 +271,7 @@ class PMMLGradientBoostingRegressor(IntegerEncodingMixin, PMMLBaseRegressor, Gra
     return raw_predictions
 
   def _more_tags(self):
-    return GradientBoostingRegressor._more_tags(self)
+    if hasattr(GradientBoostingRegressor, '_more_tags'):
+      return GradientBoostingRegressor._more_tags(self)
+    return {}
+

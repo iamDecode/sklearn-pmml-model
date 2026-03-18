@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 import sklearn_pmml_model
 from sklearn_pmml_model.ensemble import PMMLGradientBoostingClassifier, PMMLGradientBoostingRegressor
 from sklearn2pmml.pipeline import PMMLPipeline
@@ -84,6 +85,7 @@ class TestGradientBoosting(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(GradientBoostingClassifier, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     clf = PMMLGradientBoostingClassifier(path.join(BASE_DIR, '../models/gb-xgboost-iris.pmml'))
     assert clf._more_tags() == GradientBoostingClassifier()._more_tags()
@@ -160,6 +162,7 @@ class TestGradientBoostingRegression(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(GradientBoostingRegressor, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     clf = PMMLGradientBoostingRegressor(path.join(BASE_DIR, '../models/gb-gbm-cat-pima-regression.pmml'))
     assert clf._more_tags() == GradientBoostingRegressor()._more_tags()

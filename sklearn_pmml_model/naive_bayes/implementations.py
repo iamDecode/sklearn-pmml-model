@@ -113,4 +113,6 @@ class PMMLGaussianNB(OneHotEncodingMixin, PMMLBaseClassifier, GaussianNB):
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return GaussianNB._more_tags(self)
+    if hasattr(GaussianNB, '_more_tags'):
+      return GaussianNB._more_tags(self)
+    return {}

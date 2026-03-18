@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 import sklearn_pmml_model
 from sklearn_pmml_model.naive_bayes import PMMLGaussianNB
 from sklearn.naive_bayes import GaussianNB
@@ -34,6 +35,11 @@ class TestNaiveBayes(TestCase):
 
     assert str(cm.exception) == 'PMML model does not contain NaiveBayesModel.'
 
+  @unittest.skipUnless(hasattr(GaussianNB, '_more_tags'), 'sklearn version does not support _more_tags')
+  def test_more_tags(self):
+    clf = PMMLGaussianNB(path.join(BASE_DIR, '../models/nb-cat-pima.pmml'))
+    assert clf._more_tags() == GaussianNB()._more_tags()
+
   def test_unsupported_distribution(self):
     with self.assertRaises(Exception) as cm:
       PMMLGaussianNB(pmml=StringIO("""
@@ -64,10 +70,6 @@ class TestNaiveBayes(TestCase):
                 """))
 
     assert str(cm.exception) == 'Distribution "PoissonDistribution" not implemented, or not supported by scikit-learn'
-
-  def test_more_tags(self):
-    clf = PMMLGaussianNB(path.join(BASE_DIR, '../models/nb-cat-pima.pmml'))
-    assert clf._more_tags() == GaussianNB()._more_tags()
 
 
 class TestGaussianNBIntegration(TestCase):

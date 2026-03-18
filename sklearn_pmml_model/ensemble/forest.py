@@ -95,7 +95,9 @@ class PMMLForestClassifier(IntegerEncodingMixin, PMMLBaseClassifier, RandomFores
     return PMMLBaseClassifier.fit(self, x, y)
 
   def _more_tags(self):
-    return RandomForestClassifier._more_tags(self)
+    if hasattr(RandomForestClassifier, '_more_tags'):
+      return RandomForestClassifier._more_tags(self)
+    return {}
 
 
 class PMMLForestRegressor(IntegerEncodingMixin, PMMLBaseRegressor, RandomForestRegressor):
@@ -186,4 +188,6 @@ class PMMLForestRegressor(IntegerEncodingMixin, PMMLBaseRegressor, RandomForestR
     return PMMLBaseRegressor.fit(self, x, y)
 
   def _more_tags(self):
-    return RandomForestRegressor._more_tags(self)
+    if hasattr(RandomForestRegressor, '_more_tags'):
+      return RandomForestRegressor._more_tags(self)
+    return {}

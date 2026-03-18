@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 import sklearn_pmml_model
 from sklearn_pmml_model.tree import PMMLTreeClassifier, PMMLTreeRegressor
 from sklearn2pmml.pipeline import PMMLPipeline
@@ -80,6 +81,7 @@ class TestTree(TestCase):
     assert clf.tree_.threshold[0] == [0, 4]
     assert np.allclose(clf.tree_.threshold[1:], [25.18735, -2, 125.5, -2, -2, 20.02033, -2, -2])
 
+  @unittest.skipUnless(hasattr(DecisionTreeClassifier, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
     clf = PMMLTreeClassifier(path.join(BASE_DIR, '../models/tree-cat-pima.pmml'))
     assert clf._more_tags() == DecisionTreeClassifier()._more_tags()
@@ -335,7 +337,9 @@ class TestTreeRegression(TestCase):
     assert str(cm.exception) == 'Unsupported tree format: unknown predicate' \
                                 ' structure in Node 2'
 
+  @unittest.skipUnless(hasattr(DecisionTreeRegressor, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
-    pmml = path.join(BASE_DIR, '../models/tree-cat-pima-regression.pmml')
-    clf = PMMLTreeRegressor(pmml=pmml)
+    clf = PMMLTreeRegressor(path.join(BASE_DIR, '../models/tree-cat-pima-regression.pmml'))
+
     assert clf._more_tags() == DecisionTreeRegressor()._more_tags()
+

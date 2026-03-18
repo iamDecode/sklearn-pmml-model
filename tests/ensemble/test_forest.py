@@ -1,4 +1,5 @@
 from unittest import TestCase
+import unittest
 import sklearn_pmml_model
 from sklearn_pmml_model.ensemble import PMMLForestClassifier, PMMLForestRegressor
 from sklearn2pmml.pipeline import PMMLPipeline
@@ -113,9 +114,10 @@ class TestForest(TestCase):
 
     assert str(cm.exception) == 'Not supported.'
 
+  @unittest.skipUnless(hasattr(RandomForestClassifier, '_more_tags'), 'sklearn version does not support _more_tags')
   def test_more_tags(self):
-      clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/rf-cat-pima.pmml'))
-      assert clf._more_tags() == RandomForestClassifier()._more_tags()
+    clf = PMMLForestClassifier(path.join(BASE_DIR, '../models/rf-cat-pima.pmml'))
+    assert clf._more_tags() == RandomForestClassifier()._more_tags()
 
 
 class TestForestRegression(TestCase):
@@ -201,6 +203,7 @@ class TestForestRegression(TestCase):
 
         assert str(cm.exception) == 'Not supported.'
 
+    @unittest.skipUnless(hasattr(RandomForestRegressor, '_more_tags'), 'sklearn version does not support _more_tags')
     def test_more_tags(self):
         clf = PMMLForestRegressor(path.join(BASE_DIR, '../models/rf-cat-pima-regression.pmml'))
         assert clf._more_tags() == RandomForestRegressor()._more_tags()
