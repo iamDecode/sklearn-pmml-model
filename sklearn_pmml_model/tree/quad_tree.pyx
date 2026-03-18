@@ -23,7 +23,7 @@ cdef extern from "math.h":
     float fabsf(float x) nogil
 
 cdef extern from "numpy/arrayobject.h":
-    object PyArray_NewFromDescr(object subtype, np.dtype descr,
+    object PyArray_NewFromDescr(type subtype, np.dtype descr,
                                 int nd, np.npy_intp* dims,
                                 np.npy_intp* strides,
                                 void* data, int flags, object obj)
