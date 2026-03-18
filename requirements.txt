@@ -12,4 +12,4 @@ sphinx-autoapi==3.4.0
 pydata-sphinx-theme==0.16.1
 sphinx-github-changelog==1.4.0
 myst-parser==4.0.0
-sklearn2pmml==0.113.0
+sklearn2pmml==0.129.2
